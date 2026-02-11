@@ -15,6 +15,46 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  version:
+    needs: deploy
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -81,7 +121,7 @@ jobs:
             update_header "$COMMIT_TIME"
             if ! git diff --quiet -- version.properties; then
               git add version.properties
-              git commit -m "chore: bump version to v${CURRENT_VERSION}"
+              git commit -m "chore: bump version to v${CURRENT_VERSION} [skip ci]"
               git push
             fi
           else
@@ -96,7 +136,7 @@ jobs:
             update_header "$NOW"
             set_version "$NEW_VERSION"
             git add version.properties
-            git commit -m "chore: bump version to v${NEW_VERSION}"
+            git commit -m "chore: bump version to v${NEW_VERSION} [skip ci]"
             git push
             PREV_VERSION="$CURRENT_VERSION"
           fi
@@ -116,33 +156,3 @@ jobs:
           TAG="v${FINAL_VERSION}"
           git tag "${TAG}"
           git push origin "${TAG}"
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-
-      - name: Install
-        run: npm ci
-
-      - name: Build
-        env:
-          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-        run: npm run build
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
