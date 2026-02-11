@@ -13,5 +13,12 @@ export const tools: ToolItem[] = [
     tag: "Utility",
     slug: "diff",
     createdAt: "2026-02-11",
-  }
+  },
+  {
+    title: "Base64 Encode/Decode",
+    desc: "Encode plain text to Base64 or decode Base64 back to text.",
+    tag: "Utility",
+    slug: "base64",
+    createdAt: "2026-02-11",
+  },
 ];
