@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f4f1;
+  --foreground: #141414;
+  --muted: #57524b;
+  --accent: #ff6a3d;
+  --accent-2: #16a34a;
+  --surface: #ffffff;
+  --surface-muted: #efeae3;
+  --card-border: rgba(20, 20, 20, 0.1);
+  --card-shadow: 0 12px 30px rgba(16, 24, 40, 0.08);
+  --card-border-hover: rgba(20, 20, 20, 0.3);
+  --diff-added: rgba(22, 163, 74, 0.14);
+  --diff-removed: rgba(255, 106, 61, 0.16);
+  --diff-changed-left: rgba(255, 183, 159, 0.55);
+  --diff-changed-right: rgba(176, 230, 198, 0.55);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sora);
+  --font-mono: var(--font-plex-mono);
+}
+
+html.theme-dark {
+  --background: #0d0f12;
+  --foreground: #f5f4f2;
+  --muted: #a9a5a0;
+  --surface: #14171c;
+  --surface-muted: #1c2129;
+  --card-border: rgba(255, 255, 255, 0.12);
+  --card-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+  --card-border-hover: rgba(255, 255, 255, 0.28);
+  --diff-added: rgba(46, 201, 106, 0.18);
+  --diff-removed: rgba(255, 130, 92, 0.18);
+  --diff-changed-left: rgba(255, 160, 120, 0.3);
+  --diff-changed-right: rgba(96, 208, 150, 0.3);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+@keyframes float-slow {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
