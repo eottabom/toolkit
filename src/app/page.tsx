@@ -71,7 +71,7 @@ export default function Home() {
           </div>
           <nav className="flex items-center gap-4 text-sm text-[var(--muted)]">
             <button
-              className="rounded-full border border-black/10 bg-[var(--surface)] px-4 py-2 text-[var(--foreground)] transition hover:border-black/30"
+              className="inline-flex items-center justify-center rounded-full border border-black/10 bg-[var(--surface)] px-4 py-2 text-[var(--foreground)] transition hover:border-black/30"
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
@@ -79,7 +79,7 @@ export default function Home() {
                 <span className="inline-flex items-center gap-2">
                   <svg
                     viewBox="0 0 24 24"
-                    className="h-5 w-5"
+                    className="h-5 w-5 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.8"
@@ -97,13 +97,13 @@ export default function Home() {
                     <line x1="4.6" y1="19.4" x2="6.4" y2="17.6" />
                     <line x1="17.6" y1="6.4" x2="19.4" y2="4.6" />
                   </svg>
-                  <span>Light</span>
+                  <span className="leading-none">Light</span>
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-2">
                   <svg
                     viewBox="0 0 24 24"
-                    className="h-5 w-5"
+                    className="h-5 w-5 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.8"
@@ -113,7 +113,7 @@ export default function Home() {
                   >
                     <path d="M21 12.6A8.6 8.6 0 0 1 11.4 3 7.4 7.4 0 1 0 21 12.6Z" />
                   </svg>
-                  <span>Dark</span>
+                  <span className="leading-none">Dark</span>
                 </span>
               )}
             </button>
