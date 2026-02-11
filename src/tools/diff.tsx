@@ -254,6 +254,19 @@ export default function DiffPage({ tool }: DiffPageProps) {
   const [rightText, setRightText] = useState(defaultRight);
   const [onlyChanges, setOnlyChanges] = useState(false);
   const [showWordDiff, setShowWordDiff] = useState(true);
+  const [clearState, setClearState] = useState<"idle" | "left" | "right">(
+    "idle",
+  );
+
+  const handleClear = (side: "left" | "right") => {
+    if (side === "left") {
+      setLeftText("");
+    } else {
+      setRightText("");
+    }
+    setClearState(side);
+    window.setTimeout(() => setClearState("idle"), 900);
+  };
 
   const diffRows = useMemo(() => {
     const rows = new DiffEngine(leftText, rightText).buildLineDiff();
@@ -325,10 +338,10 @@ export default function DiffPage({ tool }: DiffPageProps) {
               <span>Original</span>
               <button
                 type="button"
-                onClick={() => setLeftText("")}
-                className="rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                onClick={() => handleClear("left")}
+                className="cursor-pointer rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
               >
-                Clear
+                {clearState === "left" ? "Cleared" : "Clear"}
               </button>
             </div>
           </div>
@@ -345,10 +358,10 @@ export default function DiffPage({ tool }: DiffPageProps) {
               <span>Updated</span>
               <button
                 type="button"
-                onClick={() => setRightText("")}
-                className="rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                onClick={() => handleClear("right")}
+                className="cursor-pointer rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
               >
-                Clear
+                {clearState === "right" ? "Cleared" : "Clear"}
               </button>
             </div>
           </div>
