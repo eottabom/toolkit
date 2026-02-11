@@ -148,14 +148,13 @@ jobs:
           FINAL_VERSION="${FINAL_VERSION_LINE#version=}"
 
           git fetch --tags
-          if [ -n "$PREV_VERSION" ]; then
-            PREV_TAG="v${PREV_VERSION}"
-            if git rev-parse -q --verify "refs/tags/${PREV_TAG}" >/dev/null; then
-              git tag -d "${PREV_TAG}"
-              git push origin ":refs/tags/${PREV_TAG}"
-            fi
-          fi
-
           TAG="v${FINAL_VERSION}"
           git tag "${TAG}"
           git push origin "${TAG}"
+
+          # Keep only the latest 5 version tags (semver order)
+          TAGS_TO_DELETE=$(git tag -l "v*" --sort=-v:refname | tail -n +6)
+          if [ -n "$TAGS_TO_DELETE" ]; then
+            echo "$TAGS_TO_DELETE" | xargs -I {} git tag -d {}
+            echo "$TAGS_TO_DELETE" | xargs -I {} git push origin :refs/tags/{}
+          fi
