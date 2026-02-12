@@ -88,8 +88,12 @@ class DiffEngine {
   }
 
   static buildWordDiff(leftLine: string, rightLine: string) {
-    const leftWords = leftLine.trim().length ? leftLine.split(/\s+/) : [];
-    const rightWords = rightLine.trim().length ? rightLine.split(/\s+/) : [];
+    const leadingLeft = leftLine.match(/^\s*/)?.[0] ?? "";
+    const leadingRight = rightLine.match(/^\s*/)?.[0] ?? "";
+    const trimmedLeft = leftLine.trim();
+    const trimmedRight = rightLine.trim();
+    const leftWords = trimmedLeft.length ? trimmedLeft.split(/\s+/) : [];
+    const rightWords = trimmedRight.length ? trimmedRight.split(/\s+/) : [];
     const m = leftWords.length;
     const n = rightWords.length;
     const dp: number[][] = Array.from({ length: m + 1 }, () =>
@@ -132,7 +136,7 @@ class DiffEngine {
       }
     }
 
-    return { leftParts, rightParts };
+    return { leftParts, rightParts, leadingLeft, leadingRight };
   }
 
   static renderWordParts(parts: WordPart[]) {
@@ -287,24 +291,24 @@ export default function DiffPage({ tool }: DiffPageProps) {
           <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
         </div>
         <div className="flex flex-col items-end gap-2 text-xs text-[var(--muted)]">
-          <label className="flex items-center gap-2 rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
+          <label className="flex items-center gap-2 rounded-full border border-[var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
             <span className="text-[10px] uppercase tracking-[0.16em]">
               Changes only
             </span>
             <Switch
               checked={onlyChanges}
               onCheckedChange={setOnlyChanges}
-              className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20"
+              className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20 dark:data-[state=unchecked]:bg-white/20"
             />
           </label>
-          <label className="flex items-center gap-2 rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
+          <label className="flex items-center gap-2 rounded-full border border-[var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
             <span className="text-[10px] uppercase tracking-[0.16em]">
               Word highlight
             </span>
             <Switch
               checked={showWordDiff}
               onCheckedChange={setShowWordDiff}
-              className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20"
+              className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20 dark:data-[state=unchecked]:bg-white/20"
             />
           </label>
         </div>
@@ -384,7 +388,14 @@ export default function DiffPage({ tool }: DiffPageProps) {
                 </span>
                 <span className="whitespace-pre-wrap text-[var(--foreground)]">
                   {wordDiff
-                    ? DiffEngine.renderWordParts(wordDiff.leftParts)
+                    ? (
+                        <>
+                          {wordDiff.leadingLeft && (
+                            <span>{wordDiff.leadingLeft}</span>
+                          )}
+                          {DiffEngine.renderWordParts(wordDiff.leftParts)}
+                        </>
+                      )
                     : row.left || " "}
                 </span>
               </div>
@@ -396,7 +407,14 @@ export default function DiffPage({ tool }: DiffPageProps) {
                 </span>
                 <span className="whitespace-pre-wrap text-[var(--foreground)]">
                   {wordDiff
-                    ? DiffEngine.renderWordParts(wordDiff.rightParts)
+                    ? (
+                        <>
+                          {wordDiff.leadingRight && (
+                            <span>{wordDiff.leadingRight}</span>
+                          )}
+                          {DiffEngine.renderWordParts(wordDiff.rightParts)}
+                        </>
+                      )
                     : row.right || " "}
                 </span>
               </div>

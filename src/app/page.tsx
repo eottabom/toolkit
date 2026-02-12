@@ -76,7 +76,7 @@ export default function Home() {
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full border border-black/10 bg-[var(--surface)] px-4 text-[var(--foreground)] transition hover:border-black/30"
+              className="rounded-full border border-black/10 bg-[var(--surface)] px-4 text-[var(--foreground)] transition hover:border-black/30 dark:border-white/20 dark:bg-white/15 dark:text-white/90 dark:hover:bg-white/20 dark:hover:border-white/30"
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
