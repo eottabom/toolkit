@@ -250,14 +250,9 @@ class DiffEngine {
   }
 }
 
-type DiffPageProps = {
-  tool: {
-    title: string;
-    desc: string;
-  };
-};
+import type { ToolItem } from "@/lib/tools";
 
-export default function DiffPage({ tool }: DiffPageProps) {
+export default function DiffPage({ tool }: { tool: ToolItem }) {
   const [leftText, setLeftText] = useState(defaultLeft);
   const [rightText, setRightText] = useState(defaultRight);
   const [onlyChanges, setOnlyChanges] = useState(false);
@@ -276,10 +271,15 @@ export default function DiffPage({ tool }: DiffPageProps) {
     window.setTimeout(() => setClearState("idle"), 900);
   };
 
-  const diffRows = useMemo(() => {
-    const rows = new DiffEngine(leftText, rightText).buildLineDiff();
-    return onlyChanges ? rows.filter((row) => row.status !== "same") : rows;
-  }, [leftText, rightText, onlyChanges]);
+  const allRows = useMemo(
+    () => new DiffEngine(leftText, rightText).buildLineDiff(),
+    [leftText, rightText],
+  );
+
+  const diffRows = useMemo(
+    () => (onlyChanges ? allRows.filter((row) => row.status !== "same") : allRows),
+    [allRows, onlyChanges],
+  );
 
   return (
     <div className="flex flex-col gap-8">
@@ -315,7 +315,7 @@ export default function DiffPage({ tool }: DiffPageProps) {
       </div>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <Card className="flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
             <span>Left</span>
             <div className="flex items-center gap-3">
@@ -334,10 +334,10 @@ export default function DiffPage({ tool }: DiffPageProps) {
           <Textarea
             value={leftText}
             onChange={(event) => setLeftText(event.target.value)}
-            className="min-h-[240px] w-full resize-none rounded-2xl border border-black/10 bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-black/30 focus:outline-none"
+            className="min-h-[240px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none"
           />
         </Card>
-        <Card className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <Card className="flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
             <span>Right</span>
             <div className="flex items-center gap-3">
@@ -356,17 +356,17 @@ export default function DiffPage({ tool }: DiffPageProps) {
           <Textarea
             value={rightText}
             onChange={(event) => setRightText(event.target.value)}
-            className="min-h-[240px] w-full resize-none rounded-2xl border border-black/10 bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-black/30 focus:outline-none"
+            className="min-h-[240px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none"
           />
         </Card>
       </section>
 
-      <Card className="overflow-hidden rounded-3xl border border-black/10 bg-[var(--surface)] shadow-[var(--card-shadow)]">
-        <div className="grid grid-cols-2 border-b border-black/10 bg-[var(--surface-muted)] text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
+      <Card className="overflow-hidden rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] shadow-[var(--card-shadow)]">
+        <div className="grid grid-cols-2 border-b border-[color:var(--card-border)] bg-[var(--surface-muted)] text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
           <div className="px-4 py-3">Left</div>
           <div className="px-4 py-3">Right</div>
         </div>
-        <div className="divide-y divide-black/5">
+        <div className="divide-y divide-[color:var(--card-border)]">
           {diffRows.map((row, index) => {
             const wordDiff =
               row.status === "changed" && showWordDiff
@@ -375,9 +375,7 @@ export default function DiffPage({ tool }: DiffPageProps) {
 
             return (
             <div
-              key={`${row.leftNumber ?? "x"}-${row.rightNumber ?? "y"}-${
-                row.status
-              }-${index}`}
+              key={`${row.leftNumber ?? "x"}-${row.rightNumber ?? "y"}-${row.status}`}
               className="grid grid-cols-2 text-xs font-mono"
             >
               <div

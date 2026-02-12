@@ -1,37 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { tools } from "@/lib/tools";
+import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-type ThemeMode = "light" | "dark";
-
 export default function Home() {
-  const [theme, setTheme] = useState<ThemeMode>("light");
-  const [mounted, setMounted] = useState(false);
+  const { theme, mounted, toggleTheme } = useTheme();
   const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    const stored = localStorage.getItem("theme-mode");
-    if (stored === "dark" || stored === "light") {
-      setTheme(stored);
-      document.documentElement.classList.toggle("theme-dark", stored === "dark");
-    }
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-    document.documentElement.classList.toggle("theme-dark", theme === "dark");
-    localStorage.setItem("theme-mode", theme);
-  }, [theme, mounted]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
-  };
 
   const filteredTools = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -76,7 +55,7 @@ export default function Home() {
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full border border-black/10 bg-[var(--surface)] px-4 text-[var(--foreground)] transition hover:border-black/30 dark:border-white/20 dark:bg-white/15 dark:text-white/90 dark:hover:bg-white/20 dark:hover:border-white/30"
+              className="rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-4 text-[var(--foreground)] transition hover:border-[color:var(--card-border-hover)]"
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
@@ -130,7 +109,7 @@ export default function Home() {
             className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-stretch animate-[fade-in_0.8s_ease-out]"
             style={{ animationDelay: "0.05s", animationFillMode: "both" }}
           >
-            <Card className="flex flex-col gap-5 rounded-3xl border border-black/10 bg-[var(--surface)]/80 p-6 shadow-[0_20px_60px_rgba(16,24,40,0.08)] backdrop-blur">
+            <Card className="flex flex-col gap-5 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)]/80 p-6 shadow-[var(--card-shadow)] backdrop-blur">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
@@ -146,7 +125,7 @@ export default function Home() {
                 <Input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  className="h-10 flex-1 rounded-2xl border border-black/10 bg-[var(--surface-muted)] px-4 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-black/30 focus:outline-none sm:h-12"
+                  className="h-10 flex-1 rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-4 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-[color:var(--card-border-hover)] focus:outline-none sm:h-12"
                   placeholder="Type a tool name"
                 />
                 <Button className="h-10 rounded-2xl bg-[var(--accent-2)] px-4 text-xs font-semibold text-white transition hover:opacity-90 sm:h-12 sm:px-6 sm:text-sm">
@@ -172,14 +151,14 @@ export default function Home() {
                   </Link>
                 ))}
                 {filteredTools.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-black/10 bg-[var(--surface-muted)] p-4 text-sm text-[var(--muted)]">
+                  <div className="rounded-2xl border border-dashed border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 text-sm text-[var(--muted)]">
                     No tools found. Try a different keyword.
                   </div>
                 )}
               </div>
             </Card>
 
-            <Card className="flex h-full flex-col gap-5 rounded-3xl border border-zinc-200 bg-[#141414] p-6 text-white shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
+            <Card className="flex h-full flex-col gap-5 rounded-3xl border border-[color:var(--card-border)] bg-[#141414] p-6 text-white shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
               <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-white/60">
                 <span>Workspace Pulse</span>
               </div>
@@ -216,7 +195,7 @@ export default function Home() {
           >
             {tools.map((tool, index) => (
               <Card
-                key={tool.title}
+                key={tool.slug}
                 className="group rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-6 shadow-[var(--card-shadow)] transition hover:-translate-y-1 hover:border-[color:var(--card-border-hover)] hover:shadow-[0_18px_45px_rgba(16,24,40,0.12)] animate-[fade-in_0.7s_ease-out]"
                 style={{
                   animationDelay: `${0.12 + index * 0.06}s`,
@@ -241,7 +220,7 @@ export default function Home() {
           </section>
         </main>
 
-        <footer className="mt-6 h-14 border-t border-black/10" />
+        <footer className="mt-6 h-14 border-t border-[color:var(--card-border)]" />
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
         {ToolComponent ? (
           <ToolComponent tool={tool} />
         ) : (
-          <Card className="rounded-3xl border border-black/10 bg-[var(--surface)] p-8 shadow-[0_18px_45px_rgba(16,24,40,0.08)]">
+          <Card className="rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-8 shadow-[var(--card-shadow)]">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
               Tool Page
             </p>
