@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 type LineStatus = "same" | "changed" | "added" | "removed";
 
@@ -287,93 +291,73 @@ export default function DiffPage({ tool }: DiffPageProps) {
             <span className="text-[10px] uppercase tracking-[0.16em]">
               Changes only
             </span>
-            <span
-              className={`relative inline-flex h-4 w-8 items-center rounded-full transition ${
-                onlyChanges ? "bg-[var(--accent-2)]" : "bg-black/20"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={onlyChanges}
-                onChange={(event) => setOnlyChanges(event.target.checked)}
-                className="peer sr-only"
-              />
-              <span
-                className={`inline-block h-3 w-3 transform rounded-full bg-white transition ${
-                  onlyChanges ? "translate-x-4" : "translate-x-1"
-                }`}
-              />
-            </span>
+            <Switch
+              checked={onlyChanges}
+              onCheckedChange={setOnlyChanges}
+              className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20"
+            />
           </label>
           <label className="flex items-center gap-2 rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
             <span className="text-[10px] uppercase tracking-[0.16em]">
               Word highlight
             </span>
-            <span
-              className={`relative inline-flex h-4 w-8 items-center rounded-full transition ${
-                showWordDiff ? "bg-[var(--accent-2)]" : "bg-black/20"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={showWordDiff}
-                onChange={(event) => setShowWordDiff(event.target.checked)}
-                className="peer sr-only"
-              />
-              <span
-                className={`inline-block h-3 w-3 transform rounded-full bg-white transition ${
-                  showWordDiff ? "translate-x-4" : "translate-x-1"
-                }`}
-              />
-            </span>
+            <Switch
+              checked={showWordDiff}
+              onCheckedChange={setShowWordDiff}
+              className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20"
+            />
           </label>
         </div>
       </div>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <Card className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
             <span>Left</span>
             <div className="flex items-center gap-3">
               <span>Original</span>
-              <button
+              <Button
                 type="button"
                 onClick={() => handleClear("left")}
-                className="cursor-pointer rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                variant="ghost"
+                size="sm"
+                className="h-auto rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
               >
                 {clearState === "left" ? "Cleared" : "Clear"}
-              </button>
+              </Button>
             </div>
           </div>
-          <textarea
+          <Textarea
             value={leftText}
             onChange={(event) => setLeftText(event.target.value)}
             className="min-h-[240px] w-full resize-none rounded-2xl border border-black/10 bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-black/30 focus:outline-none"
           />
-        </div>
-        <div className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        </Card>
+        <Card className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
             <span>Right</span>
             <div className="flex items-center gap-3">
               <span>Updated</span>
-              <button
+              <Button
                 type="button"
                 onClick={() => handleClear("right")}
-                className="cursor-pointer rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                variant="ghost"
+                size="sm"
+                className="h-auto rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
               >
                 {clearState === "right" ? "Cleared" : "Clear"}
-              </button>
+              </Button>
             </div>
           </div>
-          <textarea
+          <Textarea
             value={rightText}
             onChange={(event) => setRightText(event.target.value)}
             className="min-h-[240px] w-full resize-none rounded-2xl border border-black/10 bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-black/30 focus:outline-none"
           />
-        </div>
+        </Card>
       </section>
 
-      <section className="overflow-hidden rounded-3xl border border-black/10 bg-[var(--surface)] shadow-[var(--card-shadow)]">
+      <Card className="overflow-hidden rounded-3xl border border-black/10 bg-[var(--surface)] shadow-[var(--card-shadow)]">
         <div className="grid grid-cols-2 border-b border-black/10 bg-[var(--surface-muted)] text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
           <div className="px-4 py-3">Left</div>
           <div className="px-4 py-3">Right</div>
@@ -425,7 +409,7 @@ export default function DiffPage({ tool }: DiffPageProps) {
             </div>
           )}
         </div>
-      </section>
+      </Card>
     </div>
   );
 }

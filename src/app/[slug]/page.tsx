@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { tools } from "@/lib/tools";
 import { toolPages } from "@/tools";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 type ToolPageProps = {
   params: Promise<{
@@ -25,16 +27,17 @@ export default async function ToolPage({ params }: ToolPageProps) {
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-10 sm:px-10">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <Link
-          href="/"
-          className="text-sm font-semibold text-[var(--accent-2)] hover:opacity-80"
+        <Button
+          asChild
+          variant="link"
+          className="h-auto p-0 text-sm font-semibold text-[var(--accent-2)] hover:opacity-80"
         >
-          ← Back to dashboard
-        </Link>
+          <Link href="/">← Back to dashboard</Link>
+        </Button>
         {ToolComponent ? (
           <ToolComponent tool={tool} />
         ) : (
-          <div className="rounded-3xl border border-black/10 bg-[var(--surface)] p-8 shadow-[0_18px_45px_rgba(16,24,40,0.08)]">
+          <Card className="rounded-3xl border border-black/10 bg-[var(--surface)] p-8 shadow-[0_18px_45px_rgba(16,24,40,0.08)]">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
               Tool Page
             </p>
@@ -46,7 +49,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
               <span className="font-mono"> src/tools</span> and register it in
               <span className="font-mono"> src/tools/index.ts</span>.
             </p>
-          </div>
+          </Card>
         )}
       </div>
     </div>

@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 type Base64ToolProps = {
   tool: {
@@ -102,80 +106,88 @@ export default function Base64Tool({ tool }: Base64ToolProps) {
       </div>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <Card className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-[var(--font-sora)] font-semibold">
-            <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:bg-emerald-400/25 dark:text-emerald-200">
+            <Badge className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200">
               Text → Base64
-            </span>
-            <button
+            </Badge>
+            <Button
               type="button"
               onClick={() => handleClear("plain")}
-              className="cursor-pointer rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-black/30 hover:text-[var(--foreground)]"
+              variant="ghost"
+              size="sm"
+              className="h-auto rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-black/30 hover:text-[var(--foreground)]"
             >
               {clearState === "plain" ? "Cleared" : "Clear"}
-            </button>
+            </Button>
           </div>
-          <textarea
+          <Textarea
             value={plainInput}
             onChange={(event) => setPlainInput(event.target.value)}
             placeholder="Text to encode"
             className="min-h-[220px] w-full resize-none rounded-2xl border border-black/10 bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-black/30 focus:outline-none"
           />
-        </div>
+        </Card>
 
-        <div className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <Card className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-[var(--font-sora)] font-semibold">
-            <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:bg-emerald-400/25 dark:text-emerald-200">
+            <Badge className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200">
               Base64 Output
-            </span>
-            <button
+            </Badge>
+            <Button
               type="button"
               onClick={() => handleCopy(encoded, "encoded")}
-              className="cursor-pointer rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-black/30 hover:text-[var(--foreground)]"
+              variant="ghost"
+              size="sm"
+              className="h-auto rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-black/30 hover:text-[var(--foreground)]"
             >
               {copyState === "encoded" ? "Copied" : "Copy"}
-            </button>
+            </Button>
           </div>
           <div className="min-h-[220px] whitespace-pre-wrap rounded-2xl border border-black/10 bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]">
             {encoded || " "}
           </div>
-        </div>
+        </Card>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <Card className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-[var(--font-sora)] font-semibold">
-            <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:bg-emerald-400/25 dark:text-emerald-200">
+            <Badge className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200">
               Base64 → Text
-            </span>
-            <button
+            </Badge>
+            <Button
               type="button"
               onClick={() => handleClear("base64")}
-              className="cursor-pointer rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-black/30 hover:text-[var(--foreground)]"
+              variant="ghost"
+              size="sm"
+              className="h-auto rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-black/30 hover:text-[var(--foreground)]"
             >
               {clearState === "base64" ? "Cleared" : "Clear"}
-            </button>
+            </Button>
           </div>
-          <textarea
+          <Textarea
             value={base64Input}
             onChange={(event) => setBase64Input(event.target.value)}
             placeholder="Base64 string to decode"
             className="min-h-[220px] w-full resize-none rounded-2xl border border-black/10 bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-black/30 focus:outline-none"
           />
-        </div>
+        </Card>
 
-        <div className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <Card className="flex flex-col gap-3 rounded-3xl border border-black/10 bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-[var(--font-sora)] font-semibold">
-            <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:bg-emerald-400/25 dark:text-emerald-200">
+            <Badge className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200">
               Text Output
-            </span>
-            <button
+            </Badge>
+            <Button
               type="button"
               onClick={() => handleCopy(decoded, "decoded")}
-              className="cursor-pointer rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-black/30 hover:text-[var(--foreground)]"
+              variant="ghost"
+              size="sm"
+              className="h-auto rounded-full border border-black/10 bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-black/30 hover:text-[var(--foreground)]"
             >
               {copyState === "decoded" ? "Copied" : "Copy"}
-            </button>
+            </Button>
           </div>
           <div className="min-h-[220px] whitespace-pre-wrap rounded-2xl border border-black/10 bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]">
             {decoded || " "}
@@ -185,7 +197,7 @@ export default function Base64Tool({ tool }: Base64ToolProps) {
               {decodeError}
             </p>
           )}
-        </div>
+        </Card>
       </section>
     </div>
   );

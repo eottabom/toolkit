@@ -15,11 +15,38 @@
   --diff-removed: rgba(255, 106, 61, 0.16);
   --diff-changed-left: rgba(255, 183, 159, 0.55);
   --diff-changed-right: rgba(176, 230, 198, 0.55);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--foreground);
+  --muted-surface: var(--surface-muted);
+  --muted-foreground: var(--muted);
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: var(--card-border);
+  --input: var(--card-border);
+  --ring: var(--card-border-hover);
+  --radius: 0.9rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted-surface);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius: var(--radius);
   --font-sans: var(--font-sora);
   --font-mono: var(--font-plex-mono);
 }
@@ -37,6 +64,18 @@ html.theme-dark {
   --diff-removed: rgba(255, 130, 92, 0.18);
   --diff-changed-left: rgba(255, 160, 120, 0.3);
   --diff-changed-right: rgba(96, 208, 150, 0.3);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--foreground);
+  --muted-surface: var(--surface-muted);
+  --muted-foreground: var(--muted);
+  --accent-foreground: #ffffff;
+  --destructive: #f87171;
+  --destructive-foreground: #0d0f12;
+  --border: var(--card-border);
+  --input: var(--card-border);
+  --ring: var(--card-border-hover);
 }
 
 body {

@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { tools } from "@/lib/tools";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 type ThemeMode = "light" | "dark";
 
@@ -70,8 +73,10 @@ export default function Home() {
             </div>
           </div>
           <nav className="flex items-center gap-4 text-sm text-[var(--muted)]">
-            <button
-              className="inline-flex items-center justify-center rounded-full border border-black/10 bg-[var(--surface)] px-4 py-2 text-[var(--foreground)] transition hover:border-black/30"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full border border-black/10 bg-[var(--surface)] px-4 text-[var(--foreground)] transition hover:border-black/30"
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
@@ -116,7 +121,7 @@ export default function Home() {
                   <span className="leading-none">Dark</span>
                 </span>
               )}
-            </button>
+            </Button>
           </nav>
         </header>
 
@@ -125,7 +130,7 @@ export default function Home() {
             className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] items-stretch animate-[fade-in_0.8s_ease-out]"
             style={{ animationDelay: "0.05s", animationFillMode: "both" }}
           >
-            <div className="flex flex-col gap-5 rounded-3xl border border-black/10 bg-[var(--surface)]/80 p-6 shadow-[0_20px_60px_rgba(16,24,40,0.08)] backdrop-blur">
+            <Card className="flex flex-col gap-5 rounded-3xl border border-black/10 bg-[var(--surface)]/80 p-6 shadow-[0_20px_60px_rgba(16,24,40,0.08)] backdrop-blur">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
@@ -138,15 +143,15 @@ export default function Home() {
                 <span />
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <input
+                <Input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  className="h-12 flex-1 rounded-2xl border border-black/10 bg-[var(--surface-muted)] px-4 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-black/30 focus:outline-none"
+                  className="h-10 flex-1 rounded-2xl border border-black/10 bg-[var(--surface-muted)] px-4 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-black/30 focus:outline-none sm:h-12"
                   placeholder="Type a tool name"
                 />
-                <button className="h-12 rounded-2xl bg-[var(--accent-2)] px-6 text-sm font-semibold text-white transition hover:opacity-90">
+                <Button className="h-10 rounded-2xl bg-[var(--accent-2)] px-4 text-xs font-semibold text-white transition hover:opacity-90 sm:h-12 sm:px-6 sm:text-sm">
                   Go
-                </button>
+                </Button>
               </div>
               <div className="flex flex-col gap-2">
                 {filteredTools.slice(0, 3).map((tool) => (
@@ -172,9 +177,9 @@ export default function Home() {
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
 
-            <div className="flex h-full flex-col gap-5 rounded-3xl border border-zinc-200 bg-[#141414] p-6 text-white shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
+            <Card className="flex h-full flex-col gap-5 rounded-3xl border border-zinc-200 bg-[#141414] p-6 text-white shadow-[0_18px_50px_rgba(0,0,0,0.25)]">
               <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-white/60">
                 <span>Workspace Pulse</span>
               </div>
@@ -202,7 +207,7 @@ export default function Home() {
                   </span>
                 </div>
               </div>
-            </div>
+            </Card>
           </section>
 
           <section
@@ -210,7 +215,7 @@ export default function Home() {
             style={{ animationDelay: "0.18s", animationFillMode: "both" }}
           >
             {tools.map((tool, index) => (
-              <article
+              <Card
                 key={tool.title}
                 className="group rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-6 shadow-[var(--card-shadow)] transition hover:-translate-y-1 hover:border-[color:var(--card-border-hover)] hover:shadow-[0_18px_45px_rgba(16,24,40,0.12)] animate-[fade-in_0.7s_ease-out]"
                 style={{
@@ -231,7 +236,7 @@ export default function Home() {
                 >
                   Open →
                 </Link>
-              </article>
+              </Card>
             ))}
           </section>
         </main>
