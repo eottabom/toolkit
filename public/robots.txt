@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://eottabom.github.io/toolkit/sitemap.xml

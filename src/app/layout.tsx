@@ -19,6 +19,9 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Dev Tools Workspace",
   description: "Internal utilities and quick access tools.",
+  verification: {
+    google: "google18352289b026fe2f",
+  },
 };
 
 export default function RootLayout({
