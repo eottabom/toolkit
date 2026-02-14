@@ -177,19 +177,19 @@ type TreeNodeProps = {
     onChangeValue: (path: JsonPath, value: JsonPrimitive) => void;
 };
 
-/** JSON 값의 타입에 따라 색상 CSS 클래스를 반환 (다크모드 대응) */
+/** JSON 값의 타입에 따라 색상 CSS 클래스를 반환 (globals.css --syntax-* 변수 사용) */
 function getValueToneClass(value: JsonValue) {
     if (typeof value === "string") {
-        return "text-emerald-700 dark:text-emerald-300";
+        return "text-[var(--syntax-string)]";
     }
     if (typeof value === "number") {
-        return "text-sky-700 dark:text-sky-300";
+        return "text-[var(--syntax-number)]";
     }
     if (typeof value === "boolean") {
-        return "text-amber-700 dark:text-amber-300";
+        return "text-[var(--syntax-boolean)]";
     }
     if (value === null) {
-        return "text-zinc-500 dark:text-zinc-400";
+        return "text-[var(--muted)]";
     }
     return "text-[var(--muted)]";
 }
@@ -199,24 +199,6 @@ function getContainerShape(value: JsonArray | JsonObject) {
     return Array.isArray(value) ? "[]" : "{}";
 }
 
-/** 트리 뷰의 들여쓰기 깊이에 맞춰 세로 점선 가이드를 렌더링하는 컴포넌트 */
-function IndentGuides({ depth }: { depth: number }) {
-    if (depth <= 0) {
-        return null;
-    }
-
-    return (
-        <span className="pointer-events-none absolute inset-y-0 left-0">
-      {Array.from({ length: depth }).map((_, index) => (
-          <span
-              key={`guide-${index}`}
-              className="absolute inset-y-0 border-l border-dashed border-[color:var(--card-border)]/80"
-              style={{ left: `${index * 14 + 7}px` }}
-          />
-      ))}
-    </span>
-    );
-}
 
 /** 접힌 노드 옆에 표시할 축약 미리보기 문자열 생성 (maxLen 초과 시 말줄임 처리) */
 function compactPreview(value: JsonValue, maxLen = 60): string {
@@ -276,34 +258,33 @@ function TreeNode({
         return (
             <div>
                 <div
-                    className="group relative flex min-h-8 items-center gap-2 rounded-md px-1 hover:bg-black/5 dark:hover:bg-white/5"
+                    className="group flex min-h-8 items-center gap-2 rounded-md px-1 hover:bg-black/5 dark:hover:bg-white/5"
                     style={{ paddingLeft: `${depth * 14}px` }}
                 >
-                    <IndentGuides depth={depth} />
                     <button
                         type="button"
                         onClick={() => onToggleCollapse(pathId)}
-                        className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-[color:var(--card-border)] bg-[var(--surface)] font-mono text-[10px] text-[var(--foreground)]"
+                        className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-[color:var(--card-border)] bg-[var(--surface)] font-mono text-[10px] text-[var(--foreground)] transition-colors hover:bg-[var(--surface-muted)]"
                         aria-label={collapsed ? "Expand" : "Collapse"}
                     >
                         {collapsed ? "+" : "-"}
                     </button>
                     {!isRoot && (
-                        <span className="font-mono text-xs text-sky-700 dark:text-sky-200">{`"${name}"`}</span>
+                        <span className="font-mono text-xs font-medium text-[var(--syntax-key)]">{`"${name}"`}</span>
                     )}
                     {!isRoot && <span className="font-mono text-xs text-[var(--muted)]">:</span>}
                     <span className="font-mono text-xs text-[var(--muted)]">{openBrace}</span>
                     {collapsed && (
                         <span className="flex items-center gap-1 truncate font-mono text-xs text-[var(--muted)]" title={compactPreview(value, 120)}>
-              <span className="inline-block h-px w-4 bg-[var(--muted)]/40" />
-              <span className="opacity-70">{compactPreview(value, 40).slice(1, -1).trim()}</span>
-              <span className="inline-block h-px w-4 bg-[var(--muted)]/40" />
+              <span className="inline-block h-px w-4 bg-[var(--muted)]/30" />
+              <span className="opacity-80">{compactPreview(value, 40).slice(1, -1).trim()}</span>
+              <span className="inline-block h-px w-4 bg-[var(--muted)]/30" />
                             {closeBrace}
             </span>
                     )}
                     {!collapsed && <span className="font-mono text-[11px] text-[var(--muted)]">{entries.length} item(s)</span>}
                     {showTypes && (
-                        <span className="rounded bg-[var(--surface-muted)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--muted)]">
+                        <span className="rounded border border-[color:var(--card-border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--muted)]">
               {typeLabel}
             </span>
                     )}
@@ -337,15 +318,15 @@ function TreeNode({
 
     return (
         <div
-            className="group relative flex min-h-8 items-center gap-2 rounded-md px-1 hover:bg-black/5 dark:hover:bg-white/5"
+            className="group flex min-h-8 items-center gap-2 rounded-md px-1 hover:bg-black/5 dark:hover:bg-white/5"
             style={{ paddingLeft: `${depth * 14}px` }}
         >
-            <IndentGuides depth={depth} />
-            <span className="min-w-20 font-mono text-xs text-sky-700 dark:text-sky-200">{`"${name}"`}</span>
+            <span className="inline-block w-4 shrink-0" />
+            <span className="min-w-20 font-mono text-xs font-medium text-[var(--syntax-key)]">{`"${name}"`}</span>
             <span className="font-mono text-xs text-[var(--muted)]">:</span>
             <PrimitiveEditor value={value} onChange={(next) => onChangeValue(path, next)} />
             {showTypes && (
-                <span className="rounded bg-[var(--surface-muted)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--muted)]">
+                <span className="rounded border border-[color:var(--card-border)] bg-[var(--surface)] px-1.5 py-0.5 font-mono text-[10px] uppercase text-[var(--muted)]">
           {typeLabel}
         </span>
             )}
@@ -487,7 +468,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                     <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
                 </div>
 
-                <label className="flex items-center gap-2 self-start rounded-full border border-[var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)] md:self-auto">
+                <label className="flex items-center gap-2 self-start rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)] md:self-auto">
                     <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Show Types</span>
                     <Switch checked={showTypes} onCheckedChange={setShowTypes} className="h-4 w-8" />
                 </label>
@@ -502,14 +483,14 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
 
                 <Card className="flex min-h-[520px] flex-col gap-4 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Raw JSON</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Raw JSON</p>
                         <div className="flex gap-2">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleCopyRaw}
-                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em]"
+                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
                             >
                                 {rightCopyState === "copied" ? "Copied" : "Copy"}
                             </Button>
@@ -518,7 +499,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleFormat}
-                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em]"
+                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
                             >
                                 Pretty
                             </Button>
@@ -527,7 +508,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleReset}
-                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em]"
+                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
                             >
                                 Reset sample
                             </Button>
@@ -572,22 +553,22 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                     </div>
 
                     {parseError ? (
-                        <p className="text-xs font-semibold text-red-600 dark:text-red-400">JSON parse error: {parseError}</p>
+                        <p className="text-xs font-semibold text-[var(--syntax-error)]">JSON parse error: {parseError}</p>
                     ) : (
-                        <p className="text-xs text-emerald-700 dark:text-emerald-300">Valid JSON</p>
+                        <p className="text-xs text-[var(--syntax-valid)]">Valid JSON</p>
                     )}
                 </Card>
 
                 <Card className="flex min-h-[520px] flex-col gap-4 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
                     <div className="flex items-center justify-between">
-                        <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Tree Viewer</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Tree Viewer</p>
                         <div className="flex gap-2">
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleCopyTree}
-                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em]"
+                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
                             >
                                 {leftCopyState === "copied" ? "Copied" : "Copy"}
                             </Button>
@@ -596,7 +577,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleExpandAll}
-                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em]"
+                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
                             >
                                 Expand all
                             </Button>
@@ -605,14 +586,14 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleCollapseAll}
-                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em]"
+                                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
                             >
                                 Collapse all
                             </Button>
                         </div>
                     </div>
 
-                    <div className="overflow-auto rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-3">
+                    <div className="flex-1 overflow-auto rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-3">
                         <TreeNode
                             value={jsonValue}
                             path={[]}

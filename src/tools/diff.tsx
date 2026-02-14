@@ -290,9 +290,9 @@ export default function DiffPage({ tool }: { tool: ToolItem }) {
           </h1>
           <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
         </div>
-        <div className="flex flex-col items-end gap-2 text-xs text-[var(--muted)]">
-          <label className="flex items-center gap-2 rounded-full border border-[var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
-            <span className="text-[10px] uppercase tracking-[0.16em]">
+        <div className="flex flex-col items-end gap-2 text-xs">
+          <label className="flex items-center gap-2 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
               Changes only
             </span>
             <Switch
@@ -301,8 +301,8 @@ export default function DiffPage({ tool }: { tool: ToolItem }) {
               className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20 dark:data-[state=unchecked]:bg-white/20"
             />
           </label>
-          <label className="flex items-center gap-2 rounded-full border border-[var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
-            <span className="text-[10px] uppercase tracking-[0.16em]">
+          <label className="flex items-center gap-2 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
               Word highlight
             </span>
             <Switch
@@ -325,7 +325,7 @@ export default function DiffPage({ tool }: { tool: ToolItem }) {
                 onClick={() => handleClear("left")}
                 variant="ghost"
                 size="sm"
-                className="h-auto rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                className="h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
               >
                 {clearState === "left" ? "Cleared" : "Clear"}
               </Button>
@@ -347,7 +347,7 @@ export default function DiffPage({ tool }: { tool: ToolItem }) {
                 onClick={() => handleClear("right")}
                 variant="ghost"
                 size="sm"
-                className="h-auto rounded-full bg-[var(--surface-muted)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                className="h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
               >
                 {clearState === "right" ? "Cleared" : "Clear"}
               </Button>

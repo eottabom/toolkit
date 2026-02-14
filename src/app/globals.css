@@ -15,6 +15,14 @@
   --diff-removed: rgba(255, 106, 61, 0.16);
   --diff-changed-left: rgba(255, 183, 159, 0.55);
   --diff-changed-right: rgba(176, 230, 198, 0.55);
+
+  /* JSON Viewer 구문 하이라이팅 — 키 이름, 값 타입별 색상 */
+  --syntax-key: #0369a1;       /* 키 이름 (sky-700) */
+  --syntax-string: #047857;    /* 문자열 (emerald-700) */
+  --syntax-number: #0369a1;    /* 숫자 (sky-700) */
+  --syntax-boolean: #b45309;   /* 불리언 (amber-700) */
+  --syntax-error: #dc2626;     /* 에러 메시지 (red-600) */
+  --syntax-valid: #047857;     /* 유효 상태 (emerald-700) */
   --primary: var(--foreground);
   --primary-foreground: var(--background);
   --secondary: var(--surface-muted);
@@ -64,6 +72,14 @@ html.theme-dark {
   --diff-removed: rgba(255, 130, 92, 0.18);
   --diff-changed-left: rgba(255, 160, 120, 0.3);
   --diff-changed-right: rgba(96, 208, 150, 0.3);
+
+  /* JSON Viewer 구문 하이라이팅 — 키 이름, 값 타입별 색상 */
+  --syntax-key: #7dd3fc;       /* 키 이름 (sky-300) */
+  --syntax-string: #6ee7b7;    /* 문자열 (emerald-300) */
+  --syntax-number: #7dd3fc;    /* 숫자 (sky-300) */
+  --syntax-boolean: #fcd34d;   /* 불리언 (amber-300) */
+  --syntax-error: #f87171;     /* 에러 메시지 (red-400) */
+  --syntax-valid: #6ee7b7;     /* 유효 상태 (emerald-300) */
   --primary: var(--foreground);
   --primary-foreground: var(--background);
   --secondary: var(--surface-muted);
