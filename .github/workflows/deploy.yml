@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   build:
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    if: ${{ !contains(toJson(github.event.commits), '[skip ci]') && !contains(toJson(github.event.commits), '[ci skip]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,7 +45,7 @@ jobs:
 
   deploy:
     needs: build
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    if: ${{ !contains(toJson(github.event.commits), '[skip ci]') && !contains(toJson(github.event.commits), '[ci skip]') }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -57,7 +57,7 @@ jobs:
 
   version:
     needs: deploy
-    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
+    if: ${{ !contains(toJson(github.event.commits), '[skip ci]') && !contains(toJson(github.event.commits), '[ci skip]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
