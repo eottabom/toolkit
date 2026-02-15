@@ -340,6 +340,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
     const [jsonValue, setJsonValue] = useState<JsonValue>(sampleJson);
     const [rawInput, setRawInput] = useState(initialRaw);
     const [parseError, setParseError] = useState("");
+    const [errorLine, setErrorLine] = useState<number | null>(null);
     const [showTypes, setShowTypes] = useState(true);
     const [collapsedPaths, setCollapsedPaths] = useState<Set<string>>(new Set());
     const [leftCopyState, setLeftCopyState] = useState<"idle" | "copied">("idle");
@@ -370,6 +371,14 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
         }
     }, [rawInput]);
 
+    /** 에러 메시지에서 position 값을 읽어 해당 문자 위치가 몇 번째 줄인지 계산 */
+    const getErrorLine = (raw: string, message: string): number | null => {
+        const match = message.match(/position\s+(\d+)/i);
+        if (!match) return null;
+        const pos = Number(match[1]);
+        return raw.slice(0, pos).split("\n").length;
+    };
+
     /** Raw JSON 텍스트 변경 시 파싱하여 트리 상태를 동기화하고, 실패 시 에러 메시지를 표시 */
     const handleRawChange = (nextRaw: string) => {
         setRawInput(nextRaw);
@@ -378,9 +387,11 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
             const parsed = JSON.parse(nextRaw) as JsonValue;
             setJsonValue(parsed);
             setParseError("");
+            setErrorLine(null);
         } catch (error) {
             const message = error instanceof Error ? error.message : "Invalid JSON";
             setParseError(message);
+            setErrorLine(getErrorLine(nextRaw, message));
         }
     };
 
@@ -390,6 +401,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
         setJsonValue(nextValue);
         setRawInput(JSON.stringify(nextValue, null, 2));
         setParseError("");
+        setErrorLine(null);
     };
 
     /** 특정 경로의 노드 접기/펼치기 상태를 토글 */
@@ -413,9 +425,11 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
             setJsonValue(parsed);
             setRawInput(pretty);
             setParseError("");
+            setErrorLine(null);
         } catch (error) {
             const message = error instanceof Error ? error.message : "Invalid JSON";
             setParseError(message);
+            setErrorLine(getErrorLine(rawInput, message));
         }
     };
 
@@ -424,6 +438,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
         setJsonValue(sampleJson);
         setRawInput(JSON.stringify(sampleJson, null, 2));
         setParseError("");
+        setErrorLine(null);
         setCollapsedPaths(new Set());
     };
 
@@ -520,14 +535,18 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                             ref={gutterRef}
                             className="shrink-0 select-none overflow-hidden border-r border-[color:var(--card-border)]/50 bg-[var(--surface-muted)] py-4 pr-2 pl-2 font-mono text-[10px] leading-6 text-[var(--muted)]"
                         >
-                            {Array.from({ length: lineCount }, (_, index) => (
-                                <div
-                                    key={index}
-                                    className={`text-right px-1 ${index % 2 === 0 ? "bg-black/[0.03] dark:bg-white/[0.03]" : ""}`}
-                                >
-                                    {index + 1}
-                                </div>
-                            ))}
+                            {Array.from({ length: lineCount }, (_, index) => {
+                                const lineNum = index + 1;
+                                const isError = errorLine === lineNum;
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`text-right px-1 ${isError ? "bg-[var(--syntax-error)]/20 font-semibold text-[var(--syntax-error)]" : index % 2 === 0 ? "bg-black/[0.03] dark:bg-white/[0.03]" : ""}`}
+                                    >
+                                        {lineNum}
+                                    </div>
+                                );
+                            })}
                         </div>
                         <div className="relative flex-1">
                             <Textarea
@@ -545,15 +564,18 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                                         handleRawChange(next);
                                     }
                                 }}
+                                placeholder='{ "key": "value" }'
                                 style={{ tabSize: 4 }}
-                                className="absolute inset-0 resize-none rounded-none border-0 bg-transparent p-4 font-mono text-xs leading-6 text-[var(--foreground)] shadow-none outline-none ring-0 focus-visible:ring-0 focus-visible:outline-none"
+                                className="absolute inset-0 resize-none rounded-none border-0 bg-transparent p-4 font-mono text-xs leading-6 text-[var(--foreground)] shadow-none outline-none ring-0 placeholder:text-[var(--muted)]/50 focus-visible:ring-0 focus-visible:outline-none"
                                 spellCheck={false}
                             />
                         </div>
                     </div>
 
                     {parseError ? (
-                        <p className="text-xs font-semibold text-[var(--syntax-error)]">JSON parse error: {parseError}</p>
+                        <p className="text-xs font-semibold text-[var(--syntax-error)]">
+                            JSON parse error{errorLine ? ` (line ${errorLine})` : ""}: {parseError}
+                        </p>
                     ) : (
                         <p className="text-xs text-[var(--syntax-valid)]">Valid JSON</p>
                     )}
