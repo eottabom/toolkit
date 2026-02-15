@@ -15,6 +15,13 @@ export const tools: ToolItem[] = [
     createdAt: "2026-02-14",
   },
   {
+    title: "JWT Encoder/Decoder",
+    desc: "Decode JWT tokens or encode Header/Payload with HMAC-SHA256.",
+    tag: "Utility",
+    slug: "jwt",
+    createdAt: "2026-02-15",
+  },
+  {
     title: "Base64 Encode/Decode",
     desc: "Encode plain text to Base64 or decode Base64 back to text.",
     tag: "Utility",

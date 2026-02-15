@@ -3,6 +3,7 @@ import type { ToolItem } from "@/lib/tools";
 import DiffPage from "./diff";
 import Base64Tool from "./base64";
 import JsonViewerTool from "@/tools/jsonviewer";
+import JwtTool from "./jwt";
 
 type ToolComponentProps = {
   tool: ToolItem;
@@ -11,5 +12,6 @@ type ToolComponentProps = {
 export const toolPages: Record<string, ComponentType<ToolComponentProps>> = {
   "json-viewer": JsonViewerTool,
   "base64": Base64Tool,
-  "diff": DiffPage
+  "diff": DiffPage,
+  "jwt": JwtTool
 };
