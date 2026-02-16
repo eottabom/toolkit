@@ -66,7 +66,7 @@ export const tools = [
    - `version.properties`가 변경되었으면 그 버전을 사용
    - 변경이 없으면 `patch +1` 자동 증가
    - 변경 시 `# updated=...` 헤더를 갱신하고 커밋
-4. 이전 버전 태그 1개만 삭제하고 `v<version>` 태그 생성
+4. 이전 버전 태그 1개만 삭제하고 `v<version>` 태그 생성(최대 5개 유지)
 
 ### 수동 배포 (tag)
 1. GitHub Actions → `Deploy GitHub Pages (Tag)` 실행
