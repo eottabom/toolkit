@@ -35,12 +35,6 @@ jobs:
           TAG="${{ inputs.tag }}"
           TAG="$(echo "$TAG" | xargs)" # trim
 
-          # 형식 가드(원하면 완화/삭제)
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "Invalid tag format: '$TAG' (expected vX.Y.Z)"
-            exit 1
-          fi
-
           git fetch --tags --force
           git rev-parse -q --verify "refs/tags/$TAG" >/dev/null || {
             echo "Tag not found: $TAG"
