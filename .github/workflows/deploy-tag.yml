@@ -21,10 +21,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout (tag)
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag }}
+          fetch-depth: 0  # 태그 검증/메타 용도
+
+      - name: Validate tag format & existence
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="${{ inputs.tag }}"
+          TAG="$(echo "$TAG" | xargs)" # trim
+
+          # 형식 가드(원하면 완화/삭제)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Invalid tag format: '$TAG' (expected vX.Y.Z)"
+            exit 1
+          fi
+
+          git fetch --tags --force
+          git rev-parse -q --verify "refs/tags/$TAG" >/dev/null || {
+            echo "Tag not found: $TAG"
+            exit 1
+          }
+
+          echo "Tag verified: $TAG"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -32,13 +55,33 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          key: ${{ runner.os }}-nextcache-${{ hashFiles('package-lock.json') }}-${{ inputs.tag }}
+          restore-keys: |
+            ${{ runner.os }}-nextcache-${{ hashFiles('package-lock.json') }}-
+            ${{ runner.os }}-nextcache-
+
       - name: Install
         run: npm ci
 
       - name: Build
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
-        run: npm run build
+          # 필요 시(프로젝트 구성에 따라)
+          # NEXT_PUBLIC_ASSET_PREFIX: /${{ github.event.repository.name }}
+        run: |
+          npm run build
+
+      - name: Ensure export output exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d ./out || { echo "./out not found. Did you run static export?"; exit 1; }
+          test -f ./out/index.html || { echo "./out/index.html not found."; exit 1; }
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
