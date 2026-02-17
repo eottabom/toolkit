@@ -19,7 +19,9 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
   );
 
   const encoded = useMemo(() => {
-    if (!plainInput) return "";
+    if (!plainInput) {
+      return "";
+    }
     try {
       return encodeURIComponent(plainInput);
     } catch {
@@ -28,7 +30,9 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
   }, [plainInput]);
 
   const decoded = useMemo(() => {
-    if (!encodedInput) return "";
+    if (!encodedInput) {
+      return "";
+    }
     try {
       return decodeURIComponent(encodedInput);
     } catch {
@@ -37,7 +41,9 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
   }, [encodedInput]);
 
   const decodeError = useMemo(() => {
-    if (!encodedInput) return "";
+    if (!encodedInput) {
+      return "";
+    }
     try {
       decodeURIComponent(encodedInput);
       return "";
@@ -47,7 +53,9 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
   }, [encodedInput]);
 
   const handleCopy = async (text: string, type: "encoded" | "decoded") => {
-    if (!text) return;
+    if (!text) {
+      return;
+    }
     try {
       await navigator.clipboard.writeText(text);
       setCopyState(type);
