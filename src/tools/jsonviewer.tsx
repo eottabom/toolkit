@@ -489,12 +489,36 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                 </label>
             </div>
 
+            {/* Info Panel */}
+            <Card className="rounded-2xl border border-[color:var(--url-panel-border)] bg-[var(--url-panel-bg)] p-4">
+                <div className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--url-panel-icon-bg)] text-sm text-[var(--url-panel-accent)]">
+                        {"{}"}
+                    </span>
+                    <div className="flex flex-col gap-1">
+                        <h2 className="text-sm font-semibold text-[var(--foreground)]">
+                            JSON Viewer
+                        </h2>
+                        <p className="text-xs leading-relaxed text-[var(--muted)]">
+                            왼쪽에서 Raw JSON을 입력/정리하고, 오른쪽 트리 뷰에서 구조를 확인/수정한 뒤 원하는 패널에서 복사하세요.
+                            모든 처리는 브라우저에서 수행되며 서버로 전송되지 않습니다.
+                        </p>
+                        <div className="mt-1 flex flex-wrap gap-2">
+                            <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
+                                JSON 파싱 & 포맷팅
+                            </span>
+                            <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
+                                트리 뷰 탐색
+                            </span>
+                            <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
+                                인라인 값 편집
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </Card>
+
             <section className="grid gap-4 lg:grid-cols-2">
-                <Card className="rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-4 shadow-[var(--card-shadow)] lg:col-span-2">
-                    <p className="text-sm font-medium text-[var(--foreground)]">
-                        왼쪽에서 Raw JSON을 입력/정리하고, 오른쪽 트리 뷰에서 구조를 확인/수정한 뒤 원하는 패널에서 복사하세요.
-                    </p>
-                </Card>
 
                 <Card className="flex min-h-[520px] flex-col gap-4 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
                     <div className="flex flex-wrap items-center justify-between gap-2">
