@@ -193,7 +193,7 @@ export default function Home() {
             className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-[fade-in_0.8s_ease-out]"
             style={{ animationDelay: "0.18s", animationFillMode: "both" }}
           >
-            {tools.map((tool, index) => (
+            {[...tools].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).map((tool, index) => (
               <Card
                 key={tool.slug}
                 className="group rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-6 shadow-[var(--card-shadow)] transition hover:-translate-y-1 hover:border-[color:var(--card-border-hover)] hover:shadow-[0_18px_45px_rgba(16,24,40,0.12)] animate-[fade-in_0.7s_ease-out]"
