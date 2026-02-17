@@ -8,6 +8,20 @@ export type ToolItem = {
 
 export const tools: ToolItem[] = [
   {
+    title: "Base64 Encode/Decode",
+    desc: "Encode plain text to Base64 or decode Base64 back to text.",
+    tag: "Utility",
+    slug: "base64",
+    createdAt: "2026-02-11",
+  },
+  {
+    title: "Diff Studio",
+    desc: "Compare text side-by-side and highlight changes.",
+    tag: "Utility",
+    slug: "diff",
+    createdAt: "2026-02-11",
+  },
+  {
     title: "Json Viewer",
     desc: "Pretty or Edit Json.",
     tag: "Utility",
@@ -22,17 +36,10 @@ export const tools: ToolItem[] = [
     createdAt: "2026-02-15",
   },
   {
-    title: "Base64 Encode/Decode",
-    desc: "Encode plain text to Base64 or decode Base64 back to text.",
+    title: "URL Encoder/Decoder",
+    desc: "Encode text to URL format or decode URL-encoded strings back to text.",
     tag: "Utility",
-    slug: "base64",
-    createdAt: "2026-02-11",
+    slug: "url",
+    createdAt: "2026-02-17",
   },
-  {
-    title: "Diff Studio",
-    desc: "Compare text side-by-side and highlight changes.",
-    tag: "Utility",
-    slug: "diff",
-    createdAt: "2026-02-11",
-  }
 ];

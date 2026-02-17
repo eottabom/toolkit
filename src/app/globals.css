@@ -53,6 +53,13 @@
 
   /* JWT 에러 */
   --jwt-error: #dc2626;
+
+  /* URL 안내 패널 (blue) */
+  --url-panel-border: rgba(147, 197, 253, 0.5);
+  --url-panel-bg: rgba(239, 246, 255, 0.6);
+  --url-panel-icon-bg: rgba(59, 130, 246, 0.15);
+  --url-panel-accent: #2563eb;
+  --url-panel-chip-bg: rgba(59, 130, 246, 0.1);
 }
 
 @theme inline {
@@ -126,6 +133,13 @@ html.theme-dark {
 
   /* JWT 에러 */
   --jwt-error: #f87171;
+
+  /* URL 안내 패널 (blue) */
+  --url-panel-border: rgba(30, 64, 175, 0.3);
+  --url-panel-bg: rgba(30, 58, 138, 0.2);
+  --url-panel-icon-bg: rgba(96, 165, 250, 0.2);
+  --url-panel-accent: #93c5fd;
+  --url-panel-chip-bg: rgba(96, 165, 250, 0.15);
 }
 
 body {
