@@ -195,7 +195,9 @@ function getNextDefaultScenarioName(scenarios: Scenario[]): string {
   let maxIndex = 0;
   for (const sc of scenarios) {
     const m = sc.name.match(/^default_(\d+)$/);
-    if (m) maxIndex = Math.max(maxIndex, Number(m[1]));
+    if (m) {
+      maxIndex = Math.max(maxIndex, Number(m[1]));
+    }
   }
   return `default_${maxIndex + 1}`;
 }
@@ -234,7 +236,9 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
 
   const handleCopy = useCallback(async () => {
     try {
-      if (!activeScript.trim()) return;
+      if (!activeScript.trim()) {
+        return;
+      }
       await navigator.clipboard.writeText(activeScript);
       setCopyState("copied");
       window.setTimeout(() => setCopyState("idle"), 1200);
@@ -249,25 +253,19 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
   };
 
   useEffect(() => {
-    if (isCleared) setIsCleared(false);
-  }, [script, isCleared]);
-
-  const handleCopyCiCommand = async () => {
-    try {
-      await navigator.clipboard.writeText("gh workflow run k6-validate.yml");
-      setCopyState("copied");
-      window.setTimeout(() => setCopyState("idle"), 1200);
-    } catch {
-      // ignore
+    if (isCleared) {
+      setIsCleared(false);
     }
-  };
+  }, [script, isCleared]);
 
   /* 헤더 헬퍼 */
   const updateHeaderDraft = (field: "key" | "value", val: string) => {
     setHeaderDraft((prev) => ({ ...prev, [field]: val }));
   };
   const addHeader = () => {
-    if (!headerDraft.key.trim()) return;
+    if (!headerDraft.key.trim()) {
+      return;
+    }
     setHeaders((prev) => [...prev, { ...headerDraft }]);
     setHeaderDraft({ key: "", value: "" });
   };
@@ -725,9 +723,6 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
             <div className="flex items-center justify-between">
               <Badge className={badgeClass}>Generated Script</Badge>
               <div className="flex items-center gap-2">
-                <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleCopyCiCommand}>
-                  CI Command
-                </Button>
                 <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleCopy} disabled={!activeScript.trim()}>
                   {copyState === "copied" ? "Copied!" : "Copy"}
                 </Button>
