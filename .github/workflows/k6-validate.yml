@@ -1,14 +1,11 @@
 name: k6 Script Validation
 
 on:
-  push:
-    paths:
-      - "k6/**"
-      - "src/tools/k6-generator.tsx"
-  pull_request:
-    paths:
-      - "k6/**"
-      - "src/tools/k6-generator.tsx"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to run on"
+        required: false
 
 jobs:
   validate:
