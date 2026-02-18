@@ -223,7 +223,7 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
 
   // UI state
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
-  const [ciStatus, setCiStatus] = useState<"idle" | "running" | "success" | "error">("idle");
+  const [ciStatus, setCiStatus] = useState<"idle" | "pending" | "running" | "success" | "error">("idle");
   const [ciMessage, setCiMessage] = useState("");
   const [scriptTab, setScriptTab] = useState<ScriptTab>("auto");
   const [customScript, setCustomScript] = useState("");
@@ -262,20 +262,66 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
     }
   }, [script, isCleared]);
 
+  const pollCiStatus = async (since: string) => {
+    const maxAttempts = 60;
+    const delayMs = 2000;
+    for (let i = 0; i < maxAttempts; i += 1) {
+      try {
+        const res = await fetch(`/api/k6-validate?since=${encodeURIComponent(since)}`);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setCiStatus("error");
+          const details = data?.details ? `: ${data.details}` : "";
+          setCiMessage(`${data?.error || "조회에 실패했습니다."}${details}`);
+          return;
+        }
+        const data = await res.json();
+        if (data?.status === "not_found") {
+          setCiStatus("pending");
+          setCiMessage("대기중...");
+        } else if (data?.status === "queued") {
+          setCiStatus("pending");
+          setCiMessage("대기중...");
+        } else if (data?.status === "in_progress") {
+          setCiStatus("running");
+          setCiMessage("실행중...");
+        } else if (data?.status === "completed") {
+          if (data?.conclusion === "success") {
+            setCiStatus("success");
+            setCiMessage("성공");
+          } else {
+            setCiStatus("error");
+            setCiMessage(`실패${data?.conclusion ? ` (${data.conclusion})` : ""}`);
+          }
+          return;
+        }
+      } catch {
+        setCiStatus("error");
+        setCiMessage("네트워크 오류");
+        return;
+      }
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+    setCiStatus("pending");
+    setCiMessage("대기중...");
+  };
+
   const handleRunCi = async () => {
-    setCiStatus("running");
-    setCiMessage("");
+    const since = new Date().toISOString();
+    setCiStatus("pending");
+    setCiMessage("요청 중...");
     try {
       const res = await fetch("/api/k6-validate", { method: "POST" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setCiStatus("error");
-        setCiMessage(data?.error || "실행에 실패했습니다.");
+        const details = data?.details ? `: ${data.details}` : "";
+        setCiMessage(`${data?.error || "실행에 실패했습니다."}${details}`);
         return;
       }
-      setCiStatus("success");
-      setCiMessage("워크플로우 실행 요청 완료");
-      window.setTimeout(() => setCiStatus("idle"), 2000);
+      setCiStatus("pending");
+      setCiMessage("요청 완료, 실행 대기중...");
+      await pollCiStatus(since);
     } catch {
       setCiStatus("error");
       setCiMessage("네트워크 오류");
@@ -747,8 +793,8 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
             <div className="flex items-center justify-between">
               <Badge className={badgeClass}>Generated Script</Badge>
               <div className="flex items-center gap-2">
-                <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleRunCi} disabled={ciStatus === "running"}>
-                  {ciStatus === "running" ? "Running..." : "Run CI"}
+                <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleRunCi} disabled={ciStatus === "running" || ciStatus === "pending"}>
+                  {ciStatus === "running" ? "Running..." : ciStatus === "pending" ? "Pending..." : "Run CI"}
                 </Button>
                 <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleCopy} disabled={!activeScript.trim()}>
                   {copyState === "copied" ? "Copied!" : "Copy"}
@@ -766,7 +812,7 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
             </div>
             {ciStatus !== "idle" && (
               <div className={`text-xs ${ciStatus === "error" ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
-                {ciMessage || (ciStatus === "running" ? "워크플로우 실행 중..." : "완료")}
+                {ciMessage || (ciStatus === "running" ? "워크플로우 실행 중..." : ciStatus === "pending" ? "대기중..." : "완료")}
               </div>
             )}
             <div className="flex items-center gap-2">
