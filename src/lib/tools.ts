@@ -42,4 +42,11 @@ export const tools: ToolItem[] = [
     slug: "url",
     createdAt: "2026-02-17",
   },
+  {
+    title: "Java Memory Calculator",
+    desc: "Calculate JVM memory allocation based on Cloud Foundry / Paketo Buildpack formula.",
+    tag: "Utility",
+    slug: "java-memory-calculator",
+    createdAt: "2026-02-18",
+  },
 ];

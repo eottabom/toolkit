@@ -5,6 +5,8 @@ import Base64Tool from "./base64";
 import JsonViewerTool from "@/tools/jsonviewer";
 import JwtTool from "./jwt";
 import UrlTool from "./url";
+import DiffTool from "./diff";
+import JavaMemoryCalculator from "@/tools/java-memory-calculator";
 
 type ToolComponentProps = {
   tool: ToolItem;
@@ -12,8 +14,9 @@ type ToolComponentProps = {
 
 export const toolPages: Record<string, ComponentType<ToolComponentProps>> = {
   "json-viewer": JsonViewerTool,
-  "base64": Base64Tool,
-  "diff": DiffPage,
-  "jwt": JwtTool,
-  "url": UrlTool
+  base64: Base64Tool,
+  diff: DiffTool,
+  jwt: JwtTool,
+  url: UrlTool,
+  "java-memory-calculator": JavaMemoryCalculator,
 };
