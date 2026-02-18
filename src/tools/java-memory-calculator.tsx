@@ -444,7 +444,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
       <Card className="rounded-2xl border border-[color:var(--url-panel-border)] bg-[var(--url-panel-bg)] p-4">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--url-panel-icon-bg)] text-sm text-[var(--url-panel-accent)]">
-            ☕
+            💻
           </span>
           <div className="flex flex-col gap-1">
             <h2 className="text-sm font-semibold text-[var(--foreground)]">Java Memory Calculator</h2>
