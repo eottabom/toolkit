@@ -49,4 +49,11 @@ export const tools: ToolItem[] = [
     slug: "java-memory-calculator",
     createdAt: "2026-02-18",
   },
+  {
+    title: "k6 Script Generator",
+    desc: "Generate k6 performance test scripts with scenarios, thresholds, and checks.",
+    tag: "Testing",
+    slug: "k6-generator",
+    createdAt: "2026-02-18",
+  },
 ];

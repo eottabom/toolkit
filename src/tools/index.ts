@@ -7,6 +7,7 @@ import JwtTool from "./jwt";
 import UrlTool from "./url";
 import DiffTool from "./diff";
 import JavaMemoryCalculator from "@/tools/java-memory-calculator";
+import K6Generator from "@/tools/k6-generator";
 
 type ToolComponentProps = {
   tool: ToolItem;
@@ -19,4 +20,5 @@ export const toolPages: Record<string, ComponentType<ToolComponentProps>> = {
   jwt: JwtTool,
   url: UrlTool,
   "java-memory-calculator": JavaMemoryCalculator,
+  "k6-generator": K6Generator,
 };
