@@ -223,6 +223,8 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
 
   // UI state
   const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+  const [ciStatus, setCiStatus] = useState<"idle" | "running" | "success" | "error">("idle");
+  const [ciMessage, setCiMessage] = useState("");
   const [scriptTab, setScriptTab] = useState<ScriptTab>("auto");
   const [customScript, setCustomScript] = useState("");
 
@@ -250,6 +252,8 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
   const handleClear = () => {
     setIsCleared(true);
     setCopyState("idle");
+    setCiStatus("idle");
+    setCiMessage("");
   };
 
   useEffect(() => {
@@ -257,6 +261,26 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
       setIsCleared(false);
     }
   }, [script, isCleared]);
+
+  const handleRunCi = async () => {
+    setCiStatus("running");
+    setCiMessage("");
+    try {
+      const res = await fetch("/api/k6-validate", { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setCiStatus("error");
+        setCiMessage(data?.error || "실행에 실패했습니다.");
+        return;
+      }
+      setCiStatus("success");
+      setCiMessage("워크플로우 실행 요청 완료");
+      window.setTimeout(() => setCiStatus("idle"), 2000);
+    } catch {
+      setCiStatus("error");
+      setCiMessage("네트워크 오류");
+    }
+  };
 
   /* 헤더 헬퍼 */
   const updateHeaderDraft = (field: "key" | "value", val: string) => {
@@ -723,6 +747,9 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
             <div className="flex items-center justify-between">
               <Badge className={badgeClass}>Generated Script</Badge>
               <div className="flex items-center gap-2">
+                <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleRunCi} disabled={ciStatus === "running"}>
+                  {ciStatus === "running" ? "Running..." : "Run CI"}
+                </Button>
                 <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleCopy} disabled={!activeScript.trim()}>
                   {copyState === "copied" ? "Copied!" : "Copy"}
                 </Button>
@@ -737,6 +764,11 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                 )}
               </div>
             </div>
+            {ciStatus !== "idle" && (
+              <div className={`text-xs ${ciStatus === "error" ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                {ciMessage || (ciStatus === "running" ? "워크플로우 실행 중..." : "완료")}
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <button type="button" className={tabBtnClass(scriptTab === "auto")} onClick={() => setScriptTab("auto")}>
                 Auto
