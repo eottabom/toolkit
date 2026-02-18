@@ -69,9 +69,7 @@ class DiffEngine {
   buildLineDiff(): DiffLine[] {
     const m = this.leftLines.length;
     const n = this.rightLines.length;
-    const dp: number[][] = Array.from({ length: m + 1 }, () =>
-      Array(n + 1).fill(0),
-    );
+    const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
 
     for (let i = 1; i <= m; i += 1) {
       for (let j = 1; j <= n; j += 1) {
@@ -96,9 +94,7 @@ class DiffEngine {
     const rightWords = trimmedRight.length ? trimmedRight.split(/\s+/) : [];
     const m = leftWords.length;
     const n = rightWords.length;
-    const dp: number[][] = Array.from({ length: m + 1 }, () =>
-      Array(n + 1).fill(0),
-    );
+    const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
 
     for (let i = 1; i <= m; i += 1) {
       for (let j = 1; j <= n; j += 1) {
@@ -143,11 +139,7 @@ class DiffEngine {
     return parts.map((part, index) => {
       const prefix = index === 0 ? "" : " ";
       const highlight =
-        part.kind === "removed"
-          ? "bg-[var(--diff-removed)]"
-          : part.kind === "added"
-          ? "bg-[var(--diff-added)]"
-          : "";
+        part.kind === "removed" ? "bg-[var(--diff-removed)]" : part.kind === "added" ? "bg-[var(--diff-added)]" : "";
 
       return (
         <span key={`${part.kind}-${index}`}>
@@ -164,11 +156,7 @@ class DiffEngine {
     let j = this.rightLines.length;
 
     while (i > 0 || j > 0) {
-      if (
-        i > 0 &&
-        j > 0 &&
-        this.leftLines[i - 1] === this.rightLines[j - 1]
-      ) {
+      if (i > 0 && j > 0 && this.leftLines[i - 1] === this.rightLines[j - 1]) {
         ops.push({ type: "same", line: this.leftLines[i - 1] });
         i -= 1;
         j -= 1;
@@ -252,14 +240,12 @@ class DiffEngine {
 
 import type { ToolItem } from "@/lib/tools";
 
-export default function DiffPage({ tool }: { tool: ToolItem }) {
+export default function DiffTool({ tool }: { tool: ToolItem }) {
   const [leftText, setLeftText] = useState(defaultLeft);
   const [rightText, setRightText] = useState(defaultRight);
   const [onlyChanges, setOnlyChanges] = useState(false);
   const [showWordDiff, setShowWordDiff] = useState(true);
-  const [clearState, setClearState] = useState<"idle" | "left" | "right">(
-    "idle",
-  );
+  const [clearState, setClearState] = useState<"idle" | "left" | "right">("idle");
 
   const handleClear = (side: "left" | "right") => {
     if (side === "left") {
@@ -271,10 +257,7 @@ export default function DiffPage({ tool }: { tool: ToolItem }) {
     window.setTimeout(() => setClearState("idle"), 900);
   };
 
-  const allRows = useMemo(
-    () => new DiffEngine(leftText, rightText).buildLineDiff(),
-    [leftText, rightText],
-  );
+  const allRows = useMemo(() => new DiffEngine(leftText, rightText).buildLineDiff(), [leftText, rightText]);
 
   const diffRows = useMemo(
     () => (onlyChanges ? allRows.filter((row) => row.status !== "same") : allRows),
@@ -285,16 +268,12 @@ export default function DiffPage({ tool }: { tool: ToolItem }) {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">
-            {tool.title}
-          </h1>
+          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
           <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
         </div>
         <div className="flex flex-col items-end gap-2 text-xs">
           <label className="flex items-center gap-2 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
-            <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
-              Changes only
-            </span>
+            <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Changes only</span>
             <Switch
               checked={onlyChanges}
               onCheckedChange={setOnlyChanges}
@@ -302,9 +281,7 @@ export default function DiffPage({ tool }: { tool: ToolItem }) {
             />
           </label>
           <label className="flex items-center gap-2 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
-            <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
-              Word highlight
-            </span>
+            <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Word highlight</span>
             <Switch
               checked={showWordDiff}
               onCheckedChange={setShowWordDiff}
@@ -369,60 +346,44 @@ export default function DiffPage({ tool }: { tool: ToolItem }) {
         <div className="divide-y divide-[color:var(--card-border)]">
           {diffRows.map((row, index) => {
             const wordDiff =
-              row.status === "changed" && showWordDiff
-                ? DiffEngine.buildWordDiff(row.left, row.right)
-                : null;
+              row.status === "changed" && showWordDiff ? DiffEngine.buildWordDiff(row.left, row.right) : null;
 
             return (
-            <div
-              key={`${row.leftNumber ?? "x"}-${row.rightNumber ?? "y"}-${row.status}`}
-              className="grid grid-cols-2 text-xs font-mono"
-            >
               <div
-                className={`flex items-start gap-3 px-4 py-2 ${leftStatusClass[row.status]}`}
+                key={`${row.leftNumber ?? "x"}-${row.rightNumber ?? "y"}-${row.status}`}
+                className="grid grid-cols-2 text-xs font-mono"
               >
-                <span className="w-6 text-right text-[var(--muted)]">
-                  {row.leftNumber ?? ""}
-                </span>
-                <span className="whitespace-pre-wrap text-[var(--foreground)]">
-                  {wordDiff
-                    ? (
-                        <>
-                          {wordDiff.leadingLeft && (
-                            <span>{wordDiff.leadingLeft}</span>
-                          )}
-                          {DiffEngine.renderWordParts(wordDiff.leftParts)}
-                        </>
-                      )
-                    : row.left || " "}
-                </span>
+                <div className={`flex items-start gap-3 px-4 py-2 ${leftStatusClass[row.status]}`}>
+                  <span className="w-6 text-right text-[var(--muted)]">{row.leftNumber ?? ""}</span>
+                  <span className="whitespace-pre-wrap text-[var(--foreground)]">
+                    {wordDiff ? (
+                      <>
+                        {wordDiff.leadingLeft && <span>{wordDiff.leadingLeft}</span>}
+                        {DiffEngine.renderWordParts(wordDiff.leftParts)}
+                      </>
+                    ) : (
+                      row.left || " "
+                    )}
+                  </span>
+                </div>
+                <div className={`flex items-start gap-3 px-4 py-2 ${rightStatusClass[row.status]}`}>
+                  <span className="w-6 text-right text-[var(--muted)]">{row.rightNumber ?? ""}</span>
+                  <span className="whitespace-pre-wrap text-[var(--foreground)]">
+                    {wordDiff ? (
+                      <>
+                        {wordDiff.leadingRight && <span>{wordDiff.leadingRight}</span>}
+                        {DiffEngine.renderWordParts(wordDiff.rightParts)}
+                      </>
+                    ) : (
+                      row.right || " "
+                    )}
+                  </span>
+                </div>
               </div>
-              <div
-                className={`flex items-start gap-3 px-4 py-2 ${rightStatusClass[row.status]}`}
-              >
-                <span className="w-6 text-right text-[var(--muted)]">
-                  {row.rightNumber ?? ""}
-                </span>
-                <span className="whitespace-pre-wrap text-[var(--foreground)]">
-                  {wordDiff
-                    ? (
-                        <>
-                          {wordDiff.leadingRight && (
-                            <span>{wordDiff.leadingRight}</span>
-                          )}
-                          {DiffEngine.renderWordParts(wordDiff.rightParts)}
-                        </>
-                      )
-                    : row.right || " "}
-                </span>
-              </div>
-            </div>
-          );
+            );
           })}
           {diffRows.length === 0 && (
-            <div className="px-4 py-10 text-center text-sm text-[var(--muted)]">
-              No changes to show.
-            </div>
+            <div className="px-4 py-10 text-center text-sm text-[var(--muted)]">No changes to show.</div>
           )}
         </div>
       </Card>

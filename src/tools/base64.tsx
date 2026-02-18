@@ -26,12 +26,8 @@ function decodeBase64(input: string) {
 export default function Base64Tool({ tool }: { tool: ToolItem }) {
   const [plainInput, setPlainInput] = useState("");
   const [base64Input, setBase64Input] = useState("");
-  const [copyState, setCopyState] = useState<"idle" | "encoded" | "decoded">(
-    "idle",
-  );
-  const [clearState, setClearState] = useState<"idle" | "plain" | "base64">(
-    "idle",
-  );
+  const [copyState, setCopyState] = useState<"idle" | "encoded" | "decoded">("idle");
+  const [clearState, setClearState] = useState<"idle" | "plain" | "base64">("idle");
 
   const encoded = useMemo(() => {
     if (!plainInput.trim()) {
@@ -90,14 +86,10 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">
-            {tool.title}
-          </h1>
+          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
           <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
         </div>
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-          Encode + Decode
-        </div>
+        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Encode + Decode</div>
       </div>
 
       <section className="grid gap-4 lg:grid-cols-2">
@@ -187,11 +179,7 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
           <div className="min-h-[220px] whitespace-pre-wrap rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]">
             {decoded || " "}
           </div>
-          {decodeError && (
-            <p className="text-xs text-[color:var(--diff-removed)]">
-              {decodeError}
-            </p>
-          )}
+          {decodeError && <p className="text-xs text-[color:var(--diff-removed)]">{decodeError}</p>}
         </Card>
       </section>
     </div>

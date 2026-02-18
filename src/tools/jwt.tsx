@@ -40,10 +40,7 @@ function base64UrlEncode(buffer: ArrayBuffer): string {
   bytes.forEach((b) => {
     binary += String.fromCharCode(b);
   });
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 function decodeJwt(token: string): {
@@ -58,11 +55,7 @@ function decodeJwt(token: string): {
   }
   const headerObj = JSON.parse(base64UrlDecode(parts[0]));
   const header = JSON.stringify(headerObj, null, 2);
-  const payload = JSON.stringify(
-    JSON.parse(base64UrlDecode(parts[1])),
-    null,
-    2,
-  );
+  const payload = JSON.stringify(JSON.parse(base64UrlDecode(parts[1])), null, 2);
   return {
     header,
     payload,
@@ -71,11 +64,7 @@ function decodeJwt(token: string): {
   };
 }
 
-async function signJwt(
-  data: string,
-  secret: string,
-  alg: Algorithm,
-): Promise<string> {
+async function signJwt(data: string, secret: string, alg: Algorithm): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw",
@@ -88,11 +77,7 @@ async function signJwt(
   return base64UrlEncode(sig);
 }
 
-async function verifyJwt(
-  token: string,
-  secret: string,
-  alg: Algorithm,
-): Promise<boolean> {
+async function verifyJwt(token: string, secret: string, alg: Algorithm): Promise<boolean> {
   const enc = new TextEncoder();
   const parts = token.trim().split(".");
   if (parts.length !== 3) {
@@ -106,26 +91,20 @@ async function verifyJwt(
     false,
     ["verify"],
   );
-  const sigBytes = Uint8Array.from(atob(parts[2].replace(/-/g, "+").replace(/_/g, "/") + "==".slice(0, (4 - (parts[2].length % 4)) % 4)), (c) => c.charCodeAt(0));
+  const sigBytes = Uint8Array.from(
+    atob(parts[2].replace(/-/g, "+").replace(/_/g, "/") + "==".slice(0, (4 - (parts[2].length % 4)) % 4)),
+    (c) => c.charCodeAt(0),
+  );
   return crypto.subtle.verify("HMAC", key, sigBytes, enc.encode(data));
 }
 
-async function encodeJwt(
-  headerJson: string,
-  payloadJson: string,
-  secret: string,
-  alg: Algorithm,
-): Promise<string> {
+async function encodeJwt(headerJson: string, payloadJson: string, secret: string, alg: Algorithm): Promise<string> {
   JSON.parse(headerJson);
   JSON.parse(payloadJson);
 
   const enc = new TextEncoder();
-  const headerB64 = base64UrlEncode(
-    enc.encode(headerJson).buffer as ArrayBuffer,
-  );
-  const payloadB64 = base64UrlEncode(
-    enc.encode(payloadJson).buffer as ArrayBuffer,
-  );
+  const headerB64 = base64UrlEncode(enc.encode(headerJson).buffer as ArrayBuffer);
+  const payloadB64 = base64UrlEncode(enc.encode(payloadJson).buffer as ArrayBuffer);
   const data = `${headerB64}.${payloadB64}`;
   const sigB64 = await signJwt(data, secret, alg);
   return `${data}.${sigB64}`;
@@ -138,15 +117,11 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
   const [jwtInput, setJwtInput] = useState("");
   const [verifySecret, setVerifySecret] = useState("");
   const [verifyAlg, setVerifyAlg] = useState<Algorithm>("HS256");
-  const [verifyResult, setVerifyResult] = useState<
-    "idle" | "valid" | "invalid"
-  >("idle");
+  const [verifyResult, setVerifyResult] = useState<"idle" | "valid" | "invalid">("idle");
 
   // Encode
   const [encAlg, setEncAlg] = useState<Algorithm>("HS256");
-  const [encHeader, setEncHeader] = useState(
-    '{\n  "alg": "HS256",\n  "typ": "JWT"\n}',
-  );
+  const [encHeader, setEncHeader] = useState('{\n  "alg": "HS256",\n  "typ": "JWT"\n}');
   const [encPayload, setEncPayload] = useState(
     '{\n  "sub": "1234567890",\n  "name": "John Doe",\n  "iat": 1516239022\n}',
   );
@@ -234,9 +209,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
       const result = await encodeJwt(encHeader, encPayload, secret, encAlg);
       setEncodedJwt(result);
     } catch (e) {
-      setEncodeError(
-        e instanceof Error ? e.message : "Failed to encode JWT.",
-      );
+      setEncodeError(e instanceof Error ? e.message : "Failed to encode JWT.");
     }
   }, [encHeader, encPayload, secret, encAlg]);
 
@@ -257,14 +230,10 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">
-            {tool.title}
-          </h1>
+          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
           <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
         </div>
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-          Encode + Decode
-        </div>
+        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Encode + Decode</div>
       </div>
 
       {/* Decode Section */}
@@ -275,13 +244,10 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               D
             </span>
             <div className="flex flex-col gap-1">
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">
-                Decode
-              </h2>
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">Decode</h2>
               <p className="text-xs leading-relaxed text-[var(--muted)]">
-                JWT 토큰을 붙여넣으면 Header, Payload, Signature 세 부분으로
-                분리하여 보여줍니다. Secret Key를 입력하면 서명을 검증할 수
-                있습니다.
+                JWT 토큰을 붙여넣으면 Header, Payload, Signature 세 부분으로 분리하여 보여줍니다. Secret Key를 입력하면
+                서명을 검증할 수 있습니다.
               </p>
               <div className="mt-1 flex flex-wrap gap-2">
                 <span className="rounded-md bg-[var(--jwt-decode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-decode-accent)]">
@@ -301,13 +267,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
         <Card className={cardClass}>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
             <Badge className={badgeClass}>Decode JWT</Badge>
-            <Button
-              type="button"
-              onClick={() => setJwtInput("")}
-              variant="ghost"
-              size="sm"
-              className={copyBtnClass}
-            >
+            <Button type="button" onClick={() => setJwtInput("")} variant="ghost" size="sm" className={copyBtnClass}>
               Clear
             </Button>
           </div>
@@ -317,11 +277,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
             placeholder="Paste a JWT token (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.xxx)"
             className={`${textareaClass} min-h-[100px]`}
           />
-          {decodeError && (
-            <p className="text-xs text-[color:var(--jwt-error)]">
-              {decodeError}
-            </p>
-          )}
+          {decodeError && <p className="text-xs text-[color:var(--jwt-error)]">{decodeError}</p>}
         </Card>
 
         {decoded && (
@@ -365,9 +321,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                   <div className="flex items-center gap-2">
                     <select
                       value={verifyAlg}
-                      onChange={(e) =>
-                        setVerifyAlg(e.target.value as Algorithm)
-                      }
+                      onChange={(e) => setVerifyAlg(e.target.value as Algorithm)}
                       className={selectClass}
                     >
                       {ALGORITHMS.map((a) => (
@@ -378,9 +332,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                     </select>
                     <Button
                       type="button"
-                      onClick={() =>
-                        handleCopy(decoded.signature, "signature")
-                      }
+                      onClick={() => handleCopy(decoded.signature, "signature")}
                       variant="ghost"
                       size="sm"
                       className={copyBtnClass}
@@ -397,20 +349,14 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
 
                 {/* Algorithm formula */}
                 <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs leading-relaxed text-[var(--muted)]">
-                  <span className="text-[var(--syntax-key)]">
-                    HMAC{verifyAlg.replace("HS", "SHA")}
-                  </span>
+                  <span className="text-[var(--syntax-key)]">HMAC{verifyAlg.replace("HS", "SHA")}</span>
                   {"(\n  base64UrlEncode("}
                   <span className="text-[var(--syntax-string)]">header</span>
                   {') + "." +\n  base64UrlEncode('}
                   <span className="text-[var(--syntax-string)]">payload</span>
                   {"),"}
                   {"\n  "}
-                  <span className="text-[var(--syntax-boolean)]">
-                    {verifySecret
-                      ? verifySecret
-                      : "your-secret"}
-                  </span>
+                  <span className="text-[var(--syntax-boolean)]">{verifySecret ? verifySecret : "your-secret"}</span>
                   {"\n)"}
                 </div>
 
@@ -423,25 +369,16 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                   className="w-full rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-4 py-3 font-mono text-xs text-[var(--foreground)] outline-none focus:border-[color:var(--card-border-hover)]"
                 />
 
-                {verifySecret.length > 0 &&
-                  verifySecret.length < ALG_MIN_KEY_BYTES[verifyAlg] && (
-                    <p className="text-[11px] text-[color:var(--jwt-error)]">
-                      RFC 7518: {verifyAlg} requires a key of{" "}
-                      {ALG_MIN_KEY_BYTES[verifyAlg] * 8} bits (
-                      {ALG_MIN_KEY_BYTES[verifyAlg]} bytes) or larger.
-                      Current: {verifySecret.length} bytes.
-                    </p>
-                  )}
+                {verifySecret.length > 0 && verifySecret.length < ALG_MIN_KEY_BYTES[verifyAlg] && (
+                  <p className="text-[11px] text-[color:var(--jwt-error)]">
+                    RFC 7518: {verifyAlg} requires a key of {ALG_MIN_KEY_BYTES[verifyAlg] * 8} bits (
+                    {ALG_MIN_KEY_BYTES[verifyAlg]} bytes) or larger. Current: {verifySecret.length} bytes.
+                  </p>
+                )}
 
                 {/* Verify button + result */}
                 <div className="flex items-center gap-3">
-                  <Button
-                    type="button"
-                    onClick={handleVerify}
-                    variant="ghost"
-                    size="sm"
-                    className={copyBtnClass}
-                  >
+                  <Button type="button" onClick={handleVerify} variant="ghost" size="sm" className={copyBtnClass}>
                     Verify
                   </Button>
                   {verifyResult !== "idle" && (
@@ -452,9 +389,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                           : "bg-[var(--diff-removed)] text-[var(--jwt-error)]"
                       }`}
                     >
-                      {verifyResult === "valid"
-                        ? "Signature Verified"
-                        : "Invalid Signature"}
+                      {verifyResult === "valid" ? "Signature Verified" : "Invalid Signature"}
                     </span>
                   )}
                 </div>
@@ -472,14 +407,11 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               E
             </span>
             <div className="flex flex-col gap-1">
-              <h2 className="text-sm font-semibold text-[var(--foreground)]">
-                Encode
-              </h2>
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">Encode</h2>
               <p className="text-xs leading-relaxed text-[var(--muted)]">
-                Header와 Payload JSON을 작성하고 Secret Key를 입력한 뒤
-                Generate 버튼을 누르면 서명된 JWT를 생성합니다. 알고리즘을
-                선택하면 Header의 alg 필드가 자동으로 변경됩니다. 모든 처리는
-                브라우저에서 수행되며 서버로 전송되지 않습니다.
+                Header와 Payload JSON을 작성하고 Secret Key를 입력한 뒤 Generate 버튼을 누르면 서명된 JWT를 생성합니다.
+                알고리즘을 선택하면 Header의 alg 필드가 자동으로 변경됩니다. 모든 처리는 브라우저에서 수행되며 서버로
+                전송되지 않습니다.
               </p>
               <div className="mt-1 flex flex-wrap gap-2">
                 <span className="rounded-md bg-[var(--jwt-encode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-encode-accent)]">
@@ -501,9 +433,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
 
         {/* Algorithm Selector */}
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">
-            Algorithm
-          </span>
+          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Algorithm</span>
           <div className="flex gap-1">
             {ALGORITHMS.map((alg) => (
               <button
@@ -557,35 +487,22 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               placeholder="Enter your HMAC secret key"
               className={textareaClass}
             />
-            {secret.length > 0 &&
-              secret.length < ALG_MIN_KEY_BYTES[encAlg] && (
-                <p className="text-[11px] text-[color:var(--jwt-error)]">
-                  RFC 7518: {encAlg} requires a key of{" "}
-                  {ALG_MIN_KEY_BYTES[encAlg] * 8} bits (
-                  {ALG_MIN_KEY_BYTES[encAlg]} bytes) or larger. Current:{" "}
-                  {secret.length} bytes.
-                </p>
-              )}
+            {secret.length > 0 && secret.length < ALG_MIN_KEY_BYTES[encAlg] && (
+              <p className="text-[11px] text-[color:var(--jwt-error)]">
+                RFC 7518: {encAlg} requires a key of {ALG_MIN_KEY_BYTES[encAlg] * 8} bits ({ALG_MIN_KEY_BYTES[encAlg]}{" "}
+                bytes) or larger. Current: {secret.length} bytes.
+              </p>
+            )}
           </Card>
         </div>
 
         <div className="flex items-center justify-center gap-4">
-          <Button
-            type="button"
-            onClick={handleEncode}
-            variant="ghost"
-            size="sm"
-            className={copyBtnClass}
-          >
+          <Button type="button" onClick={handleEncode} variant="ghost" size="sm" className={copyBtnClass}>
             Generate JWT
           </Button>
         </div>
 
-        {encodeError && (
-          <p className="text-xs text-center text-[color:var(--jwt-error)]">
-            {encodeError}
-          </p>
-        )}
+        {encodeError && <p className="text-xs text-center text-[color:var(--jwt-error)]">{encodeError}</p>}
 
         {encodedJwt && (
           <Card className={cardClass}>

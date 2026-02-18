@@ -39,9 +39,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body
-        className={`${sora.variable} ${plexMono.variable} antialiased`}
-      >
+      <body className={`${sora.variable} ${plexMono.variable} antialiased`}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

@@ -11,12 +11,8 @@ import type { ToolItem } from "@/lib/tools";
 export default function UrlTool({ tool }: { tool: ToolItem }) {
   const [plainInput, setPlainInput] = useState("");
   const [encodedInput, setEncodedInput] = useState("");
-  const [copyState, setCopyState] = useState<"idle" | "encoded" | "decoded">(
-    "idle",
-  );
-  const [clearState, setClearState] = useState<"idle" | "plain" | "encoded">(
-    "idle",
-  );
+  const [copyState, setCopyState] = useState<"idle" | "encoded" | "decoded">("idle");
+  const [clearState, setClearState] = useState<"idle" | "plain" | "encoded">("idle");
 
   const encoded = useMemo(() => {
     if (!plainInput) {
@@ -90,14 +86,10 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">
-            {tool.title}
-          </h1>
+          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
           <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
         </div>
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-          Encode + Decode
-        </div>
+        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Encode + Decode</div>
       </div>
 
       {/* Info Panel */}
@@ -107,13 +99,10 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             %
           </span>
           <div className="flex flex-col gap-1">
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">
-              URL Encoding
-            </h2>
+            <h2 className="text-sm font-semibold text-[var(--foreground)]">URL Encoding</h2>
             <p className="text-xs leading-relaxed text-[var(--muted)]">
               URL 인코딩은 특수 문자를 <code className="text-[var(--url-panel-accent)]">%XX</code> 형태로 변환하여
-              URL에서 안전하게 사용할 수 있도록 합니다. 모든 처리는 브라우저에서
-              수행되며 서버로 전송되지 않습니다.
+              URL에서 안전하게 사용할 수 있도록 합니다. 모든 처리는 브라우저에서 수행되며 서버로 전송되지 않습니다.
             </p>
             <div className="mt-1 flex flex-wrap gap-2">
               <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
@@ -134,9 +123,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
       <section className="grid gap-4 lg:grid-cols-2">
         <Card className={cardClass}>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-            <Badge className={badgeClass}>
-              Text → URL Encode
-            </Badge>
+            <Badge className={badgeClass}>Text → URL Encode</Badge>
             <Button
               type="button"
               onClick={() => handleClear("plain")}
@@ -157,9 +144,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
 
         <Card className={cardClass}>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-            <Badge className={badgeClass}>
-              Encoded Output
-            </Badge>
+            <Badge className={badgeClass}>Encoded Output</Badge>
             <Button
               type="button"
               onClick={() => handleCopy(encoded, "encoded")}
@@ -170,9 +155,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
               {copyState === "encoded" ? "Copied" : "Copy"}
             </Button>
           </div>
-          <div className={outputClass}>
-            {encoded || " "}
-          </div>
+          <div className={outputClass}>{encoded || " "}</div>
         </Card>
       </section>
 
@@ -180,9 +163,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
       <section className="grid gap-4 lg:grid-cols-2">
         <Card className={cardClass}>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-            <Badge className={badgeClass}>
-              URL Encoded → Text
-            </Badge>
+            <Badge className={badgeClass}>URL Encoded → Text</Badge>
             <Button
               type="button"
               onClick={() => handleClear("encoded")}
@@ -203,9 +184,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
 
         <Card className={cardClass}>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-            <Badge className={badgeClass}>
-              Text Output
-            </Badge>
+            <Badge className={badgeClass}>Text Output</Badge>
             <Button
               type="button"
               onClick={() => handleCopy(decoded, "decoded")}
@@ -216,14 +195,8 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
               {copyState === "decoded" ? "Copied" : "Copy"}
             </Button>
           </div>
-          <div className={outputClass}>
-            {decoded || " "}
-          </div>
-          {decodeError && (
-            <p className="text-xs text-[color:var(--syntax-error)]">
-              {decodeError}
-            </p>
-          )}
+          <div className={outputClass}>{decoded || " "}</div>
+          {decodeError && <p className="text-xs text-[color:var(--syntax-error)]">{decodeError}</p>}
         </Card>
       </section>
     </div>

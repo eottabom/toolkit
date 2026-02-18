@@ -38,12 +38,8 @@ export default async function ToolPage({ params }: ToolPageProps) {
           <ToolComponent tool={tool} />
         ) : (
           <Card className="rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-8 shadow-[var(--card-shadow)]">
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-              Tool Page
-            </p>
-            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">
-              {tool.title}
-            </h1>
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Tool Page</p>
+            <h1 className="mt-3 text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
             <p className="mt-2 text-base text-[var(--muted)]">
               This page is not wired yet. Add a component in
               <span className="font-mono"> src/tools</span> and register it in
