@@ -1,10 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPage, ToolTextarea } from "@/components/tool-ui";
 
 import type { ToolItem } from "@/lib/tools";
 
@@ -83,105 +80,79 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
-          <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
-        </div>
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Encode + Decode</div>
-      </div>
+    <ToolPage>
+      <ToolHeader
+        title={tool.title}
+        description={tool.desc}
+        right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">Encode + Decode</div>}
+      />
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card className="flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-[var(--font-sora)] font-semibold">
-            <Badge className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200">
-              Text → Base64
-            </Badge>
-            <Button
+            <ToolBadge>Text → Base64</ToolBadge>
+            <ToolActionButton
               type="button"
               onClick={() => handleClear("plain")}
-              variant="ghost"
-              size="sm"
-              className="h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
             >
               {clearState === "plain" ? "Cleared" : "Clear"}
-            </Button>
+            </ToolActionButton>
           </div>
-          <Textarea
+          <ToolTextarea
             value={plainInput}
             onChange={(event) => setPlainInput(event.target.value)}
             placeholder="Text to encode"
-            className="min-h-[220px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none"
+            className="min-h-[220px]"
           />
-        </Card>
+        </ToolCard>
 
-        <Card className="flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-[var(--font-sora)] font-semibold">
-            <Badge className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200">
-              Base64 Output
-            </Badge>
-            <Button
+            <ToolBadge>Base64 Output</ToolBadge>
+            <ToolActionButton
               type="button"
               onClick={() => handleCopy(encoded, "encoded")}
-              variant="ghost"
-              size="sm"
-              className="h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
             >
               {copyState === "encoded" ? "Copied" : "Copy"}
-            </Button>
+            </ToolActionButton>
           </div>
-          <div className="min-h-[220px] whitespace-pre-wrap rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]">
-            {encoded || " "}
-          </div>
-        </Card>
+          <ToolOutput className="min-h-[220px]">{encoded || " "}</ToolOutput>
+        </ToolCard>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card className="flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-[var(--font-sora)] font-semibold">
-            <Badge className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200">
-              Base64 → Text
-            </Badge>
-            <Button
+            <ToolBadge>Base64 → Text</ToolBadge>
+            <ToolActionButton
               type="button"
               onClick={() => handleClear("base64")}
-              variant="ghost"
-              size="sm"
-              className="h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
             >
               {clearState === "base64" ? "Cleared" : "Clear"}
-            </Button>
+            </ToolActionButton>
           </div>
-          <Textarea
+          <ToolTextarea
             value={base64Input}
             onChange={(event) => setBase64Input(event.target.value)}
             placeholder="Base64 string to decode"
-            className="min-h-[220px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none"
+            className="min-h-[220px]"
           />
-        </Card>
+        </ToolCard>
 
-        <Card className="flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-[var(--font-sora)] font-semibold">
-            <Badge className="rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200">
-              Text Output
-            </Badge>
-            <Button
+            <ToolBadge>Text Output</ToolBadge>
+            <ToolActionButton
               type="button"
               onClick={() => handleCopy(decoded, "decoded")}
-              variant="ghost"
-              size="sm"
-              className="h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
             >
               {copyState === "decoded" ? "Copied" : "Copy"}
-            </Button>
+            </ToolActionButton>
           </div>
-          <div className="min-h-[220px] whitespace-pre-wrap rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]">
-            {decoded || " "}
-          </div>
+          <ToolOutput className="min-h-[220px]">{decoded || " "}</ToolOutput>
           {decodeError && <p className="text-xs text-[color:var(--diff-removed)]">{decodeError}</p>}
-        </Card>
+        </ToolCard>
       </section>
-    </div>
+    </ToolPage>
   );
 }

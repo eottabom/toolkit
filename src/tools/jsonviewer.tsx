@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { ToolItem } from "@/lib/tools";
+import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonObject = { [key: string]: JsonValue };
@@ -474,78 +474,52 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
-          <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
-        </div>
-
-        <label className="flex items-center gap-2 self-start rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)] md:self-auto">
+    <ToolPage>
+      <ToolHeader
+        title={tool.title}
+        description={tool.desc}
+        right={
+          <label className="flex items-center gap-2 self-start rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)] md:self-auto">
           <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Show Types</span>
           <Switch checked={showTypes} onCheckedChange={setShowTypes} className="h-4 w-8" />
-        </label>
-      </div>
+          </label>
+        }
+      />
 
       {/* Info Panel */}
-      <Card className="rounded-2xl border border-[color:var(--url-panel-border)] bg-[var(--url-panel-bg)] p-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--url-panel-icon-bg)] text-sm text-[var(--url-panel-accent)]">
-            {"{}"}
-          </span>
-          <div className="flex flex-col gap-1">
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">JSON Viewer</h2>
-            <p className="text-xs leading-relaxed text-[var(--muted)]">
-              왼쪽에서 Raw JSON을 입력/정리하고, 오른쪽 트리 뷰에서 구조를 확인/수정한 뒤 원하는 패널에서 복사하세요.
-              모든 처리는 브라우저에서 수행되며 서버로 전송되지 않습니다.
-            </p>
-            <div className="mt-1 flex flex-wrap gap-2">
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                JSON 파싱 & 포맷팅
-              </span>
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                트리 뷰 탐색
-              </span>
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                인라인 값 편집
-              </span>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <ToolInfoPanel
+        icon="{}"
+        title="JSON Viewer"
+        description="왼쪽에서 Raw JSON을 입력/정리하고, 오른쪽 트리 뷰에서 구조를 확인/수정한 뒤 원하는 패널에서 복사하세요. 모든 처리는 브라우저에서 수행되며 서버로 전송되지 않습니다."
+        chips={["JSON 파싱 & 포맷팅", "트리 뷰 탐색", "인라인 값 편집"]}
+      />
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card className="flex min-h-[520px] flex-col gap-4 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <ToolCard className="min-h-[520px] gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Raw JSON</p>
             <div className="flex gap-2">
-              <Button
+              <ToolActionButton
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={handleCopyRaw}
-                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                className="h-7 px-3"
               >
                 {rightCopyState === "copied" ? "Copied" : "Copy"}
-              </Button>
-              <Button
+              </ToolActionButton>
+              <ToolActionButton
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={handleFormat}
-                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                className="h-7 px-3"
               >
                 Pretty
-              </Button>
-              <Button
+              </ToolActionButton>
+              <ToolActionButton
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={handleReset}
-                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                className="h-7 px-3"
               >
                 Reset sample
-              </Button>
+              </ToolActionButton>
             </div>
           </div>
 
@@ -598,39 +572,33 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
           ) : (
             <p className="text-xs text-[var(--syntax-valid)]">Valid JSON</p>
           )}
-        </Card>
+        </ToolCard>
 
-        <Card className="flex min-h-[520px] flex-col gap-4 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <ToolCard className="min-h-[520px] gap-4">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Tree Viewer</p>
             <div className="flex gap-2">
-              <Button
+              <ToolActionButton
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={handleCopyTree}
-                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                className="h-7 px-3"
               >
                 {leftCopyState === "copied" ? "Copied" : "Copy"}
-              </Button>
-              <Button
+              </ToolActionButton>
+              <ToolActionButton
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={handleExpandAll}
-                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                className="h-7 px-3"
               >
                 Expand all
-              </Button>
-              <Button
+              </ToolActionButton>
+              <ToolActionButton
                 type="button"
-                variant="ghost"
-                size="sm"
                 onClick={handleCollapseAll}
-                className="h-7 rounded-full border border-[color:var(--card-border)] px-3 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                className="h-7 px-3"
               >
                 Collapse all
-              </Button>
+              </ToolActionButton>
             </div>
           </div>
 
@@ -646,8 +614,8 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
               onChangeValue={handleChangeValue}
             />
           </div>
-        </Card>
+        </ToolCard>
       </section>
-    </div>
+    </ToolPage>
   );
 }

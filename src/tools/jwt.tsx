@@ -1,10 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPage } from "@/components/tool-ui";
 
 import type { ToolItem } from "@/lib/tools";
 
@@ -213,28 +212,18 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
     }
   }, [encHeader, encPayload, secret, encAlg]);
 
-  const badgeClass =
-    "rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200";
-  const copyBtnClass =
-    "h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]";
-  const cardClass =
-    "flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]";
-  const outputClass =
-    "min-h-[140px] whitespace-pre-wrap rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]";
   const textareaClass =
     "min-h-[140px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
   const selectClass =
     "h-8 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 text-[11px] font-semibold text-[var(--foreground)] outline-none transition hover:border-[color:var(--card-border-hover)] cursor-pointer";
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
-          <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
-        </div>
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Encode + Decode</div>
-      </div>
+    <ToolPage>
+      <ToolHeader
+        title={tool.title}
+        description={tool.desc}
+        right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">Encode + Decode</div>}
+      />
 
       {/* Decode Section */}
       <section className="flex flex-col gap-4">
@@ -264,12 +253,12 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
           </div>
         </Card>
 
-        <Card className={cardClass}>
+        <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-            <Badge className={badgeClass}>Decode JWT</Badge>
-            <Button type="button" onClick={() => setJwtInput("")} variant="ghost" size="sm" className={copyBtnClass}>
+            <ToolBadge>Decode JWT</ToolBadge>
+            <ToolActionButton type="button" onClick={() => setJwtInput("")}>
               Clear
-            </Button>
+            </ToolActionButton>
           </div>
           <Textarea
             value={jwtInput}
@@ -278,46 +267,40 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
             className={`${textareaClass} min-h-[100px]`}
           />
           {decodeError && <p className="text-xs text-[color:var(--jwt-error)]">{decodeError}</p>}
-        </Card>
+        </ToolCard>
 
         {decoded && (
           <>
             <div className="grid gap-4 lg:grid-cols-3">
-              <Card className={cardClass}>
+              <ToolCard>
                 <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-                  <Badge className={badgeClass}>Header</Badge>
-                  <Button
+                  <ToolBadge>Header</ToolBadge>
+                  <ToolActionButton
                     type="button"
                     onClick={() => handleCopy(decoded.header, "header")}
-                    variant="ghost"
-                    size="sm"
-                    className={copyBtnClass}
                   >
                     {copyState === "header" ? "Copied" : "Copy"}
-                  </Button>
+                  </ToolActionButton>
                 </div>
-                <div className={outputClass}>{decoded.header}</div>
-              </Card>
+                <ToolOutput className="min-h-[140px]">{decoded.header}</ToolOutput>
+              </ToolCard>
 
-              <Card className={cardClass}>
+              <ToolCard>
                 <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-                  <Badge className={badgeClass}>Payload</Badge>
-                  <Button
+                  <ToolBadge>Payload</ToolBadge>
+                  <ToolActionButton
                     type="button"
                     onClick={() => handleCopy(decoded.payload, "payload")}
-                    variant="ghost"
-                    size="sm"
-                    className={copyBtnClass}
                   >
                     {copyState === "payload" ? "Copied" : "Copy"}
-                  </Button>
+                  </ToolActionButton>
                 </div>
-                <div className={outputClass}>{decoded.payload}</div>
-              </Card>
+                <ToolOutput className="min-h-[140px]">{decoded.payload}</ToolOutput>
+              </ToolCard>
 
-              <Card className={cardClass}>
+              <ToolCard>
                 <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-                  <Badge className={badgeClass}>Signature</Badge>
+                  <ToolBadge>Signature</ToolBadge>
                   <div className="flex items-center gap-2">
                     <select
                       value={verifyAlg}
@@ -330,15 +313,12 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                         </option>
                       ))}
                     </select>
-                    <Button
+                    <ToolActionButton
                       type="button"
                       onClick={() => handleCopy(decoded.signature, "signature")}
-                      variant="ghost"
-                      size="sm"
-                      className={copyBtnClass}
                     >
                       {copyState === "signature" ? "Copied" : "Copy"}
-                    </Button>
+                    </ToolActionButton>
                   </div>
                 </div>
 
@@ -378,9 +358,9 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
 
                 {/* Verify button + result */}
                 <div className="flex items-center gap-3">
-                  <Button type="button" onClick={handleVerify} variant="ghost" size="sm" className={copyBtnClass}>
+                  <ToolActionButton type="button" onClick={handleVerify}>
                     Verify
-                  </Button>
+                  </ToolActionButton>
                   {verifyResult !== "idle" && (
                     <span
                       className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
@@ -393,7 +373,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                     </span>
                   )}
                 </div>
-              </Card>
+              </ToolCard>
             </div>
           </>
         )}
@@ -452,10 +432,10 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Card className={cardClass}>
+          <div className="grid gap-4 lg:grid-cols-3">
+          <ToolCard>
             <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-              <Badge className={badgeClass}>Header (JSON)</Badge>
+              <ToolBadge>Header (JSON)</ToolBadge>
             </div>
             <Textarea
               value={encHeader}
@@ -463,11 +443,11 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               placeholder='{"alg": "HS256", "typ": "JWT"}'
               className={textareaClass}
             />
-          </Card>
+          </ToolCard>
 
-          <Card className={cardClass}>
+          <ToolCard>
             <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-              <Badge className={badgeClass}>Payload (JSON)</Badge>
+              <ToolBadge>Payload (JSON)</ToolBadge>
             </div>
             <Textarea
               value={encPayload}
@@ -475,11 +455,11 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               placeholder='{"sub": "1234567890", "name": "John Doe"}'
               className={textareaClass}
             />
-          </Card>
+          </ToolCard>
 
-          <Card className={cardClass}>
+          <ToolCard>
             <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-              <Badge className={badgeClass}>Secret Key</Badge>
+              <ToolBadge>Secret Key</ToolBadge>
             </div>
             <Textarea
               value={secret}
@@ -493,35 +473,32 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                 bytes) or larger. Current: {secret.length} bytes.
               </p>
             )}
-          </Card>
+          </ToolCard>
         </div>
 
         <div className="flex items-center justify-center gap-4">
-          <Button type="button" onClick={handleEncode} variant="ghost" size="sm" className={copyBtnClass}>
+          <ToolActionButton type="button" onClick={handleEncode}>
             Generate JWT
-          </Button>
+          </ToolActionButton>
         </div>
 
         {encodeError && <p className="text-xs text-center text-[color:var(--jwt-error)]">{encodeError}</p>}
 
         {encodedJwt && (
-          <Card className={cardClass}>
+          <ToolCard>
             <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
-              <Badge className={badgeClass}>Encoded JWT</Badge>
-              <Button
+              <ToolBadge>Encoded JWT</ToolBadge>
+              <ToolActionButton
                 type="button"
                 onClick={() => handleCopy(encodedJwt, "encoded")}
-                variant="ghost"
-                size="sm"
-                className={copyBtnClass}
               >
                 {copyState === "encoded" ? "Copied" : "Copy"}
-              </Button>
+              </ToolActionButton>
             </div>
-            <div className={`${outputClass} break-all`}>{encodedJwt}</div>
-          </Card>
+            <ToolOutput className="min-h-[140px] break-all">{encodedJwt}</ToolOutput>
+          </ToolCard>
         )}
       </section>
-    </div>
+    </ToolPage>
   );
 }

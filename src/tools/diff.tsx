@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+import { ToolActionButton, ToolCard, ToolHeader, ToolPage, ToolTextarea } from "@/components/tool-ui";
 
 type LineStatus = "same" | "changed" | "added" | "removed";
 
@@ -265,13 +264,12 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
   );
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
-          <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
-        </div>
-        <div className="flex flex-col items-end gap-2 text-xs">
+    <ToolPage>
+      <ToolHeader
+        title={tool.title}
+        description={tool.desc}
+        right={
+          <div className="flex flex-col items-start gap-2 text-xs md:items-end">
           <label className="flex items-center gap-2 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
             <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Changes only</span>
             <Switch
@@ -288,54 +286,51 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
               className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20 dark:data-[state=unchecked]:bg-white/20"
             />
           </label>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card className="flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
             <span>Left</span>
             <div className="flex items-center gap-3">
               <span>Original</span>
-              <Button
+              <ToolActionButton
                 type="button"
                 onClick={() => handleClear("left")}
-                variant="ghost"
-                size="sm"
-                className="h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
+                className="px-2 py-1 font-normal"
               >
                 {clearState === "left" ? "Cleared" : "Clear"}
-              </Button>
+              </ToolActionButton>
             </div>
           </div>
-          <Textarea
+          <ToolTextarea
             value={leftText}
             onChange={(event) => setLeftText(event.target.value)}
-            className="min-h-[240px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none"
+            className="min-h-[240px]"
           />
-        </Card>
-        <Card className="flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]">
+        </ToolCard>
+        <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
             <span>Right</span>
             <div className="flex items-center gap-3">
               <span>Updated</span>
-              <Button
+              <ToolActionButton
                 type="button"
                 onClick={() => handleClear("right")}
-                variant="ghost"
-                size="sm"
-                className="h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
+                className="px-2 py-1 font-normal"
               >
                 {clearState === "right" ? "Cleared" : "Clear"}
-              </Button>
+              </ToolActionButton>
             </div>
           </div>
-          <Textarea
+          <ToolTextarea
             value={rightText}
             onChange={(event) => setRightText(event.target.value)}
-            className="min-h-[240px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none"
+            className="min-h-[240px]"
           />
-        </Card>
+        </ToolCard>
       </section>
 
       <Card className="overflow-hidden rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] shadow-[var(--card-shadow)]">
@@ -387,6 +382,6 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
           )}
         </div>
       </Card>
-    </div>
+    </ToolPage>
   );
 }

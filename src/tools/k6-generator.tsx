@@ -1,11 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
 
 import type { ToolItem } from "@/lib/tools";
 
@@ -313,21 +312,15 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
   const removeCheck = (idx: number) => setChecks((prev) => prev.filter((_, i) => i !== idx));
 
   /* 스타일 */
-  const cardClass =
-    "flex flex-col gap-3 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]";
   const labelClass = "text-xs font-semibold text-[var(--muted)] uppercase tracking-[0.12em]";
   const inputClass =
     "h-9 rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
-  const smallBtnClass =
-    "h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]";
   const addBtnClass =
     "h-auto rounded-full bg-blue-600 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-blue-700";
   const removeBtnClass =
     "h-8 min-w-[56px] rounded-full border border-rose-200 bg-rose-50 px-3 text-[11px] font-semibold text-rose-600 transition hover:bg-rose-100 dark:border-rose-700/60 dark:bg-rose-900/20 dark:text-rose-300 dark:hover:bg-rose-900/40";
   const selectClass =
     "h-9 w-full rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 pr-8 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none appearance-none cursor-pointer";
-  const badgeClass =
-    "rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200";
   const tabBtnClass = (active: boolean) =>
     `h-8 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
       active
@@ -338,49 +331,37 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
   const showBody = ["POST", "PUT", "PATCH"].includes(method);
 
   return (
-    <div className="flex flex-col gap-8">
+    <ToolPage>
       {/* 상단 헤더 */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
-          <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
-        </div>
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Script Generator</div>
-      </div>
+      <ToolHeader
+        title={tool.title}
+        description={tool.desc}
+        right={
+          <div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">
+            Script Generator
+          </div>
+        }
+      />
 
       {/* 안내 패널 */}
-      <Card className="rounded-2xl border border-[color:var(--url-panel-border)] bg-[var(--url-panel-bg)] p-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--url-panel-icon-bg)] text-sm text-[var(--url-panel-accent)]">
-            k6
-          </span>
-          <div className="flex flex-col gap-1">
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">k6 Performance Test Script</h2>
-            <p className="text-xs leading-relaxed text-[var(--muted)]">
-              HTTP 요청, 시나리오, 임계값, 체크를 설정하여 k6 성능 테스트 스크립트를 생성합니다. 생성된 스크립트를{" "}
-              <code className="text-[var(--url-panel-accent)]">k6 run script.js</code>로 실행할 수 있습니다.
-            </p>
-            <div className="mt-1 flex flex-wrap gap-2">
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                Ramping VUs
-              </span>
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                Constant Arrival Rate
-              </span>
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                Thresholds & Checks
-              </span>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <ToolInfoPanel
+        icon="k6"
+        title="k6 Performance Test Script"
+        description={
+          <>
+            HTTP 요청, 시나리오, 임계값, 체크를 설정하여 k6 성능 테스트 스크립트를 생성합니다. 생성된 스크립트를{" "}
+            <code className="text-[var(--url-panel-accent)]">k6 run script.js</code>로 실행할 수 있습니다.
+          </>
+        }
+        chips={["Ramping VUs", "Constant Arrival Rate", "Thresholds & Checks"]}
+      />
 
       <div className="grid gap-6 xl:grid-cols-2">
         {/* 입력 영역 */}
         <div className="flex flex-col gap-5">
           {/* HTTP 요청 */}
-          <Card className={cardClass}>
-            <Badge className={badgeClass}>HTTP Request</Badge>
+          <ToolCard>
+            <ToolBadge>HTTP Request</ToolBadge>
 
             <div className="flex gap-2">
               <div className="relative w-28 shrink-0">
@@ -459,12 +440,12 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                 />
               </div>
             )}
-          </Card>
+          </ToolCard>
 
           {/* 시나리오 */}
-          <Card className={cardClass}>
+          <ToolCard>
             <div className="flex items-center justify-between">
-              <Badge className={badgeClass}>Scenarios</Badge>
+              <ToolBadge>Scenarios</ToolBadge>
               <Button type="button" variant="ghost" size="sm" className={addBtnClass} onClick={addScenario}>
                 + Add Scenario
               </Button>
@@ -651,12 +632,12 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                 )}
               </div>
             ))}
-          </Card>
+          </ToolCard>
 
           {/* 임계값 */}
-          <Card className={cardClass}>
+          <ToolCard>
             <div className="flex items-center justify-between">
-              <Badge className={badgeClass}>Thresholds</Badge>
+              <ToolBadge>Thresholds</ToolBadge>
               <Button type="button" variant="ghost" size="sm" className={addBtnClass} onClick={addThreshold}>
                 + Add
               </Button>
@@ -683,12 +664,12 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                 )}
               </div>
             ))}
-          </Card>
+          </ToolCard>
 
           {/* 체크 */}
-          <Card className={cardClass}>
+          <ToolCard>
             <div className="flex items-center justify-between">
-              <Badge className={badgeClass}>Checks</Badge>
+              <ToolBadge>Checks</ToolBadge>
               <Button type="button" variant="ghost" size="sm" className={addBtnClass} onClick={addCheck}>
                 + Add
               </Button>
@@ -715,26 +696,26 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                 )}
               </div>
             ))}
-          </Card>
+          </ToolCard>
         </div>
 
         {/* 스크립트 미리보기 */}
         <div className="flex flex-col gap-5">
-          <Card className={cardClass}>
+          <ToolCard>
             <div className="flex items-center justify-between">
-              <Badge className={badgeClass}>Generated Script</Badge>
+              <ToolBadge>Generated Script</ToolBadge>
               <div className="flex items-center gap-2">
-                <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleCopy} disabled={!activeScript.trim()}>
+                <ToolActionButton type="button" onClick={handleCopy} disabled={!activeScript.trim()}>
                   {copyState === "copied" ? "Copied!" : "Copy"}
-                </Button>
+                </ToolActionButton>
                 {scriptTab === "custom" ? (
-                  <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={() => setCustomScript("")}>
+                  <ToolActionButton type="button" onClick={() => setCustomScript("")}>
                     Clear
-                  </Button>
+                  </ToolActionButton>
                 ) : (
-                  <Button type="button" variant="ghost" size="sm" className={smallBtnClass} onClick={handleClear}>
+                  <ToolActionButton type="button" onClick={handleClear}>
                     Clear
-                  </Button>
+                  </ToolActionButton>
                 )}
               </div>
             </div>
@@ -758,9 +739,9 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                 {outputScript || "// 아직 생성된 스크립트가 없습니다."}
               </pre>
             )}
-          </Card>
+          </ToolCard>
         </div>
       </div>
-    </div>
+    </ToolPage>
   );
 }

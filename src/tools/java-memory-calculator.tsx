@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
 
 import type { ToolItem } from "@/lib/tools";
 
@@ -84,7 +83,6 @@ function ResultPanel({
   jvmFlags,
   recommendedTotal,
   usageRegions,
-  copyBtnClass,
 }: {
   regions: Array<{ label: string; mb: number }>;
   totalMB: number;
@@ -93,7 +91,6 @@ function ResultPanel({
   jvmFlags: string;
   recommendedTotal?: number;
   usageRegions?: Array<{ label: string; mb: number }>;
-  copyBtnClass: string;
 }) {
   const [copyState, setCopyState] = useState(false);
   const handleCopy = async () => {
@@ -107,11 +104,8 @@ function ResultPanel({
     }
   };
 
-  const cardClass =
-    "flex flex-col gap-4 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]";
-
   return (
-    <Card className={cardClass}>
+    <ToolCard className="gap-4">
       <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Memory Allocation</h3>
 
       {/* 추천 모드 결과 */}
@@ -193,16 +187,13 @@ function ResultPanel({
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">JVM Flags</h4>
-          <Button
+          <ToolActionButton
             type="button"
             onClick={handleCopy}
-            variant="ghost"
-            size="sm"
-            className={copyBtnClass}
             disabled={isError}
           >
             {copyState ? "Copied" : "Copy"}
-          </Button>
+          </ToolActionButton>
         </div>
         <div
           className={`whitespace-pre-wrap rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-3 font-mono text-xs leading-relaxed ${
@@ -227,7 +218,7 @@ function ResultPanel({
           </p>
         </div>
       </details>
-    </Card>
+    </ToolCard>
   );
 }
 
@@ -420,57 +411,41 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
   const inputClass =
     "h-9 rounded-lg border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 font-mono text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
   const labelClass = "text-xs font-medium text-[var(--muted)]";
-  const cardClass =
-    "flex flex-col gap-4 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-5 shadow-[var(--card-shadow)]";
-  const copyBtnClass =
-    "h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]";
   const modeTabClass = (active: boolean) =>
     `px-4 py-2 text-xs font-semibold transition rounded-lg ${
       active ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600 hover:text-gray-900"
     }`;
 
   return (
-    <div className="flex flex-col gap-8">
+    <ToolPage>
       {/* 상단 헤더 */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-semibold text-[var(--foreground)]">{tool.title}</h1>
-          <p className="text-sm text-[var(--muted)]">{tool.desc}</p>
-        </div>
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">JVM Memory</div>
-      </div>
+      <ToolHeader
+        title={tool.title}
+        description={tool.desc}
+        right={
+          <div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">JVM Memory</div>
+        }
+      />
 
       {/* 안내 패널 */}
-      <Card className="rounded-2xl border border-[color:var(--url-panel-border)] bg-[var(--url-panel-bg)] p-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--url-panel-icon-bg)] text-sm text-[var(--url-panel-accent)]">
-            💻
-          </span>
-          <div className="flex flex-col gap-1">
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">Java Memory Calculator</h2>
-            <p className="text-xs leading-relaxed text-[var(--muted)]">
-              Cloud Foundry / Paketo Buildpack의 Java Memory Calculator와 동일한 로직으로 JVM 메모리 영역별 할당량을
-              계산합니다.
+      <ToolInfoPanel
+        icon="💻"
+        title="Java Memory Calculator"
+        description={
+          <>
+            <p>
+              Cloud Foundry / Paketo Buildpack의 Java Memory Calculator와 동일한 로직으로 JVM 메모리 영역별
+              할당량을 계산합니다.
             </p>
-            <p className="text-xs leading-relaxed text-[var(--muted)]">
+            <p>
               <strong className="text-[var(--foreground)]">Calculate</strong>는 세부 설정으로 계산,
               <strong className="text-[var(--foreground)]"> Recommend</strong>는 실제 사용량 기반 추천,
               <strong className="text-[var(--foreground)]"> Quick</strong>은 총 메모리만으로 즉시 추천합니다.
             </p>
-            <div className="mt-1 flex flex-wrap gap-2">
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                Paketo Buildpack
-              </span>
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                Cloud Foundry
-              </span>
-              <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
-                JVM Flags
-              </span>
-            </div>
-          </div>
-        </div>
-      </Card>
+          </>
+        }
+        chips={["Paketo Buildpack", "Cloud Foundry", "JVM Flags"]}
+      />
 
       {/* 모드 전환 */}
       <div className="flex gap-2">
@@ -488,7 +463,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
       {/* 계산 모드 */}
       {mode === "calculate" && (
         <section className="grid gap-4 lg:grid-cols-2">
-          <Card className={cardClass}>
+          <ToolCard className="gap-4">
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Configuration</h3>
 
             <div className="flex flex-col gap-1.5">
@@ -592,7 +567,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
                 className={inputClass}
               />
             </div>
-          </Card>
+          </ToolCard>
 
           <ResultPanel
             regions={calculateResult.regions}
@@ -600,7 +575,6 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
             heapMB={calculateResult.heapMB}
             isError={calculateResult.isError}
             jvmFlags={calculateResult.jvmFlags}
-            copyBtnClass={copyBtnClass}
           />
         </section>
       )}
@@ -608,7 +582,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
       {/* 추천 모드 */}
       {mode === "reverse" && (
         <section className="grid gap-4 lg:grid-cols-2">
-          <Card className={cardClass}>
+          <ToolCard className="gap-4">
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Actual Usage</h3>
 
             {/* JVM 플래그 붙여넣기 */}
@@ -620,15 +594,13 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
                 placeholder="-Xms512M -Xmx512M -XX:MaxMetaspaceSize=..."
                 className="min-h-[60px] w-full resize-none rounded-lg border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-3 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none"
               />
-              <Button
+              <ToolActionButton
                 type="button"
                 onClick={handleParseFlags}
-                variant="ghost"
-                size="sm"
-                className={`${copyBtnClass} self-start`}
+                className="self-start"
               >
                 Parse & Fill
-              </Button>
+              </ToolActionButton>
             </div>
 
             <div className="my-1 border-t border-[color:var(--card-border)]" />
@@ -753,7 +725,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
                 className={inputClass}
               />
             </div>
-          </Card>
+          </ToolCard>
 
           <ResultPanel
             regions={reverseResult.regions}
@@ -763,7 +735,6 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
             jvmFlags={reverseResult.jvmFlags}
             recommendedTotal={reverseResult.recommendedTotal}
             usageRegions={reverseResult.usageRegions}
-            copyBtnClass={copyBtnClass}
           />
         </section>
       )}
@@ -771,7 +742,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
       {/* 빠른 추천 모드 */}
       {mode === "quick" && (
         <section className="grid gap-4 lg:grid-cols-2">
-          <Card className={cardClass}>
+          <ToolCard className="gap-4">
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Quick Recommend</h3>
             <p className="text-xs text-[var(--muted)]">
               서버의 총 메모리만 입력하면 Buildpack 기본값(Class 20K, Thread 250, Stack 1MB, CodeCache 240MB, Direct
@@ -828,7 +799,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
                 <li>Head Room: 0%</li>
               </ul>
             </div>
-          </Card>
+          </ToolCard>
 
           <ResultPanel
             regions={quickResult.regions}
@@ -836,10 +807,9 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
             heapMB={quickResult.heapMB}
             isError={quickResult.isError}
             jvmFlags={quickResult.jvmFlags}
-            copyBtnClass={copyBtnClass}
           />
         </section>
       )}
-    </div>
+    </ToolPage>
   );
 }

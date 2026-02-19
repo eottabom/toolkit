@@ -3,7 +3,7 @@
 import {useMemo, useState} from "react";
 import Link from "next/link";
 import {tools} from "@/lib/tools";
-import {useTheme} from "@/components/ThemeProvider";
+import {useTheme} from "@/components/theme-provider";
 import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
