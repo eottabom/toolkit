@@ -11,13 +11,14 @@ import {
   ToolPage,
   ToolTextarea,
 } from "@/components/tool-ui";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
 
 export default function UrlTool({ tool }: { tool: ToolItem }) {
   const [plainInput, setPlainInput] = useState("");
   const [encodedInput, setEncodedInput] = useState("");
-  const [copyState, setCopyState] = useState<"idle" | "encoded" | "decoded">("idle");
+  const { copy, isCopied } = useCopyToClipboard();
   const [clearState, setClearState] = useState<"idle" | "plain" | "encoded">("idle");
 
   const encoded = useMemo(() => {
@@ -54,19 +55,6 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
     }
   }, [encodedInput]);
 
-  const handleCopy = async (text: string, type: "encoded" | "decoded") => {
-    if (!text) {
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopyState(type);
-      window.setTimeout(() => setCopyState("idle"), 1200);
-    } catch {
-      // ignore clipboard errors
-    }
-  };
-
   const handleClear = (type: "plain" | "encoded") => {
     if (type === "plain") {
       setPlainInput("");
@@ -85,14 +73,12 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
         right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">Encode + Decode</div>}
       />
 
-      {/* Info Panel */}
       <ToolInfoPanel
-        icon="%"
-        title="URL Encoding"
+        icon="E"
+        title="Encode"
         description={
           <>
-            URL 인코딩은 특수 문자를 <code className="text-[var(--url-panel-accent)]">%XX</code> 형태로 변환하여 URL에서
-            안전하게 사용할 수 있도록 합니다. 모든 처리는 브라우저에서 수행되며 서버로 전송되지 않습니다.
+            특수 문자를 <code className="text-[var(--url-panel-accent)]">%XX</code> 형태로 변환하여 URL에서 안전하게 사용할 수 있도록 합니다.
           </>
         }
         chips={["쿼리 파라미터 인코딩", "폼 데이터 전송", "특수 문자 → %XX 변환"]}
@@ -123,14 +109,25 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             <ToolBadge>Encoded Output</ToolBadge>
             <ToolActionButton
               type="button"
-              onClick={() => handleCopy(encoded, "encoded")}
+              onClick={() => copy(encoded, "encoded")}
             >
-              {copyState === "encoded" ? "Copied" : "Copy"}
+              {isCopied("encoded") ? "Copied" : "Copy"}
             </ToolActionButton>
           </div>
           <ToolOutput className="min-h-[220px]">{encoded || " "}</ToolOutput>
         </ToolCard>
       </section>
+
+      <ToolInfoPanel
+        icon="D"
+        title="Decode"
+        description={
+          <>
+            <code className="text-[var(--url-panel-accent)]">%XX</code> 형태의 URL 인코딩된 문자열을 원래 텍스트로 복원합니다.
+          </>
+        }
+        chips={["URL 디코딩", "%XX → 원본 문자"]}
+      />
 
       {/* Decode Section */}
       <section className="grid gap-4 lg:grid-cols-2">
@@ -157,13 +154,13 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             <ToolBadge>Text Output</ToolBadge>
             <ToolActionButton
               type="button"
-              onClick={() => handleCopy(decoded, "decoded")}
+              onClick={() => copy(decoded, "decoded")}
             >
-              {copyState === "decoded" ? "Copied" : "Copy"}
+              {isCopied("decoded") ? "Copied" : "Copy"}
             </ToolActionButton>
           </div>
           <ToolOutput className="min-h-[220px]">{decoded || " "}</ToolOutput>
-          {decodeError && <p className="text-xs text-[color:var(--syntax-error)]">{decodeError}</p>}
+          {decodeError && <p className="text-xs text-[var(--error)]">{decodeError}</p>}
         </ToolCard>
       </section>
     </ToolPage>

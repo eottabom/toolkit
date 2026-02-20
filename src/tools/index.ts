@@ -1,11 +1,10 @@
 import type { ComponentType } from "react";
 import type { ToolItem } from "@/lib/tools";
-import DiffPage from "./diff";
 import Base64Tool from "./base64";
+import DiffTool from "./diff";
 import JsonViewerTool from "@/tools/jsonviewer";
 import JwtTool from "./jwt";
 import UrlTool from "./url";
-import DiffTool from "./diff";
 import JavaMemoryCalculator from "@/tools/java-memory-calculator";
 import K6Generator from "@/tools/k6-generator";
 

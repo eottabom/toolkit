@@ -261,7 +261,7 @@ function TreeNode({
           <button
             type="button"
             onClick={() => onToggleCollapse(pathId)}
-            className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-[color:var(--card-border)] bg-[var(--surface)] font-mono text-[10px] text-[var(--foreground)] transition-colors hover:bg-[var(--surface-muted)]"
+            className="cursor-pointer inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-[color:var(--card-border)] bg-[var(--surface)] font-mono text-[10px] text-[var(--foreground)] transition-colors hover:bg-[var(--surface-muted)]"
             aria-label={collapsed ? "Expand" : "Collapse"}
           >
             {collapsed ? "+" : "-"}
@@ -490,7 +490,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
       <ToolInfoPanel
         icon="{}"
         title="JSON Viewer"
-        description="왼쪽에서 Raw JSON을 입력/정리하고, 오른쪽 트리 뷰에서 구조를 확인/수정한 뒤 원하는 패널에서 복사하세요. 모든 처리는 브라우저에서 수행되며 서버로 전송되지 않습니다."
+        description="왼쪽에서 Raw JSON을 입력/정리하고, 오른쪽 트리 뷰에서 구조를 확인/수정한 뒤 원하는 패널에서 복사하세요."
         chips={["JSON 파싱 & 포맷팅", "트리 뷰 탐색", "인라인 값 편집"]}
       />
 
@@ -534,7 +534,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                 return (
                   <div
                     key={index}
-                    className={`text-right px-1 ${isError ? "bg-[var(--syntax-error)]/20 font-semibold text-[var(--syntax-error)]" : index % 2 === 0 ? "bg-black/[0.03] dark:bg-white/[0.03]" : ""}`}
+                    className={`text-right px-1 ${isError ? "bg-[var(--syntax-error)]/20 font-semibold text-[var(--syntax-error)]" : ""}`}
                   >
                     {lineNum}
                   </div>

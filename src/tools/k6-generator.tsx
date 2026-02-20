@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
 
@@ -221,7 +222,7 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
   const [checks, setChecks] = useState<Check[]>([...DEFAULT_CHECKS]);
 
   // UI state
-  const [copyState, setCopyState] = useState<"idle" | "copied">("idle");
+  const { copy, isCopied } = useCopyToClipboard();
   const [scriptTab, setScriptTab] = useState<ScriptTab>("auto");
   const [customScript, setCustomScript] = useState("");
 
@@ -234,21 +235,11 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
   const activeScript = scriptTab === "custom" ? customScript : outputScript;
 
   const handleCopy = useCallback(async () => {
-    try {
-      if (!activeScript.trim()) {
-        return;
-      }
-      await navigator.clipboard.writeText(activeScript);
-      setCopyState("copied");
-      window.setTimeout(() => setCopyState("idle"), 1200);
-    } catch {
-      // ignore
-    }
-  }, [activeScript]);
+    await copy(activeScript);
+  }, [copy, activeScript]);
 
   const handleClear = () => {
     setIsCleared(true);
-    setCopyState("idle");
   };
 
   useEffect(() => {
@@ -316,13 +307,13 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
   const inputClass =
     "h-9 rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
   const addBtnClass =
-    "h-auto rounded-full bg-blue-600 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-blue-700";
+    "cursor-pointer h-auto rounded-full bg-blue-600 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-blue-700";
   const removeBtnClass =
-    "h-8 min-w-[56px] rounded-full border border-rose-200 bg-rose-50 px-3 text-[11px] font-semibold text-rose-600 transition hover:bg-rose-100 dark:border-rose-700/60 dark:bg-rose-900/20 dark:text-rose-300 dark:hover:bg-rose-900/40";
+    "cursor-pointer h-7 rounded-full bg-red-500 px-2 text-[10px] font-semibold text-white transition hover:bg-red-600";
   const selectClass =
     "h-9 w-full rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 pr-8 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none appearance-none cursor-pointer";
   const tabBtnClass = (active: boolean) =>
-    `h-8 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
+    `cursor-pointer h-8 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
       active
         ? "bg-blue-600 text-white"
         : "border border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--foreground)]"
@@ -706,7 +697,7 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
               <ToolBadge>Generated Script</ToolBadge>
               <div className="flex items-center gap-2">
                 <ToolActionButton type="button" onClick={handleCopy} disabled={!activeScript.trim()}>
-                  {copyState === "copied" ? "Copied!" : "Copy"}
+                  {isCopied() ? "Copied!" : "Copy"}
                 </ToolActionButton>
                 {scriptTab === "custom" ? (
                   <ToolActionButton type="button" onClick={() => setCustomScript("")}>

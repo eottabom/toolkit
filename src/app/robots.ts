@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
+import { BASE_URL } from "@/lib/constants";
 
 export const dynamic = "force-static";
-
-const BASE_URL = "https://eottabom.github.io/toolkit";
 
 export default function robots(): MetadataRoute.Robots {
   return {

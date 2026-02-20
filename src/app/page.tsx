@@ -34,8 +34,10 @@ export default function Home() {
       className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,106,61,0.14)_0%,_transparent_55%),radial-gradient(circle_at_bottom,_rgba(31,122,224,0.16)_0%,_transparent_45%)]">
       <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10">
         <div
+          aria-hidden="true"
           className="pointer-events-none absolute -top-24 right-6 h-44 w-44 rounded-full bg-[#ff6a3d]/20 blur-3xl animate-[float-slow_10s_ease-in-out_infinite]"/>
         <div
+          aria-hidden="true"
           className="pointer-events-none absolute bottom-10 left-8 h-56 w-56 rounded-full bg-[#1f7ae0]/15 blur-3xl animate-[float-slow_12s_ease-in-out_infinite]"/>
 
         <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">

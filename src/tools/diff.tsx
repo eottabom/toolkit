@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ToolActionButton, ToolCard, ToolHeader, ToolPage, ToolTextarea } from "@/components/tool-ui";
+import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolPage, ToolTextarea } from "@/components/tool-ui";
 
 type LineStatus = "same" | "changed" | "added" | "removed";
 
@@ -268,9 +268,12 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
       <ToolHeader
         title={tool.title}
         description={tool.desc}
-        right={
-          <div className="flex flex-col items-start gap-2 text-xs md:items-end">
-          <label className="flex items-center gap-2 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
+        right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">Compare</div>}
+      />
+
+      <div className="flex justify-end">
+        <div className="flex items-center gap-4 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-4 py-1.5 shadow-[var(--card-shadow)]">
+          <label className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Changes only</span>
             <Switch
               checked={onlyChanges}
@@ -278,7 +281,8 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
               className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20 dark:data-[state=unchecked]:bg-white/20"
             />
           </label>
-          <label className="flex items-center gap-2 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 shadow-[var(--card-shadow)]">
+          <div className="h-4 w-px bg-[var(--card-border)]" />
+          <label className="flex items-center gap-2">
             <span className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">Word highlight</span>
             <Switch
               checked={showWordDiff}
@@ -286,8 +290,14 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
               className="h-4 w-8 data-[state=checked]:bg-[var(--accent-2)] data-[state=unchecked]:bg-black/20 dark:data-[state=unchecked]:bg-white/20"
             />
           </label>
-          </div>
-        }
+        </div>
+      </div>
+
+      <ToolInfoPanel
+        icon="Δ"
+        title="Text Diff"
+        description="두 텍스트를 나란히 비교하여 변경된 부분을 하이라이트합니다. 추가/삭제/수정된 라인과 단어 단위 차이를 시각적으로 확인할 수 있습니다."
+        chips={["라인 단위 비교", "단어 단위 하이라이트", "변경 사항만 필터"]}
       />
 
       <section className="grid gap-4 lg:grid-cols-2">

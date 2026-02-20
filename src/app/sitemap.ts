@@ -1,9 +1,8 @@
 import type { MetadataRoute } from "next";
+import { BASE_URL } from "@/lib/constants";
 import { tools } from "@/lib/tools";
 
 export const dynamic = "force-static";
-
-const BASE_URL = "https://eottabom.github.io/toolkit";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const toolPages = tools.map((tool) => ({

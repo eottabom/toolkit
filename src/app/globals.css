@@ -23,6 +23,7 @@
   --syntax-boolean: #b45309; /* 불리언 (amber-700) */
   --syntax-error: #dc2626; /* 에러 메시지 (red-600) */
   --syntax-valid: #047857; /* 유효 상태 (emerald-700) */
+  --error: #dc2626;
   --primary: var(--foreground);
   --primary-foreground: var(--background);
   --secondary: var(--surface-muted);
@@ -37,24 +38,7 @@
   --ring: var(--card-border-hover);
   --radius: 0.9rem;
 
-  /* JWT 안내 패널 — Decode (blue) */
-  --jwt-decode-border: rgba(147, 197, 253, 0.5);
-  --jwt-decode-bg: rgba(239, 246, 255, 0.6);
-  --jwt-decode-icon-bg: rgba(59, 130, 246, 0.15);
-  --jwt-decode-accent: #2563eb;
-  --jwt-decode-chip-bg: rgba(59, 130, 246, 0.1);
-
-  /* JWT 안내 패널 — Encode (emerald) */
-  --jwt-encode-border: rgba(110, 231, 183, 0.5);
-  --jwt-encode-bg: rgba(236, 253, 245, 0.6);
-  --jwt-encode-icon-bg: rgba(16, 185, 129, 0.15);
-  --jwt-encode-accent: #059669;
-  --jwt-encode-chip-bg: rgba(16, 185, 129, 0.1);
-
-  /* JWT 에러 */
-  --jwt-error: #dc2626;
-
-  /* URL 안내 패널 (blue) */
+  /* 안내 패널 (blue) */
   --url-panel-border: rgba(147, 197, 253, 0.5);
   --url-panel-bg: rgba(239, 246, 255, 0.6);
   --url-panel-icon-bg: rgba(59, 130, 246, 0.15);
@@ -104,6 +88,7 @@ html.theme-dark {
   --syntax-boolean: #fcd34d; /* 불리언 (amber-300) */
   --syntax-error: #f87171; /* 에러 메시지 (red-400) */
   --syntax-valid: #6ee7b7; /* 유효 상태 (emerald-300) */
+  --error: #f87171;
   --primary: var(--foreground);
   --primary-foreground: var(--background);
   --secondary: var(--surface-muted);
@@ -117,24 +102,7 @@ html.theme-dark {
   --input: var(--card-border);
   --ring: var(--card-border-hover);
 
-  /* JWT 안내 패널 — Decode (blue) */
-  --jwt-decode-border: rgba(30, 64, 175, 0.3);
-  --jwt-decode-bg: rgba(30, 58, 138, 0.2);
-  --jwt-decode-icon-bg: rgba(96, 165, 250, 0.2);
-  --jwt-decode-accent: #93c5fd;
-  --jwt-decode-chip-bg: rgba(96, 165, 250, 0.15);
-
-  /* JWT 안내 패널 — Encode (emerald) */
-  --jwt-encode-border: rgba(6, 95, 70, 0.35);
-  --jwt-encode-bg: rgba(6, 78, 59, 0.2);
-  --jwt-encode-icon-bg: rgba(110, 231, 183, 0.2);
-  --jwt-encode-accent: #6ee7b7;
-  --jwt-encode-chip-bg: rgba(110, 231, 183, 0.15);
-
-  /* JWT 에러 */
-  --jwt-error: #f87171;
-
-  /* URL 안내 패널 (blue) */
+  /* 안내 패널 (blue) */
   --url-panel-border: rgba(30, 64, 175, 0.3);
   --url-panel-bg: rgba(30, 58, 138, 0.2);
   --url-panel-icon-bg: rgba(96, 165, 250, 0.2);

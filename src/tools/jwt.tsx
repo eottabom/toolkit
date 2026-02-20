@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPage } from "@/components/tool-ui";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
 
@@ -128,7 +129,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
   const [encodedJwt, setEncodedJwt] = useState("");
   const [encodeError, setEncodeError] = useState("");
 
-  const [copyState, setCopyState] = useState<CopyTarget | "idle">("idle");
+  const { copy, isCopied } = useCopyToClipboard();
 
   const decoded = useMemo(() => {
     if (!jwtInput.trim()) {
@@ -159,19 +160,6 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
       return e instanceof Error ? e.message : "Invalid JWT.";
     }
   }, [jwtInput]);
-
-  const handleCopy = async (text: string, target: CopyTarget) => {
-    if (!text) {
-      return;
-    }
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopyState(target);
-      window.setTimeout(() => setCopyState("idle"), 1200);
-    } catch {
-      // ignore
-    }
-  };
 
   const handleVerify = useCallback(async () => {
     if (!jwtInput.trim() || !verifySecret) {
@@ -227,9 +215,9 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
 
       {/* Decode Section */}
       <section className="flex flex-col gap-4">
-        <Card className="rounded-2xl border border-[color:var(--jwt-decode-border)] bg-[var(--jwt-decode-bg)] p-4">
+        <Card className="rounded-2xl border border-[color:var(--url-panel-border)] bg-[var(--url-panel-bg)] p-4">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--jwt-decode-icon-bg)] text-sm text-[var(--jwt-decode-accent)]">
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--url-panel-icon-bg)] text-sm text-[var(--url-panel-accent)]">
               D
             </span>
             <div className="flex flex-col gap-1">
@@ -239,13 +227,13 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                 서명을 검증할 수 있습니다.
               </p>
               <div className="mt-1 flex flex-wrap gap-2">
-                <span className="rounded-md bg-[var(--jwt-decode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-decode-accent)]">
+                <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
                   Header : 알고리즘(alg) + 토큰 타입(typ)
                 </span>
-                <span className="rounded-md bg-[var(--jwt-decode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-decode-accent)]">
+                <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
                   Payload : 사용자 정보 + 클레임(sub, exp, iss 등)
                 </span>
-                <span className="rounded-md bg-[var(--jwt-decode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-decode-accent)]">
+                <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
                   Signature : HMAC 해시값 (Secret Key로 검증)
                 </span>
               </div>
@@ -266,7 +254,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
             placeholder="Paste a JWT token (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.xxx)"
             className={`${textareaClass} min-h-[100px]`}
           />
-          {decodeError && <p className="text-xs text-[color:var(--jwt-error)]">{decodeError}</p>}
+          {decodeError && <p className="text-xs text-[color:var(--error)]">{decodeError}</p>}
         </ToolCard>
 
         {decoded && (
@@ -277,9 +265,9 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                   <ToolBadge>Header</ToolBadge>
                   <ToolActionButton
                     type="button"
-                    onClick={() => handleCopy(decoded.header, "header")}
+                    onClick={() => copy(decoded.header, "header")}
                   >
-                    {copyState === "header" ? "Copied" : "Copy"}
+                    {isCopied("header") ? "Copied" : "Copy"}
                   </ToolActionButton>
                 </div>
                 <ToolOutput className="min-h-[140px]">{decoded.header}</ToolOutput>
@@ -290,9 +278,9 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                   <ToolBadge>Payload</ToolBadge>
                   <ToolActionButton
                     type="button"
-                    onClick={() => handleCopy(decoded.payload, "payload")}
+                    onClick={() => copy(decoded.payload, "payload")}
                   >
-                    {copyState === "payload" ? "Copied" : "Copy"}
+                    {isCopied("payload") ? "Copied" : "Copy"}
                   </ToolActionButton>
                 </div>
                 <ToolOutput className="min-h-[140px]">{decoded.payload}</ToolOutput>
@@ -315,9 +303,9 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                     </select>
                     <ToolActionButton
                       type="button"
-                      onClick={() => handleCopy(decoded.signature, "signature")}
+                      onClick={() => copy(decoded.signature, "signature")}
                     >
-                      {copyState === "signature" ? "Copied" : "Copy"}
+                      {isCopied("signature") ? "Copied" : "Copy"}
                     </ToolActionButton>
                   </div>
                 </div>
@@ -350,7 +338,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                 />
 
                 {verifySecret.length > 0 && verifySecret.length < ALG_MIN_KEY_BYTES[verifyAlg] && (
-                  <p className="text-[11px] text-[color:var(--jwt-error)]">
+                  <p className="text-[11px] text-[color:var(--error)]">
                     RFC 7518: {verifyAlg} requires a key of {ALG_MIN_KEY_BYTES[verifyAlg] * 8} bits (
                     {ALG_MIN_KEY_BYTES[verifyAlg]} bytes) or larger. Current: {verifySecret.length} bytes.
                   </p>
@@ -366,7 +354,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                       className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
                         verifyResult === "valid"
                           ? "bg-[var(--diff-added)] text-[var(--syntax-valid)]"
-                          : "bg-[var(--diff-removed)] text-[var(--jwt-error)]"
+                          : "bg-[var(--diff-removed)] text-[var(--error)]"
                       }`}
                     >
                       {verifyResult === "valid" ? "Signature Verified" : "Invalid Signature"}
@@ -381,29 +369,28 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
 
       {/* Encode Section */}
       <section className="flex flex-col gap-4">
-        <Card className="rounded-2xl border border-[color:var(--jwt-encode-border)] bg-[var(--jwt-encode-bg)] p-4">
+        <Card className="rounded-2xl border border-[color:var(--url-panel-border)] bg-[var(--url-panel-bg)] p-4">
           <div className="flex items-start gap-3">
-            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--jwt-encode-icon-bg)] text-sm text-[var(--jwt-encode-accent)]">
+            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--url-panel-icon-bg)] text-sm text-[var(--url-panel-accent)]">
               E
             </span>
             <div className="flex flex-col gap-1">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">Encode</h2>
               <p className="text-xs leading-relaxed text-[var(--muted)]">
                 Header와 Payload JSON을 작성하고 Secret Key를 입력한 뒤 Generate 버튼을 누르면 서명된 JWT를 생성합니다.
-                알고리즘을 선택하면 Header의 alg 필드가 자동으로 변경됩니다. 모든 처리는 브라우저에서 수행되며 서버로
-                전송되지 않습니다.
+                알고리즘을 선택하면 Header의 alg 필드가 자동으로 변경됩니다.
               </p>
               <div className="mt-1 flex flex-wrap gap-2">
-                <span className="rounded-md bg-[var(--jwt-encode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-encode-accent)]">
+                <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
                   1. 알고리즘 선택
                 </span>
-                <span className="rounded-md bg-[var(--jwt-encode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-encode-accent)]">
+                <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
                   2. Header / Payload JSON 작성
                 </span>
-                <span className="rounded-md bg-[var(--jwt-encode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-encode-accent)]">
+                <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
                   3. Secret Key 입력
                 </span>
-                <span className="rounded-md bg-[var(--jwt-encode-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--jwt-encode-accent)]">
+                <span className="rounded-md bg-[var(--url-panel-chip-bg)] px-2 py-0.5 text-[10px] font-medium text-[var(--url-panel-accent)]">
                   4. Generate JWT 클릭
                 </span>
               </div>
@@ -468,7 +455,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               className={textareaClass}
             />
             {secret.length > 0 && secret.length < ALG_MIN_KEY_BYTES[encAlg] && (
-              <p className="text-[11px] text-[color:var(--jwt-error)]">
+              <p className="text-[11px] text-[color:var(--error)]">
                 RFC 7518: {encAlg} requires a key of {ALG_MIN_KEY_BYTES[encAlg] * 8} bits ({ALG_MIN_KEY_BYTES[encAlg]}{" "}
                 bytes) or larger. Current: {secret.length} bytes.
               </p>
@@ -482,7 +469,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
           </ToolActionButton>
         </div>
 
-        {encodeError && <p className="text-xs text-center text-[color:var(--jwt-error)]">{encodeError}</p>}
+        {encodeError && <p className="text-xs text-center text-[color:var(--error)]">{encodeError}</p>}
 
         {encodedJwt && (
           <ToolCard>
@@ -490,9 +477,9 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               <ToolBadge>Encoded JWT</ToolBadge>
               <ToolActionButton
                 type="button"
-                onClick={() => handleCopy(encodedJwt, "encoded")}
+                onClick={() => copy(encodedJwt, "encoded")}
               >
-                {copyState === "encoded" ? "Copied" : "Copy"}
+                {isCopied("encoded") ? "Copied" : "Copy"}
               </ToolActionButton>
             </div>
             <ToolOutput className="min-h-[140px] break-all">{encodedJwt}</ToolOutput>

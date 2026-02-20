@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { tools } from "@/lib/tools";
 import { toolPages } from "@/tools";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 type ToolPageProps = {
   params: Promise<{
@@ -13,6 +15,16 @@ type ToolPageProps = {
 
 export function generateStaticParams() {
   return tools.map((tool) => ({ slug: tool.slug }));
+}
+
+export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const tool = tools.find((t) => t.slug === slug);
+  if (!tool) return {};
+  return {
+    title: `${tool.title} | Toolkit`,
+    description: tool.desc,
+  };
 }
 
 export default async function ToolPage({ params }: ToolPageProps) {
@@ -35,7 +47,9 @@ export default async function ToolPage({ params }: ToolPageProps) {
           <Link href="/">← Back to dashboard</Link>
         </Button>
         {ToolComponent ? (
-          <ToolComponent tool={tool} />
+          <ErrorBoundary>
+            <ToolComponent tool={tool} />
+          </ErrorBoundary>
         ) : (
           <Card className="rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-8 shadow-[var(--card-shadow)]">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Tool Page</p>
