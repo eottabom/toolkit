@@ -26,7 +26,11 @@ export default function Home() {
   }, [query]);
 
   const recentTools = useMemo(() => {
-    return [...tools].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).slice(0, 3);
+    const now = new Date();
+    const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()).toISOString().slice(0, 10);
+    return tools
+      .filter((t) => t.createdAt && t.createdAt >= oneMonthAgo)
+      .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   }, []);
 
   return (
