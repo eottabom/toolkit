@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
@@ -42,37 +41,29 @@ type FieldDef = {
   names?: string[];
 };
 
+const COMMON_FIELDS: FieldDef[] = [
+  { key: "minute", label: "분 (Minute)", min: 0, max: 59 },
+  { key: "hour", label: "시 (Hour)", min: 0, max: 23 },
+  { key: "day", label: "일 (Day)", min: 1, max: 31 },
+  { key: "month", label: "월 (Month)", min: 1, max: 12, names: ["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"] },
+  { key: "weekday", label: "요일 (Weekday)", min: 0, max: 6, names: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] },
+];
+
+const SECOND_DEF: FieldDef = { key: "second", label: "초 (Second)", min: 0, max: 59 };
+const YEAR_DEF: FieldDef = { key: "year", label: "연도 (Year)", min: 2024, max: 2099 };
+
 const FIELD_DEFS: Record<CronPlatform, FieldDef[]> = {
-  linux: [
-    { key: "minute", label: "분 (Minute)", min: 0, max: 59 },
-    { key: "hour", label: "시 (Hour)", min: 0, max: 23 },
-    { key: "day", label: "일 (Day)", min: 1, max: 31 },
-    { key: "month", label: "월 (Month)", min: 1, max: 12, names: ["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"] },
-    { key: "weekday", label: "요일 (Weekday)", min: 0, max: 6, names: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] },
-  ],
-  jenkins: [
-    { key: "minute", label: "분 (Minute)", min: 0, max: 59 },
-    { key: "hour", label: "시 (Hour)", min: 0, max: 23 },
-    { key: "day", label: "일 (Day)", min: 1, max: 31 },
-    { key: "month", label: "월 (Month)", min: 1, max: 12, names: ["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"] },
-    { key: "weekday", label: "요일 (Weekday)", min: 0, max: 6, names: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] },
-  ],
+  linux: COMMON_FIELDS,
+  jenkins: COMMON_FIELDS,
   spring: [
-    { key: "second", label: "초 (Second)", min: 0, max: 59 },
-    { key: "minute", label: "분 (Minute)", min: 0, max: 59 },
-    { key: "hour", label: "시 (Hour)", min: 0, max: 23 },
-    { key: "day", label: "일 (Day)", min: 1, max: 31 },
-    { key: "month", label: "월 (Month)", min: 1, max: 12, names: ["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"] },
-    { key: "weekday", label: "요일 (Weekday)", min: 0, max: 6, names: ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] },
+    SECOND_DEF,
+    ...COMMON_FIELDS,
   ],
   quartz: [
-    { key: "second", label: "초 (Second)", min: 0, max: 59 },
-    { key: "minute", label: "분 (Minute)", min: 0, max: 59 },
-    { key: "hour", label: "시 (Hour)", min: 0, max: 23 },
-    { key: "day", label: "일 (Day)", min: 1, max: 31 },
-    { key: "month", label: "월 (Month)", min: 1, max: 12, names: ["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"] },
+    SECOND_DEF,
+    ...COMMON_FIELDS.slice(0, -1),
     { key: "weekday", label: "요일 (Weekday)", min: 1, max: 7, names: ["", "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] },
-    { key: "year", label: "연도 (Year)", min: 2024, max: 2099 },
+    YEAR_DEF,
   ],
 };
 
@@ -107,6 +98,16 @@ function makeFields(platform: CronPlatform, overrides: Partial<Record<FieldKey, 
   return result;
 }
 
+/** specific field shorthand */
+function sf(values: number[]): Partial<FieldState> {
+  return { mode: "specific", specific: values, rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 };
+}
+
+/** hash field shorthand */
+function hf(): Partial<FieldState> {
+  return { mode: "hash", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 };
+}
+
 const PRESETS: Preset[] = [
   {
     label: "매분",
@@ -118,13 +119,13 @@ const PRESETS: Preset[] = [
     label: "매시 정각",
     desc: "매시간 0분에 실행",
     platforms: ["linux", "spring", "quartz"],
-    apply: (p) => makeFields(p, { minute: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 }, second: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 } }),
+    apply: (p) => makeFields(p, { minute: sf([0]), second: sf([0]) }),
   },
   {
     label: "매일 자정",
     desc: "매일 00:00에 실행",
     platforms: ["linux", "spring", "quartz"],
-    apply: (p) => makeFields(p, { minute: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 }, hour: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 23, intervalBase: 0, intervalStep: 1 }, second: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 } }),
+    apply: (p) => makeFields(p, { minute: sf([0]), hour: { ...sf([0]), rangeEnd: 23 }, second: sf([0]) }),
   },
   {
     label: "매주 월요일",
@@ -133,10 +134,10 @@ const PRESETS: Preset[] = [
     apply: (p) => {
       const wdVal = p === "quartz" ? 2 : 1;
       return makeFields(p, {
-        minute: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 },
-        hour: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 23, intervalBase: 0, intervalStep: 1 },
-        weekday: { mode: "specific", specific: [wdVal], rangeStart: p === "quartz" ? 1 : 0, rangeEnd: p === "quartz" ? 7 : 6, intervalBase: p === "quartz" ? 1 : 0, intervalStep: 1 },
-        second: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 },
+        minute: sf([0]),
+        hour: { ...sf([0]), rangeEnd: 23 },
+        weekday: { ...sf([wdVal]), rangeStart: p === "quartz" ? 1 : 0, rangeEnd: p === "quartz" ? 7 : 6, intervalBase: p === "quartz" ? 1 : 0 },
+        second: sf([0]),
       });
     },
   },
@@ -144,14 +145,14 @@ const PRESETS: Preset[] = [
     label: "5분마다",
     desc: "매 5분 간격으로 실행",
     platforms: ["linux", "spring", "quartz"],
-    apply: (p) => makeFields(p, { minute: { mode: "interval", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 5 }, second: { mode: "specific", specific: [0], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 } }),
+    apply: (p) => makeFields(p, { minute: { mode: "interval", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 5 }, second: sf([0]) }),
   },
   /* Jenkins 전용 프리셋 */
   {
     label: "H (분산)",
     desc: "H * * * * — Jenkins가 알아서 분산",
     platforms: ["jenkins"],
-    apply: (p) => makeFields(p, { minute: { mode: "hash", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 } }),
+    apply: (p) => makeFields(p, { minute: hf() }),
   },
   {
     label: "H/15 (15분 분산)",
@@ -163,19 +164,19 @@ const PRESETS: Preset[] = [
     label: "매일 분산",
     desc: "H H * * * — 하루 한 번 분산 실행",
     platforms: ["jenkins"],
-    apply: (p) => makeFields(p, { minute: { mode: "hash", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 }, hour: { mode: "hash", specific: [], rangeStart: 0, rangeEnd: 23, intervalBase: 0, intervalStep: 1 } }),
+    apply: (p) => makeFields(p, { minute: hf(), hour: { ...hf(), rangeEnd: 23 } }),
   },
   {
     label: "평일 분산",
     desc: "H H * * 1-5 — 평일 하루 한 번",
     platforms: ["jenkins"],
-    apply: (p) => makeFields(p, { minute: { mode: "hash", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 }, hour: { mode: "hash", specific: [], rangeStart: 0, rangeEnd: 23, intervalBase: 0, intervalStep: 1 }, weekday: { mode: "range", specific: [], rangeStart: 1, rangeEnd: 5, intervalBase: 0, intervalStep: 1 } }),
+    apply: (p) => makeFields(p, { minute: hf(), hour: { ...hf(), rangeEnd: 23 }, weekday: { mode: "range", specific: [], rangeStart: 1, rangeEnd: 5, intervalBase: 0, intervalStep: 1 } }),
   },
   {
     label: "업무시간 분산",
     desc: "H H(9-17) * * 1-5 — 업무시간 내 분산",
     platforms: ["jenkins"],
-    apply: (p) => makeFields(p, { minute: { mode: "hash", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 }, hour: { mode: "hashRange", specific: [], rangeStart: 9, rangeEnd: 17, intervalBase: 0, intervalStep: 1 }, weekday: { mode: "range", specific: [], rangeStart: 1, rangeEnd: 5, intervalBase: 0, intervalStep: 1 } }),
+    apply: (p) => makeFields(p, { minute: hf(), hour: { mode: "hashRange", specific: [], rangeStart: 9, rangeEnd: 17, intervalBase: 0, intervalStep: 1 }, weekday: { mode: "range", specific: [], rangeStart: 1, rangeEnd: 5, intervalBase: 0, intervalStep: 1 } }),
   },
 ];
 
@@ -502,7 +503,6 @@ function getNextExecutions(expr: string, platform: CronPlatform, count: number, 
 
   const maxIterations = 525960; // 약 1년(분)
   for (let i = 0; i < maxIterations && results.length < count; i++) {
-    const sec = platform === "spring" || platform === "quartz" ? 0 : 0;
     const min = cursor.getMinutes();
     const hr = cursor.getHours();
     const day = cursor.getDate();
@@ -511,8 +511,8 @@ function getNextExecutions(expr: string, platform: CronPlatform, count: number, 
     const yr = cursor.getFullYear();
 
     let match = true;
-    if (fieldMap.second !== undefined && fieldMap.second !== null) {
-      match = match && fieldMap.second.includes(sec);
+    if (fieldMap.second !== undefined) {
+      match = match && matches(0, fieldMap.second);
     }
     match = match && matches(min, fieldMap.minute);
     match = match && matches(hr, fieldMap.hour);
@@ -542,8 +542,8 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
     for (const def of FIELD_DEFS.linux) {
       result[def.key] = defaultField(def);
     }
-    result.second = { mode: "every", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 };
-    result.year = { mode: "every", specific: [], rangeStart: 2024, rangeEnd: 2099, intervalBase: 2024, intervalStep: 1 };
+    result.second = defaultField(SECOND_DEF);
+    result.year = defaultField(YEAR_DEF);
     return result;
   });
 
@@ -578,13 +578,31 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
   const handlePlatformChange = useCallback(
     (p: CronPlatform) => {
       setPlatform(p);
+
+      const jenkinsModes: FieldMode[] = ["hash", "hashInterval", "hashRange"];
+      const standardOnlyModes: FieldMode[] = ["interval", "specific"];
+
+      const isValidMode = (mode: FieldMode, target: CronPlatform): boolean => {
+        if (target === "jenkins" && standardOnlyModes.includes(mode)) return false;
+        if (target !== "jenkins" && jenkinsModes.includes(mode)) return false;
+        return true;
+      };
+
       // 새 플랫폼에 맞게 필드 초기화
       const result = {} as Record<FieldKey, FieldState>;
       for (const def of FIELD_DEFS[p]) {
-        result[def.key] = fields[def.key] ? { ...fields[def.key] } : defaultField(def);
+        if (fields[def.key]) {
+          const existing = { ...fields[def.key] };
+          if (!isValidMode(existing.mode, p)) {
+            existing.mode = "every";
+          }
+          result[def.key] = existing;
+        } else {
+          result[def.key] = defaultField(def);
+        }
       }
-      if (!result.second) result.second = { mode: "every", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 };
-      if (!result.year) result.year = { mode: "every", specific: [], rangeStart: 2024, rangeEnd: 2099, intervalBase: 2024, intervalStep: 1 };
+      if (!result.second) result.second = defaultField(SECOND_DEF);
+      if (!result.year) result.year = defaultField(YEAR_DEF);
       setFields(result);
     },
     [fields],
@@ -615,11 +633,8 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
   }, [copy, activeExpr]);
 
   /* 스타일 */
-  const labelClass = "text-xs font-semibold text-[var(--muted)] uppercase tracking-[0.12em]";
   const inputClass =
     "h-9 rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
-  const selectClass =
-    "h-9 w-full rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 pr-8 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none appearance-none cursor-pointer";
   const tabBtnClass = (active: boolean) =>
     `cursor-pointer h-8 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
       active
@@ -890,11 +905,11 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                     </div>
                   )}
 
-                  {fields[def.key].mode === "hash" && (
+                  {platform === "jenkins" && fields[def.key].mode === "hash" && (
                     <p className="text-xs text-[var(--muted)]">Jenkins가 빌드별로 자동 분산합니다.</p>
                   )}
 
-                  {fields[def.key].mode === "hashInterval" && (
+                  {platform === "jenkins" && fields[def.key].mode === "hashInterval" && (
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-[var(--muted)]">H /</span>
                       <Input
@@ -908,7 +923,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                     </div>
                   )}
 
-                  {fields[def.key].mode === "hashRange" && (
+                  {platform === "jenkins" && fields[def.key].mode === "hashRange" && (
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-[var(--muted)]">H(</span>
                       <Input
