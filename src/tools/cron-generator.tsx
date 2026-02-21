@@ -563,7 +563,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
   const description = useMemo(() => describeExpression(fields, platform), [fields, platform]);
 
   const activeExpr = manualMode ? manualExpr : expression;
-  const breakdownParts = useMemo(() => activeExpr.split(/\s+/), [activeExpr]);
+  const breakdownParts = useMemo(() => activeExpr.trim().split(/\s+/).filter(Boolean), [activeExpr]);
 
   const validation = useMemo(() => {
     if (!activeExpr.trim()) {
