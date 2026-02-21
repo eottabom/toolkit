@@ -24,7 +24,7 @@ jobs:
           echo "$DIFF" > /tmp/pr_diff.txt
 
           # 너무 긴 diff는 잘라냄 (토큰 제한)
-          head -c 12000 /tmp/pr_diff.txt > /tmp/pr_diff_trimmed.txt
+          head -c 120000 /tmp/pr_diff.txt > /tmp/pr_diff_trimmed.txt
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
