@@ -5,8 +5,6 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: 기능 설명
-      description: 어떤 기능이 필요한지 설명해 주세요.
       value: |
         ## 배경
 
