@@ -51,6 +51,14 @@ const COMMON_FIELDS: FieldDef[] = [
 
 const SECOND_DEF: FieldDef = { key: "second", label: "초 (Second)", min: 0, max: 59 };
 const YEAR_DEF: FieldDef = { key: "year", label: "연도 (Year)", min: 2024, max: 2099 };
+const ALL_FIELD_DEFS: Record<FieldKey, FieldDef> = [
+  SECOND_DEF,
+  ...COMMON_FIELDS,
+  YEAR_DEF,
+].reduce((acc, def) => {
+  acc[def.key] = def;
+  return acc;
+}, {} as Record<FieldKey, FieldDef>);
 
 const FIELD_DEFS: Record<CronPlatform, FieldDef[]> = {
   linux: COMMON_FIELDS,
@@ -92,7 +100,7 @@ function makeFields(platform: CronPlatform, overrides: Partial<Record<FieldKey, 
   // 나머지 키 기본값 채우기
   for (const key of ["second", "minute", "hour", "day", "month", "weekday", "year"] as FieldKey[]) {
     if (!result[key]) {
-      result[key] = { mode: "every", specific: [], rangeStart: 0, rangeEnd: 59, intervalBase: 0, intervalStep: 1 };
+      result[key] = defaultField(ALL_FIELD_DEFS[key]);
     }
   }
   return result;
@@ -190,7 +198,7 @@ function fieldToExpression(field: FieldState, def: FieldDef, platform: CronPlatf
       if (field.specific.length === 0) {
         return "*";
       }
-      return field.specific.sort((a, b) => a - b).join(",");
+      return [...field.specific].sort((a, b) => a - b).join(",");
     case "range":
       return `${field.rangeStart}-${field.rangeEnd}`;
     case "interval":
@@ -229,16 +237,11 @@ function describeExpression(fields: Record<FieldKey, FieldState>, platform: Cron
     const label = def.label.split(" (")[0];
 
     if (f.mode === "specific" && f.specific.length > 0) {
-      const vals = f.specific.sort((a, b) => a - b);
-      if (def.names && def.key === "weekday") {
-        const names = vals.map((v) => def.names![v] ?? String(v));
-        parts.push(`${label}: ${names.join(", ")}`);
-      } else if (def.names && def.key === "month") {
-        const names = vals.map((v) => def.names![v] ?? String(v));
-        parts.push(`${label}: ${names.join(", ")}`);
-      } else {
-        parts.push(`${label}: ${vals.join(", ")}`);
-      }
+      const vals = [...f.specific].sort((a, b) => a - b);
+      const valueText = def.names
+        ? vals.map((v) => def.names![v] ?? String(v)).join(", ")
+        : vals.join(", ");
+      parts.push(`${label}: ${valueText}`);
     } else if (f.mode === "range") {
       parts.push(`${label}: ${f.rangeStart}~${f.rangeEnd}`);
     } else if (f.mode === "interval") {
@@ -560,6 +563,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
   const description = useMemo(() => describeExpression(fields, platform), [fields, platform]);
 
   const activeExpr = manualMode ? manualExpr : expression;
+  const breakdownParts = useMemo(() => activeExpr.split(/\s+/), [activeExpr]);
 
   const validation = useMemo(() => {
     if (!activeExpr.trim()) {
@@ -840,7 +844,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                       /* 초/분/시/일/연도: 텍스트 입력 */
                       <div className="flex flex-col gap-1.5">
                         <Input
-                          value={fields[def.key].specific.sort((a, b) => a - b).join(", ")}
+                          value={[...fields[def.key].specific].sort((a, b) => a - b).join(", ")}
                           onChange={(e) => {
                             const vals = e.target.value
                               .split(",")
@@ -975,18 +979,15 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
             <ToolCard>
               <ToolBadge>Field Breakdown</ToolBadge>
               <div className="flex flex-col gap-1.5">
-                {currentDefs.map((def, i) => {
-                  const parts = activeExpr.split(/\s+/);
-                  return (
+                {currentDefs.map((def, i) => (
                     <div
                       key={def.key}
                       className="flex items-center justify-between rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 py-2"
                     >
                       <span className="text-xs text-[var(--muted)]">{def.label}</span>
-                      <code className="text-xs font-semibold text-[var(--foreground)]">{parts[i] ?? "*"}</code>
+                      <code className="text-xs font-semibold text-[var(--foreground)]">{breakdownParts[i] ?? "*"}</code>
                     </div>
-                  );
-                })}
+                  ))}
               </div>
             </ToolCard>
           )}
@@ -1080,4 +1081,3 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
     </ToolPage>
   );
 }
-
