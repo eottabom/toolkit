@@ -56,4 +56,11 @@ export const tools: ToolItem[] = [
     slug: "k6-generator",
     createdAt: "2026-02-18",
   },
+  {
+    title: "Cron Expression Generator",
+    desc: "Build and validate cron expressions for Linux, Jenkins, Spring, and Quartz.",
+    tag: "Utility",
+    slug: "cron-generator",
+    createdAt: "2026-02-21",
+  },
 ];
