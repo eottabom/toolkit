@@ -1,0 +1,73 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          DIFF=$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})
+          echo "$DIFF" > /tmp/pr_diff.txt
+
+          # 너무 긴 diff는 잘라냄 (토큰 제한)
+          head -c 12000 /tmp/pr_diff.txt > /tmp/pr_diff_trimmed.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: AI Review
+        id: review
+        run: |
+          DIFF=$(cat /tmp/pr_diff_trimmed.txt)
+
+          RESPONSE=$(curl -s https://api.openai.com/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+            -d "$(jq -n \
+              --arg diff "$DIFF" \
+              '{
+                model: "gpt-4o-mini",
+                messages: [
+                  {
+                    role: "system",
+                    content: "You are a senior code reviewer. Review the given PR diff and provide concise, actionable feedback in Korean. Focus on: bugs, security issues, performance, and readability. If the code looks good, say so briefly. Do not repeat the diff. Use markdown formatting."
+                  },
+                  {
+                    role: "user",
+                    content: ("Review this PR diff:\n\n" + $diff)
+                  }
+                ],
+                max_tokens: 1024,
+                temperature: 0.3
+              }')")
+
+          COMMENT=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // "리뷰를 생성할 수 없습니다."')
+
+          echo "$COMMENT" > /tmp/review_comment.txt
+
+      - name: Post review comment
+        run: |
+          BODY=$(cat /tmp/review_comment.txt)
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --body "## 🤖 AI Code Review
+
+          $BODY
+
+          ---
+          *Powered by OpenAI gpt-4o-mini*"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
