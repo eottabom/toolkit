@@ -11,19 +11,28 @@ import {Input} from "@/components/ui/input";
 export default function Home() {
   const {theme, mounted, toggleTheme} = useTheme();
   const [query, setQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  const allTags = useMemo(() => [...new Set(tools.map((t) => t.tag))].sort(), []);
 
   const filteredTools = useMemo(() => {
+    let result = tools;
+    if (selectedTag) {
+      result = result.filter((t) => t.tag === selectedTag);
+    }
     const q = query.trim().toLowerCase();
-    if (!q) return tools;
-    return tools.filter((tool) => {
-      return (
-        tool.title.toLowerCase().includes(q) ||
-        tool.desc.toLowerCase().includes(q) ||
-        tool.tag.toLowerCase().includes(q) ||
-        tool.slug.toLowerCase().includes(q)
-      );
-    });
-  }, [query]);
+    if (q) {
+      result = result.filter((tool) => {
+        return (
+          tool.title.toLowerCase().includes(q) ||
+          tool.desc.toLowerCase().includes(q) ||
+          tool.tag.toLowerCase().includes(q) ||
+          tool.slug.toLowerCase().includes(q)
+        );
+      });
+    }
+    return result;
+  }, [query, selectedTag]);
 
   const recentTools = useMemo(() => {
     const now = new Date();
@@ -192,11 +201,40 @@ export default function Home() {
             </Card>
           </section>
 
+          <div
+            className="flex flex-wrap gap-2 animate-[fade-in_0.8s_ease-out]"
+            style={{animationDelay: "0.12s", animationFillMode: "both"}}
+          >
+            <button
+              onClick={() => setSelectedTag(null)}
+              className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5 ${
+                selectedTag === null
+                  ? "border-transparent bg-[var(--foreground)] text-[var(--background)]"
+                  : "border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[color:var(--card-border-hover)]"
+              }`}
+            >
+              All
+            </button>
+            {allTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5 ${
+                  selectedTag === tag
+                    ? "border-transparent bg-[var(--foreground)] text-[var(--background)]"
+                    : "border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[color:var(--card-border-hover)]"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+
           <section
             className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-[fade-in_0.8s_ease-out]"
             style={{animationDelay: "0.18s", animationFillMode: "both"}}
           >
-            {[...tools]
+            {[...filteredTools]
               .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""))
               .map((tool, index) => (
                 <Card
