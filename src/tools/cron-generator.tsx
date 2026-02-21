@@ -56,6 +56,9 @@ const ALL_FIELD_DEFS: Record<FieldKey, FieldDef> = [
   ...COMMON_FIELDS,
   YEAR_DEF,
 ].reduce((acc, def) => {
+  if (process.env.NODE_ENV === 'development' && acc[def.key]) {
+    console.warn(`ALL_FIELD_DEFS: duplicate key "${def.key}" detected`);
+  }
   acc[def.key] = def;
   return acc;
 }, {} as Record<FieldKey, FieldDef>);
