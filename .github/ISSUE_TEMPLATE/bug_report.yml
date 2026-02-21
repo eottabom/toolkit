@@ -1,4 +1,4 @@
-name: Bug Report
+name: 🐛 Bug Report
 description: 버그를 제보합니다.
 labels: ["bug"]
 body:
