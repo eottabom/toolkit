@@ -24,9 +24,9 @@ jobs:
           echo "$DIFF" > /tmp/pr_diff.txt
 
           # 너무 긴 diff는 잘라냄 (토큰 제한)
-          head -c 12000 /tmp/pr_diff.txt > /tmp/pr_diff_trimmed.txt
+          head -c 120000 /tmp/pr_diff.txt > /tmp/pr_diff_trimmed.txt
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: AI Review
         id: review
@@ -68,4 +68,4 @@ jobs:
           ---
           *Powered by OpenAI gpt-4o-mini*"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
