@@ -1,80 +1,80 @@
-name: AI Code Review
-
-on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
-
-permissions:
-  contents: read
-  pull-requests: write
-
-jobs:
-  review:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get PR diff
-        run: |
-          gh pr diff ${{ github.event.pull_request.number }} \
-            --repo ${{ github.repository }} \
-            > /tmp/pr_diff.txt
-
-          echo "=== DIFF SIZE ==="
-          wc -c /tmp/pr_diff.txt
-
-          head -n 3000 /tmp/pr_diff.txt > /tmp/pr_diff_trimmed.txt
-
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: AI Review
-        run: |
-          set -euo pipefail
-
-          PAYLOAD=$(jq -n --rawfile diff /tmp/pr_diff_trimmed.txt '{
-            model: "gpt-4o-mini",
-            messages: [
-              {
-                role: "system",
-                content: "You are a senior code reviewer. Review the given PR diff and provide concise, actionable feedback in Korean. Focus on: bugs, security issues, performance, and readability. If the code looks good, say so briefly. Do not repeat the diff. Use markdown formatting."
-              },
-              {
-                role: "user",
-                content: ("Review this PR diff:\n\n" + $diff)
-              }
-            ],
-            max_tokens: 1024,
-            temperature: 0.3
-          }')
-
-          HTTP_STATUS=$(curl -sS -o /tmp/openai_resp.json -w "%{http_code}" \
-            https://api.openai.com/v1/chat/completions \
-            -H "Content-Type: application/json" \
-            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
-            -d "$PAYLOAD")
-
-          echo "OpenAI HTTP status: $HTTP_STATUS"
-
-          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
-            echo "OpenAI error:"
-            cat /tmp/openai_resp.json
-            echo "리뷰를 생성할 수 없습니다." > /tmp/review_comment.txt
-          else
-            jq -r '.choices[0].message.content // "리뷰를 생성할 수 없습니다."' \
-              /tmp/openai_resp.json > /tmp/review_comment.txt
-          fi
-
-      - name: Post review comment
-        run: |
-          BODY=$(cat /tmp/review_comment.txt)
-
-          gh pr comment ${{ github.event.pull_request.number }} \
-            --repo ${{ github.repository }} \
-            --body "## 🤖 AI Code Review $BODY"
-env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#name: AI Code Review
+#
+#on:
+#  pull_request:
+#    types: [opened, synchronize]
+#    branches: [main]
+#
+#permissions:
+#  contents: read
+#  pull-requests: write
+#
+#jobs:
+#  review:
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#
+#      - name: Get PR diff
+#        run: |
+#          gh pr diff ${{ github.event.pull_request.number }} \
+#            --repo ${{ github.repository }} \
+#            > /tmp/pr_diff.txt
+#
+#          echo "=== DIFF SIZE ==="
+#          wc -c /tmp/pr_diff.txt
+#
+#          head -n 3000 /tmp/pr_diff.txt > /tmp/pr_diff_trimmed.txt
+#
+#        env:
+#          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: AI Review
+#        run: |
+#          set -euo pipefail
+#
+#          PAYLOAD=$(jq -n --rawfile diff /tmp/pr_diff_trimmed.txt '{
+#            model: "gpt-4o-mini",
+#            messages: [
+#              {
+#                role: "system",
+#                content: "You are a senior code reviewer. Review the given PR diff and provide concise, actionable feedback in Korean. Focus on: bugs, security issues, performance, and readability. If the code looks good, say so briefly. Do not repeat the diff. Use markdown formatting."
+#              },
+#              {
+#                role: "user",
+#                content: ("Review this PR diff:\n\n" + $diff)
+#              }
+#            ],
+#            max_tokens: 1024,
+#            temperature: 0.3
+#          }')
+#
+#          HTTP_STATUS=$(curl -sS -o /tmp/openai_resp.json -w "%{http_code}" \
+#            https://api.openai.com/v1/chat/completions \
+#            -H "Content-Type: application/json" \
+#            -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+#            -d "$PAYLOAD")
+#
+#          echo "OpenAI HTTP status: $HTTP_STATUS"
+#
+#          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+#            echo "OpenAI error:"
+#            cat /tmp/openai_resp.json
+#            echo "리뷰를 생성할 수 없습니다." > /tmp/review_comment.txt
+#          else
+#            jq -r '.choices[0].message.content // "리뷰를 생성할 수 없습니다."' \
+#              /tmp/openai_resp.json > /tmp/review_comment.txt
+#          fi
+#
+#      - name: Post review comment
+#        run: |
+#          BODY=$(cat /tmp/review_comment.txt)
+#
+#          gh pr comment ${{ github.event.pull_request.number }} \
+#            --repo ${{ github.repository }} \
+#            --body "## 🤖 AI Code Review $BODY"
+#env:
+#  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
