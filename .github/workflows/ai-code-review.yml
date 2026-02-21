@@ -31,13 +31,11 @@ jobs:
       - name: AI Review
         id: review
         run: |
-          DIFF=$(cat /tmp/pr_diff_trimmed.txt)
-
           RESPONSE=$(curl -s https://api.openai.com/v1/chat/completions \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
             -d "$(jq -n \
-              --arg diff "$DIFF" \
+              --rawfile diff /tmp/pr_diff_trimmed.txt \
               '{
                 model: "gpt-4o-mini",
                 messages: [
