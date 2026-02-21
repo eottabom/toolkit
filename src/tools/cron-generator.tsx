@@ -100,7 +100,7 @@ function makeFields(platform: CronPlatform, overrides: Partial<Record<FieldKey, 
   // 나머지 키 기본값 채우기
   for (const key of ["second", "minute", "hour", "day", "month", "weekday", "year"] as FieldKey[]) {
     if (!result[key]) {
-      result[key] = defaultField(ALL_FIELD_DEFS[key]);
+      result[key] = defaultField(ALL_FIELD_DEFS[key]!);
     }
   }
   return result;
