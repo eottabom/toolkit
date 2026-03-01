@@ -4,6 +4,7 @@ import {useMemo, useState} from "react";
 import Link from "next/link";
 import {tools} from "@/lib/tools";
 import {useTheme} from "@/components/theme-provider";
+import {TagFilterButton} from "@/components/tag-filter-button";
 import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
@@ -78,13 +79,6 @@ export default function Home() {
       topTag: segments[0] ?? null,
     };
   }, []);
-
-  const getTagButtonClass = (isActive: boolean) =>
-    `cursor-pointer rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5 ${
-      isActive
-        ? "border-transparent bg-[var(--foreground)] text-[var(--background)]"
-        : "border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[color:var(--card-border-hover)]"
-    }`;
 
   return (
     <div
@@ -270,24 +264,14 @@ export default function Home() {
             className="flex flex-wrap gap-2 animate-[fade-in_0.8s_ease-out]"
             style={{animationDelay: "0.12s", animationFillMode: "both"}}
           >
-            <button
-              type="button"
-              onClick={() => setSelectedTag(null)}
-              aria-pressed={selectedTag === null}
-              className={getTagButtonClass(selectedTag === null)}
-            >
-              All
-            </button>
+            <TagFilterButton label="All" active={selectedTag === null} onClick={() => setSelectedTag(null)} />
             {allTags.map((tag) => (
-              <button
-                type="button"
+              <TagFilterButton
                 key={tag}
+                label={tag}
+                active={selectedTag === tag}
                 onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                aria-pressed={selectedTag === tag}
-                className={getTagButtonClass(selectedTag === tag)}
-              >
-                {tag}
-              </button>
+              />
             ))}
           </div>
 
