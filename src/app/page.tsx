@@ -42,6 +42,43 @@ export default function Home() {
       .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   }, []);
 
+  const toolTagStats = useMemo(() => {
+    const colorPalette = ["#f97316", "#10b981", "#3b82f6", "#f59e0b", "#ec4899", "#8b5cf6", "#14b8a6"];
+    const countByTag = tools.reduce<Record<string, number>>((acc, tool) => {
+      acc[tool.tag] = (acc[tool.tag] ?? 0) + 1;
+      return acc;
+    }, {});
+    const entries = Object.entries(countByTag)
+      .map(([tag, count]) => ({tag, count}))
+      .sort((a, b) => b.count - a.count);
+    const total = tools.length || 1;
+    const segments = entries.reduce<
+      Array<{tag: string; count: number; ratio: number; color: string; start: number; end: number}>
+    >((acc, entry, index) => {
+      const ratio = (entry.count / total) * 100;
+      const start = acc[index - 1]?.end ?? 0;
+      acc.push({
+        ...entry,
+        ratio,
+        color: colorPalette[index % colorPalette.length],
+        start,
+        end: start + ratio,
+      });
+      return acc;
+    }, []);
+
+    const gradient =
+      segments.length > 0
+        ? `conic-gradient(${segments.map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`).join(", ")})`
+        : "conic-gradient(#6b7280 0% 100%)";
+
+    return {
+      segments,
+      gradient,
+      topTag: segments[0] ?? null,
+    };
+  }, []);
+
   return (
     <div
       className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,106,61,0.14)_0%,_transparent_55%),radial-gradient(circle_at_bottom,_rgba(31,122,224,0.16)_0%,_transparent_45%)]">
@@ -174,21 +211,42 @@ export default function Home() {
                 <span>Workspace Pulse</span>
               </div>
               <h3 className="text-2xl font-semibold">Workspace overview.</h3>
-              <p className="text-sm text-white/70">A quick snapshot of tools and recent changes.</p>
               <div className="mt-2 grid gap-3 text-sm">
-                <div className="flex min-h-[48px] items-center justify-between rounded-2xl bg-white/10 px-4 py-3">
-                  <span>Total tools</span>
-                  <span
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-400/20 text-sm font-semibold text-emerald-200">
-                    {tools.length}
-                  </span>
-                </div>
-                <div className="flex min-h-[48px] items-center justify-between rounded-2xl bg-white/10 px-4 py-3">
-                  <span>Recently added</span>
-                  <span
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-400/20 text-sm font-semibold text-emerald-200">
-                    {recentTools.length}
-                  </span>
+                <div className="rounded-2xl bg-white/10 p-4">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="relative h-28 w-28 rounded-full"
+                      style={{background: toolTagStats.gradient}}
+                      aria-label="Tool category distribution"
+                    >
+                      <div
+                        className="absolute inset-[16%] flex flex-col items-center justify-center rounded-full bg-[#141414]">
+                        <span className="text-xl font-semibold text-white">{tools.length}</span>
+                        <span className="text-[10px] uppercase tracking-[0.15em] text-white/60">tools</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      {toolTagStats.segments.map((segment) => (
+                        <div key={segment.tag} className="flex items-center justify-between text-xs text-white/80">
+                          <span className="inline-flex items-center gap-2">
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{backgroundColor: segment.color}}
+                              aria-hidden="true"
+                            />
+                            {segment.tag}
+                          </span>
+                          <span>{segment.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs text-white/60">
+                    Most tools:{" "}
+                    <span className="font-semibold text-white/90">
+                      {toolTagStats.topTag ? `${toolTagStats.topTag.tag} (${toolTagStats.topTag.count})` : "—"}
+                    </span>
+                  </p>
                 </div>
                 <div className="flex min-h-[48px] items-center justify-between rounded-2xl bg-white/10 px-4 py-3">
                   <span>Latest</span>
