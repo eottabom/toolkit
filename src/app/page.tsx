@@ -79,6 +79,13 @@ export default function Home() {
     };
   }, []);
 
+  const getTagButtonClass = (isActive: boolean) =>
+    `cursor-pointer rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5 ${
+      isActive
+        ? "border-transparent bg-[var(--foreground)] text-[var(--background)]"
+        : "border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[color:var(--card-border-hover)]"
+    }`;
+
   return (
     <div
       className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,106,61,0.14)_0%,_transparent_55%),radial-gradient(circle_at_bottom,_rgba(31,122,224,0.16)_0%,_transparent_45%)]">
@@ -264,24 +271,20 @@ export default function Home() {
             style={{animationDelay: "0.12s", animationFillMode: "both"}}
           >
             <button
+              type="button"
               onClick={() => setSelectedTag(null)}
-              className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5 ${
-                selectedTag === null
-                  ? "border-transparent bg-[var(--foreground)] text-[var(--background)]"
-                  : "border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[color:var(--card-border-hover)]"
-              }`}
+              aria-pressed={selectedTag === null}
+              className={getTagButtonClass(selectedTag === null)}
             >
               All
             </button>
             {allTags.map((tag) => (
               <button
+                type="button"
                 key={tag}
                 onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                className={`rounded-full border px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5 ${
-                  selectedTag === tag
-                    ? "border-transparent bg-[var(--foreground)] text-[var(--background)]"
-                    : "border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[color:var(--card-border-hover)]"
-                }`}
+                aria-pressed={selectedTag === tag}
+                className={getTagButtonClass(selectedTag === tag)}
               >
                 {tag}
               </button>
