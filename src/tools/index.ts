@@ -1,13 +1,13 @@
 import type { ComponentType } from "react";
 import type { ToolItem } from "@/lib/tools";
 import Base64Tool from "./base64";
+import CronGenerator from "./cron-generator";
 import DiffTool from "./diff";
-import JsonViewerTool from "@/tools/jsonviewer";
+import JavaMemoryCalculator from "./java-memory-calculator";
+import JsonViewerTool from "./jsonviewer";
 import JwtTool from "./jwt";
+import K6Generator from "./k6-generator";
 import UrlTool from "./url";
-import JavaMemoryCalculator from "@/tools/java-memory-calculator";
-import K6Generator from "@/tools/k6-generator";
-import CronGenerator from "@/tools/cron-generator";
 
 type ToolComponentProps = {
   tool: ToolItem;

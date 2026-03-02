@@ -4,6 +4,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -107,6 +108,88 @@ export function ToolOutput({
     >
       {children}
     </div>
+  );
+}
+
+export function ToolLabel({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <span
+      className={cn(
+        "text-xs font-semibold text-[var(--muted)] uppercase tracking-[0.12em]",
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function ToolInput({ className, ...props }: ComponentProps<typeof Input>) {
+  return (
+    <Input
+      className={cn(
+        "h-9 rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export function ToolSelect({
+  className,
+  children,
+  ...props
+}: ComponentProps<"select">) {
+  return (
+    <div className="relative">
+      <select
+        className={cn(
+          "h-9 w-full rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 pr-8 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none appearance-none cursor-pointer",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </select>
+      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]">
+        ▼
+      </span>
+    </div>
+  );
+}
+
+export function ToolAddButton({ className, children, ...props }: ComponentProps<typeof Button>) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className={cn(
+        "cursor-pointer h-auto rounded-full bg-blue-600 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-blue-700",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </Button>
+  );
+}
+
+export function ToolRemoveButton({ className, children = "삭제", ...props }: ComponentProps<typeof Button>) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className={cn(
+        "cursor-pointer h-7 rounded-full bg-red-500 px-2 text-[10px] font-semibold text-white transition hover:bg-red-600",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </Button>
   );
 }
 

@@ -1,10 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
+import {
+  ToolActionButton,
+  ToolAddButton,
+  ToolBadge,
+  ToolCard,
+  ToolHeader,
+  ToolInfoPanel,
+  ToolInput,
+  ToolLabel,
+  ToolPage,
+  ToolRemoveButton,
+  ToolSelect,
+} from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -24,14 +34,10 @@ type RampingStage = { duration: string; target: number };
 type Scenario = {
   name: string;
   type: ScenarioType;
-  // constant-vus
   vus: number;
   duration: string;
-  // ramping-vus
   stages: RampingStage[];
-  // per-vu-iterations
   iterations: number;
-  // constant-arrival-rate
   rate: number;
   timeUnit: string;
   preAllocatedVUs: number;
@@ -43,6 +49,8 @@ type Threshold = { metric: string; condition: string };
 type ScriptTab = "auto" | "custom";
 
 /* 기본값 */
+
+const HTTP_METHODS: HttpMethod[] = ["GET", "POST", "PUT", "DELETE", "PATCH"];
 
 const SCENARIO_TYPES: { value: ScenarioType; label: string }[] = [
   { value: "ramping-vus", label: "Ramping VUs" },
@@ -90,17 +98,14 @@ function generateScript(
 ): string {
   const lines: string[] = [];
 
-  // imports
   lines.push("import http from 'k6/http';");
   if (checks.length > 0) {
     lines.push("import { check } from 'k6';");
   }
   lines.push("");
 
-  // options
   lines.push("export const options = {");
 
-  // scenarios
   if (scenarios.length > 0) {
     lines.push("  scenarios: {");
     for (const sc of scenarios) {
@@ -132,7 +137,6 @@ function generateScript(
     lines.push("  },");
   }
 
-  // thresholds
   if (thresholds.length > 0) {
     lines.push("  thresholds: {");
     for (const t of thresholds) {
@@ -144,10 +148,8 @@ function generateScript(
   lines.push("};");
   lines.push("");
 
-  // default function
   lines.push("export default function () {");
 
-  // headers
   const activeHeaders = headers.filter((h) => h.key.trim());
   const hasHeaders = activeHeaders.length > 0;
   if (hasHeaders) {
@@ -161,21 +163,19 @@ function generateScript(
     lines.push("");
   }
 
-  // request
   const hasBody = ["POST", "PUT", "PATCH"].includes(method) && body.trim();
   const paramsArg = hasHeaders ? ", params" : "";
 
   if (hasBody) {
     lines.push(`  const payload = ${JSON.stringify(body.trim())};`);
     lines.push("");
-    lines.push(`  const res = http.${method.toLowerCase()}('${url}'${hasBody ? ", payload" : ""}${paramsArg});`);
+    lines.push(`  const res = http.${method.toLowerCase()}('${url}', payload${paramsArg});`);
   } else if (method === "GET" || method === "DELETE") {
     lines.push(`  const res = http.${method.toLowerCase()}('${url}'${paramsArg});`);
   } else {
     lines.push(`  const res = http.${method.toLowerCase()}('${url}', null${paramsArg});`);
   }
 
-  // checks
   if (checks.length > 0) {
     lines.push("");
     lines.push("  check(res, {");
@@ -202,26 +202,199 @@ function getNextDefaultScenarioName(scenarios: Scenario[]): string {
   return `default_${maxIndex + 1}`;
 }
 
-/* 컴포넌트 */
+/* 리스트 헬퍼 */
+
+function updateAt<T>(list: T[], idx: number, patch: Partial<T>): T[] {
+  return list.map((item, i) => (i === idx ? { ...item, ...patch } : item));
+}
+
+function removeAt<T>(list: T[], idx: number): T[] {
+  return list.filter((_, i) => i !== idx);
+}
+
+/* 서브 컴포넌트 */
+
+function ScenarioCard({
+  scenario,
+  canRemove,
+  onUpdate,
+  onRemove,
+}: {
+  scenario: Scenario;
+  canRemove: boolean;
+  onUpdate: (patch: Partial<Scenario>) => void;
+  onRemove: () => void;
+}) {
+  const updateStage = (stIdx: number, patch: Partial<RampingStage>) => {
+    onUpdate({ stages: updateAt(scenario.stages, stIdx, patch) });
+  };
+  const addStage = () => {
+    onUpdate({ stages: [...scenario.stages, { duration: "10s", target: 0 }] });
+  };
+  const removeStage = (stIdx: number) => {
+    onUpdate({ stages: removeAt(scenario.stages, stIdx) });
+  };
+
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4">
+      <div className="flex items-center justify-between">
+        <ToolInput
+          value={scenario.name}
+          onChange={(e) => onUpdate({ name: e.target.value })}
+          placeholder="scenario_name"
+          className="w-48 font-mono text-xs"
+        />
+        {canRemove && <ToolRemoveButton onClick={onRemove} />}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <ToolLabel>Executor</ToolLabel>
+        <ToolSelect
+          value={scenario.type}
+          onChange={(e) => onUpdate({ type: e.target.value as ScenarioType })}
+        >
+          {SCENARIO_TYPES.map((st) => (
+            <option key={st.value} value={st.value}>
+              {st.label}
+            </option>
+          ))}
+        </ToolSelect>
+      </div>
+
+      {scenario.type === "constant-vus" && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1">
+            <ToolLabel>VUs</ToolLabel>
+            <ToolInput
+              type="number"
+              value={scenario.vus}
+              onChange={(e) => onUpdate({ vus: Number(e.target.value) })}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <ToolLabel>Duration</ToolLabel>
+            <ToolInput
+              value={scenario.duration}
+              onChange={(e) => onUpdate({ duration: e.target.value })}
+              placeholder="30s"
+            />
+          </div>
+        </div>
+      )}
+
+      {scenario.type === "ramping-vus" && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <ToolLabel>Stages</ToolLabel>
+            <ToolAddButton onClick={addStage}>+ Stage</ToolAddButton>
+          </div>
+          {scenario.stages.map((st, stIdx) => (
+            <div key={stIdx} className="flex items-center gap-2">
+              <ToolInput
+                value={st.duration}
+                onChange={(e) => updateStage(stIdx, { duration: e.target.value })}
+                placeholder="10s"
+                className="flex-1"
+              />
+              <span className="text-xs text-[var(--muted)]">&rarr;</span>
+              <ToolInput
+                type="number"
+                value={st.target}
+                onChange={(e) => updateStage(stIdx, { target: Number(e.target.value) })}
+                placeholder="VUs"
+                className="w-20"
+              />
+              <span className="text-xs text-[var(--muted)]">VUs</span>
+              {scenario.stages.length > 1 && (
+                <ToolRemoveButton onClick={() => removeStage(stIdx)} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {scenario.type === "per-vu-iterations" && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1">
+            <ToolLabel>VUs</ToolLabel>
+            <ToolInput
+              type="number"
+              value={scenario.vus}
+              onChange={(e) => onUpdate({ vus: Number(e.target.value) })}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <ToolLabel>Iterations per VU</ToolLabel>
+            <ToolInput
+              type="number"
+              value={scenario.iterations}
+              onChange={(e) => onUpdate({ iterations: Number(e.target.value) })}
+            />
+          </div>
+        </div>
+      )}
+
+      {scenario.type === "constant-arrival-rate" && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1">
+            <ToolLabel>Rate</ToolLabel>
+            <ToolInput
+              type="number"
+              value={scenario.rate}
+              onChange={(e) => onUpdate({ rate: Number(e.target.value) })}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <ToolLabel>Time Unit</ToolLabel>
+            <ToolInput
+              value={scenario.timeUnit}
+              onChange={(e) => onUpdate({ timeUnit: e.target.value })}
+              placeholder="1s"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <ToolLabel>Duration</ToolLabel>
+            <ToolInput
+              value={scenario.duration}
+              onChange={(e) => onUpdate({ duration: e.target.value })}
+              placeholder="30s"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <ToolLabel>Pre-allocated VUs</ToolLabel>
+            <ToolInput
+              type="number"
+              value={scenario.preAllocatedVUs}
+              onChange={(e) => onUpdate({ preAllocatedVUs: Number(e.target.value) })}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <ToolLabel>Max VUs</ToolLabel>
+            <ToolInput
+              type="number"
+              value={scenario.maxVUs}
+              onChange={(e) => onUpdate({ maxVUs: Number(e.target.value) })}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* 메인 컴포넌트 */
 
 export default function K6Generator({ tool }: { tool: ToolItem }) {
-  // HTTP config
   const [method, setMethod] = useState<HttpMethod>("GET");
   const [url, setUrl] = useState("https://test.k6.io");
   const [headers, setHeaders] = useState<Header[]>([]);
   const [headerDraft, setHeaderDraft] = useState<Header>({ key: "", value: "" });
   const [body, setBody] = useState("");
 
-  // Scenarios
   const [scenarios, setScenarios] = useState<Scenario[]>([newScenario("default_1")]);
-
-  // Thresholds
   const [thresholds, setThresholds] = useState<Threshold[]>([...DEFAULT_THRESHOLDS]);
-
-  // Checks
   const [checks, setChecks] = useState<Check[]>([...DEFAULT_CHECKS]);
 
-  // UI state
   const { copy, isCopied } = useCopyToClipboard();
   const [scriptTab, setScriptTab] = useState<ScriptTab>("auto");
   const [customScript, setCustomScript] = useState("");
@@ -238,21 +411,13 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
     await copy(activeScript);
   }, [copy, activeScript]);
 
-  const handleClear = () => {
-    setIsCleared(true);
-  };
+  const handleClear = () => setIsCleared(true);
 
   useEffect(() => {
-    if (isCleared) {
-      setIsCleared(false);
-    }
+    if (isCleared) setIsCleared(false);
   }, [script, isCleared]);
 
-
   /* 헤더 헬퍼 */
-  const updateHeaderDraft = (field: "key" | "value", val: string) => {
-    setHeaderDraft((prev) => ({ ...prev, [field]: val }));
-  };
   const addHeader = () => {
     if (!headerDraft.key.trim()) {
       return;
@@ -260,58 +425,17 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
     setHeaders((prev) => [...prev, { ...headerDraft }]);
     setHeaderDraft({ key: "", value: "" });
   };
-  const removeHeader = (idx: number) => setHeaders((prev) => prev.filter((_, i) => i !== idx));
 
   /* 시나리오 헬퍼 */
   const updateScenario = (idx: number, patch: Partial<Scenario>) => {
-    setScenarios((prev) => prev.map((s, i) => (i === idx ? { ...s, ...patch } : s)));
+    setScenarios((prev) => updateAt(prev, idx, patch));
   };
   const addScenario = () => {
     setScenarios((prev) => [...prev, newScenario(getNextDefaultScenarioName(prev))]);
   };
-  const removeScenario = (idx: number) => setScenarios((prev) => prev.filter((_, i) => i !== idx));
-  const updateStage = (sIdx: number, stIdx: number, patch: Partial<RampingStage>) => {
-    setScenarios((prev) =>
-      prev.map((s, i) =>
-        i === sIdx ? { ...s, stages: s.stages.map((st, j) => (j === stIdx ? { ...st, ...patch } : st)) } : s,
-      ),
-    );
-  };
-  const addStage = (sIdx: number) => {
-    setScenarios((prev) =>
-      prev.map((s, i) => (i === sIdx ? { ...s, stages: [...s.stages, { duration: "10s", target: 0 }] } : s)),
-    );
-  };
-  const removeStage = (sIdx: number, stIdx: number) => {
-    setScenarios((prev) =>
-      prev.map((s, i) => (i === sIdx ? { ...s, stages: s.stages.filter((_, j) => j !== stIdx) } : s)),
-    );
-  };
 
-  /* 임계값 헬퍼 */
-  const updateThreshold = (idx: number, field: "metric" | "condition", val: string) => {
-    setThresholds((prev) => prev.map((t, i) => (i === idx ? { ...t, [field]: val } : t)));
-  };
-  const addThreshold = () => setThresholds((prev) => [...prev, { metric: "", condition: "" }]);
-  const removeThreshold = (idx: number) => setThresholds((prev) => prev.filter((_, i) => i !== idx));
+  const showBody = ["POST", "PUT", "PATCH"].includes(method);
 
-  /* 체크 헬퍼 */
-  const updateCheck = (idx: number, field: "name" | "expression", val: string) => {
-    setChecks((prev) => prev.map((c, i) => (i === idx ? { ...c, [field]: val } : c)));
-  };
-  const addCheck = () => setChecks((prev) => [...prev, { name: "", expression: "" }]);
-  const removeCheck = (idx: number) => setChecks((prev) => prev.filter((_, i) => i !== idx));
-
-  /* 스타일 */
-  const labelClass = "text-xs font-semibold text-[var(--muted)] uppercase tracking-[0.12em]";
-  const inputClass =
-    "h-9 rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
-  const addBtnClass =
-    "cursor-pointer h-auto rounded-full bg-blue-600 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-blue-700";
-  const removeBtnClass =
-    "cursor-pointer h-7 rounded-full bg-red-500 px-2 text-[10px] font-semibold text-white transition hover:bg-red-600";
-  const selectClass =
-    "h-9 w-full rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 pr-8 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none appearance-none cursor-pointer";
   const tabBtnClass = (active: boolean) =>
     `cursor-pointer h-8 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
       active
@@ -319,11 +443,8 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
         : "border border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--foreground)]"
     }`;
 
-  const showBody = ["POST", "PUT", "PATCH"].includes(method);
-
   return (
     <ToolPage>
-      {/* 상단 헤더 */}
       <ToolHeader
         title={tool.title}
         description={tool.desc}
@@ -334,7 +455,6 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
         }
       />
 
-      {/* 안내 패널 */}
       <ToolInfoPanel
         icon="k6"
         title="k6 Performance Test Script"
@@ -355,50 +475,41 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
             <ToolBadge>HTTP Request</ToolBadge>
 
             <div className="flex gap-2">
-              <div className="relative w-28 shrink-0">
-                <select
-                  value={method}
-                  onChange={(e) => setMethod(e.target.value as HttpMethod)}
-                  className={selectClass}
-                >
-                  {(["GET", "POST", "PUT", "DELETE", "PATCH"] as HttpMethod[]).map((m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ))}
-                </select>
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]">
-                  ▼
-                </span>
-              </div>
-              <Input
+              <ToolSelect
+                value={method}
+                onChange={(e) => setMethod(e.target.value as HttpMethod)}
+                className="w-28 shrink-0"
+              >
+                {HTTP_METHODS.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </ToolSelect>
+              <ToolInput
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://example.com/api"
-                className={`${inputClass} flex-1`}
+                className="flex-1"
               />
             </div>
 
             {/* 헤더 */}
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <span className={labelClass}>Headers</span>
-                <Button type="button" variant="ghost" size="sm" className={addBtnClass} onClick={addHeader}>
-                  + Add
-                </Button>
+                <ToolLabel>Headers</ToolLabel>
+                <ToolAddButton onClick={addHeader}>+ Add</ToolAddButton>
               </div>
               <div className="flex gap-2">
-                <Input
+                <ToolInput
                   value={headerDraft.key}
-                  onChange={(e) => updateHeaderDraft("key", e.target.value)}
+                  onChange={(e) => setHeaderDraft((prev) => ({ ...prev, key: e.target.value }))}
                   placeholder="Key"
-                  className={`${inputClass} flex-1`}
+                  className="flex-1"
                 />
-                <Input
+                <ToolInput
                   value={headerDraft.value}
-                  onChange={(e) => updateHeaderDraft("value", e.target.value)}
+                  onChange={(e) => setHeaderDraft((prev) => ({ ...prev, value: e.target.value }))}
                   placeholder="Value"
-                  className={`${inputClass} flex-1`}
+                  className="flex-1"
                 />
               </div>
               {headers.length > 0 && (
@@ -410,9 +521,7 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                         <span className="text-[var(--muted)]">:</span>
                         <span className="text-[var(--muted)]">{h.value}</span>
                       </div>
-                      <Button type="button" variant="ghost" size="sm" className={removeBtnClass} onClick={() => removeHeader(i)}>
-                        삭제
-                      </Button>
+                      <ToolRemoveButton onClick={() => setHeaders((prev) => removeAt(prev, i))} />
                     </div>
                   ))}
                 </div>
@@ -422,7 +531,7 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
             {/* 바디 */}
             {showBody && (
               <div className="flex flex-col gap-2">
-                <span className={labelClass}>Request Body</span>
+                <ToolLabel>Request Body</ToolLabel>
                 <Textarea
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
@@ -437,191 +546,17 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
           <ToolCard>
             <div className="flex items-center justify-between">
               <ToolBadge>Scenarios</ToolBadge>
-              <Button type="button" variant="ghost" size="sm" className={addBtnClass} onClick={addScenario}>
-                + Add Scenario
-              </Button>
+              <ToolAddButton onClick={addScenario}>+ Add Scenario</ToolAddButton>
             </div>
 
             {scenarios.map((sc, sIdx) => (
-              <div
+              <ScenarioCard
                 key={sIdx}
-                className="flex flex-col gap-3 rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4"
-              >
-                <div className="flex items-center justify-between">
-                  <Input
-                    value={sc.name}
-                    onChange={(e) => updateScenario(sIdx, { name: e.target.value })}
-                    placeholder="scenario_name"
-                    className={`${inputClass} w-48 font-mono text-xs`}
-                  />
-                  {scenarios.length > 1 && (
-                    <Button type="button" variant="ghost" size="sm" className={removeBtnClass} onClick={() => removeScenario(sIdx)}>
-                      삭제
-                    </Button>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <span className={labelClass}>Executor</span>
-                  <div className="relative">
-                    <select
-                      value={sc.type}
-                      onChange={(e) => updateScenario(sIdx, { type: e.target.value as ScenarioType })}
-                      className={selectClass}
-                    >
-                      {SCENARIO_TYPES.map((st) => (
-                        <option key={st.value} value={st.value}>
-                          {st.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[var(--muted)]">
-                      ▼
-                    </span>
-                  </div>
-                </div>
-
-                {/* constant-vus 입력 */}
-                {sc.type === "constant-vus" && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>VUs</span>
-                      <Input
-                        type="number"
-                        value={sc.vus}
-                        onChange={(e) => updateScenario(sIdx, { vus: Number(e.target.value) })}
-                        className={inputClass}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>Duration</span>
-                      <Input
-                        value={sc.duration}
-                        onChange={(e) => updateScenario(sIdx, { duration: e.target.value })}
-                        placeholder="30s"
-                        className={inputClass}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* ramping-vus 입력 */}
-                {sc.type === "ramping-vus" && (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <span className={labelClass}>Stages</span>
-                      <Button type="button" variant="ghost" size="sm" className={addBtnClass} onClick={() => addStage(sIdx)}>
-                        + Stage
-                      </Button>
-                    </div>
-                    {sc.stages.map((st, stIdx) => (
-                      <div key={stIdx} className="flex items-center gap-2">
-                        <Input
-                          value={st.duration}
-                          onChange={(e) => updateStage(sIdx, stIdx, { duration: e.target.value })}
-                          placeholder="10s"
-                          className={`${inputClass} flex-1`}
-                        />
-                        <span className="text-xs text-[var(--muted)]">&rarr;</span>
-                        <Input
-                          type="number"
-                          value={st.target}
-                          onChange={(e) => updateStage(sIdx, stIdx, { target: Number(e.target.value) })}
-                          placeholder="VUs"
-                          className={`${inputClass} w-20`}
-                        />
-                        <span className="text-xs text-[var(--muted)]">VUs</span>
-                        {sc.stages.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className={removeBtnClass}
-                            onClick={() => removeStage(sIdx, stIdx)}
-                          >
-                            삭제
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* per-vu-iterations 입력 */}
-                {sc.type === "per-vu-iterations" && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>VUs</span>
-                      <Input
-                        type="number"
-                        value={sc.vus}
-                        onChange={(e) => updateScenario(sIdx, { vus: Number(e.target.value) })}
-                        className={inputClass}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>Iterations per VU</span>
-                      <Input
-                        type="number"
-                        value={sc.iterations}
-                        onChange={(e) => updateScenario(sIdx, { iterations: Number(e.target.value) })}
-                        className={inputClass}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* constant-arrival-rate 입력 */}
-                {sc.type === "constant-arrival-rate" && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>Rate</span>
-                      <Input
-                        type="number"
-                        value={sc.rate}
-                        onChange={(e) => updateScenario(sIdx, { rate: Number(e.target.value) })}
-                        className={inputClass}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>Time Unit</span>
-                      <Input
-                        value={sc.timeUnit}
-                        onChange={(e) => updateScenario(sIdx, { timeUnit: e.target.value })}
-                        placeholder="1s"
-                        className={inputClass}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>Duration</span>
-                      <Input
-                        value={sc.duration}
-                        onChange={(e) => updateScenario(sIdx, { duration: e.target.value })}
-                        placeholder="30s"
-                        className={inputClass}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>Pre-allocated VUs</span>
-                      <Input
-                        type="number"
-                        value={sc.preAllocatedVUs}
-                        onChange={(e) => updateScenario(sIdx, { preAllocatedVUs: Number(e.target.value) })}
-                        className={inputClass}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className={labelClass}>Max VUs</span>
-                      <Input
-                        type="number"
-                        value={sc.maxVUs}
-                        onChange={(e) => updateScenario(sIdx, { maxVUs: Number(e.target.value) })}
-                        className={inputClass}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+                scenario={sc}
+                canRemove={scenarios.length > 1}
+                onUpdate={(patch) => updateScenario(sIdx, patch)}
+                onRemove={() => setScenarios((prev) => removeAt(prev, sIdx))}
+              />
             ))}
           </ToolCard>
 
@@ -629,29 +564,27 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
           <ToolCard>
             <div className="flex items-center justify-between">
               <ToolBadge>Thresholds</ToolBadge>
-              <Button type="button" variant="ghost" size="sm" className={addBtnClass} onClick={addThreshold}>
+              <ToolAddButton onClick={() => setThresholds((prev) => [...prev, { metric: "", condition: "" }])}>
                 + Add
-              </Button>
+              </ToolAddButton>
             </div>
 
             {thresholds.map((t, i) => (
               <div key={i} className="flex gap-2">
-                <Input
+                <ToolInput
                   value={t.metric}
-                  onChange={(e) => updateThreshold(i, "metric", e.target.value)}
+                  onChange={(e) => setThresholds((prev) => updateAt(prev, i, { metric: e.target.value }))}
                   placeholder="http_req_duration"
-                  className={`${inputClass} flex-1 font-mono text-xs`}
+                  className="flex-1 font-mono text-xs"
                 />
-                <Input
+                <ToolInput
                   value={t.condition}
-                  onChange={(e) => updateThreshold(i, "condition", e.target.value)}
+                  onChange={(e) => setThresholds((prev) => updateAt(prev, i, { condition: e.target.value }))}
                   placeholder="p(95)<500"
-                  className={`${inputClass} flex-1 font-mono text-xs`}
+                  className="flex-1 font-mono text-xs"
                 />
                 {thresholds.length > 1 && (
-                  <Button type="button" variant="ghost" size="sm" className={removeBtnClass} onClick={() => removeThreshold(i)}>
-                    삭제
-                  </Button>
+                  <ToolRemoveButton onClick={() => setThresholds((prev) => removeAt(prev, i))} />
                 )}
               </div>
             ))}
@@ -661,29 +594,27 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
           <ToolCard>
             <div className="flex items-center justify-between">
               <ToolBadge>Checks</ToolBadge>
-              <Button type="button" variant="ghost" size="sm" className={addBtnClass} onClick={addCheck}>
+              <ToolAddButton onClick={() => setChecks((prev) => [...prev, { name: "", expression: "" }])}>
                 + Add
-              </Button>
+              </ToolAddButton>
             </div>
 
             {checks.map((c, i) => (
               <div key={i} className="flex gap-2">
-                <Input
+                <ToolInput
                   value={c.name}
-                  onChange={(e) => updateCheck(i, "name", e.target.value)}
+                  onChange={(e) => setChecks((prev) => updateAt(prev, i, { name: e.target.value }))}
                   placeholder="status is 200"
-                  className={`${inputClass} flex-1`}
+                  className="flex-1"
                 />
-                <Input
+                <ToolInput
                   value={c.expression}
-                  onChange={(e) => updateCheck(i, "expression", e.target.value)}
+                  onChange={(e) => setChecks((prev) => updateAt(prev, i, { expression: e.target.value }))}
                   placeholder="res.status === 200"
-                  className={`${inputClass} flex-1 font-mono text-xs`}
+                  className="flex-1 font-mono text-xs"
                 />
                 {checks.length > 1 && (
-                  <Button type="button" variant="ghost" size="sm" className={removeBtnClass} onClick={() => removeCheck(i)}>
-                    삭제
-                  </Button>
+                  <ToolRemoveButton onClick={() => setChecks((prev) => removeAt(prev, i))} />
                 )}
               </div>
             ))}
