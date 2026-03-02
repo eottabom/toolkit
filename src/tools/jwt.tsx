@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPage } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPage, ToolSelect } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -202,8 +202,6 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
 
   const textareaClass =
     "min-h-[140px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
-  const selectClass =
-    "h-8 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 text-[11px] font-semibold text-[var(--foreground)] outline-none transition hover:border-[color:var(--card-border-hover)] cursor-pointer";
 
   return (
     <ToolPage>
@@ -290,17 +288,17 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                 <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
                   <ToolBadge>Signature</ToolBadge>
                   <div className="flex items-center gap-2">
-                    <select
+                    <ToolSelect
                       value={verifyAlg}
                       onChange={(e) => setVerifyAlg(e.target.value as Algorithm)}
-                      className={selectClass}
+                      className="h-8 w-auto rounded-full text-[11px]"
                     >
                       {ALGORITHMS.map((a) => (
                         <option key={a} value={a}>
                           {a}
                         </option>
                       ))}
-                    </select>
+                    </ToolSelect>
                     <ToolActionButton
                       type="button"
                       onClick={() => copy(decoded.signature, "signature")}

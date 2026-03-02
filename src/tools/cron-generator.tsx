@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Input } from "@/components/ui/input";
-import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolInput, ToolPage } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -587,8 +586,12 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
       const standardOnlyModes: FieldMode[] = ["interval", "specific"];
 
       const isValidMode = (mode: FieldMode, target: CronPlatform): boolean => {
-        if (target === "jenkins" && standardOnlyModes.includes(mode)) return false;
-        if (target !== "jenkins" && jenkinsModes.includes(mode)) return false;
+        if (target === "jenkins" && standardOnlyModes.includes(mode)) {
+          return false;
+        }
+        if (target !== "jenkins" && jenkinsModes.includes(mode)) {
+          return false;
+        }
         return true;
       };
 
@@ -605,8 +608,12 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
           result[def.key] = defaultField(def);
         }
       }
-      if (!result.second) result.second = defaultField(SECOND_DEF);
-      if (!result.year) result.year = defaultField(YEAR_DEF);
+      if (!result.second) {
+        result.second = defaultField(SECOND_DEF);
+      }
+      if (!result.year) {
+        result.year = defaultField(YEAR_DEF);
+      }
       setFields(result);
     },
     [fields],
@@ -637,8 +644,6 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
   }, [copy, activeExpr]);
 
   /* 스타일 */
-  const inputClass =
-    "h-9 rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
   const tabBtnClass = (active: boolean) =>
     `cursor-pointer h-8 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
       active
@@ -740,11 +745,11 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
           {manualMode ? (
             <ToolCard>
               <ToolBadge>Expression Input</ToolBadge>
-              <Input
+              <ToolInput
                 value={manualExpr}
                 onChange={(e) => setManualExpr(e.target.value)}
                 placeholder={platform === "quartz" ? "0 0 12 * * ? 2025" : platform === "spring" ? "0 0 12 * * *" : platform === "jenkins" ? "H H * * *" : "0 12 * * *"}
-                className={`${inputClass} w-full font-mono`}
+                className="w-full font-mono"
                 aria-label="Cron expression"
               />
               <p className="text-xs text-[var(--muted)]">
@@ -843,7 +848,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                     ) : (
                       /* 초/분/시/일/연도: 텍스트 입력 */
                       <div className="flex flex-col gap-1.5">
-                        <Input
+                        <ToolInput
                           value={[...fields[def.key].specific].sort((a, b) => a - b).join(", ")}
                           onChange={(e) => {
                             const vals = e.target.value
@@ -853,7 +858,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                             updateField(def.key, { specific: vals });
                           }}
                           placeholder={`${def.min}~${def.max} 쉼표로 구분 (예: 0, 15, 30)`}
-                          className={`${inputClass} w-full font-mono text-xs`}
+                          className="w-full font-mono text-xs"
                           aria-label={`${def.label} specific values`}
                         />
                         <p className="text-[10px] text-[var(--muted)]">범위: {def.min}~{def.max}</p>
@@ -863,23 +868,23 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
 
                   {fields[def.key].mode === "range" && (
                     <div className="flex items-center gap-2">
-                      <Input
+                      <ToolInput
                         type="number"
                         min={def.min}
                         max={def.max}
                         value={fields[def.key].rangeStart}
                         onChange={(e) => updateField(def.key, { rangeStart: Number(e.target.value) })}
-                        className={`${inputClass} w-20`}
+                        className="w-20"
                         aria-label={`${def.label} range start`}
                       />
                       <span className="text-xs text-[var(--muted)]">~</span>
-                      <Input
+                      <ToolInput
                         type="number"
                         min={def.min}
                         max={def.max}
                         value={fields[def.key].rangeEnd}
                         onChange={(e) => updateField(def.key, { rangeEnd: Number(e.target.value) })}
-                        className={`${inputClass} w-20`}
+                        className="w-20"
                         aria-label={`${def.label} range end`}
                       />
                     </div>
@@ -887,22 +892,22 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
 
                   {fields[def.key].mode === "interval" && (
                     <div className="flex items-center gap-2">
-                      <Input
+                      <ToolInput
                         type="number"
                         min={def.min}
                         max={def.max}
                         value={fields[def.key].intervalBase}
                         onChange={(e) => updateField(def.key, { intervalBase: Number(e.target.value) })}
-                        className={`${inputClass} w-20`}
+                        className="w-20"
                         aria-label={`${def.label} interval base`}
                       />
                       <span className="text-xs text-[var(--muted)]">부터 매</span>
-                      <Input
+                      <ToolInput
                         type="number"
                         min={1}
                         value={fields[def.key].intervalStep}
                         onChange={(e) => updateField(def.key, { intervalStep: Number(e.target.value) })}
-                        className={`${inputClass} w-20`}
+                        className="w-20"
                         aria-label={`${def.label} interval step`}
                       />
                       <span className="text-xs text-[var(--muted)]">마다</span>
@@ -916,12 +921,12 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                   {platform === "jenkins" && fields[def.key].mode === "hashInterval" && (
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-[var(--muted)]">H /</span>
-                      <Input
+                      <ToolInput
                         type="number"
                         min={1}
                         value={fields[def.key].intervalStep}
                         onChange={(e) => updateField(def.key, { intervalStep: Number(e.target.value) })}
-                        className={`${inputClass} w-20`}
+                        className="w-20"
                         aria-label={`${def.label} hash interval`}
                       />
                     </div>
@@ -930,23 +935,23 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                   {platform === "jenkins" && fields[def.key].mode === "hashRange" && (
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-[var(--muted)]">H(</span>
-                      <Input
+                      <ToolInput
                         type="number"
                         min={def.min}
                         max={def.max}
                         value={fields[def.key].rangeStart}
                         onChange={(e) => updateField(def.key, { rangeStart: Number(e.target.value) })}
-                        className={`${inputClass} w-20`}
+                        className="w-20"
                         aria-label={`${def.label} hash range start`}
                       />
                       <span className="font-mono text-xs text-[var(--muted)]">-</span>
-                      <Input
+                      <ToolInput
                         type="number"
                         min={def.min}
                         max={def.max}
                         value={fields[def.key].rangeEnd}
                         onChange={(e) => updateField(def.key, { rangeEnd: Number(e.target.value) })}
-                        className={`${inputClass} w-20`}
+                        className="w-20"
                         aria-label={`${def.label} hash range end`}
                       />
                       <span className="font-mono text-xs text-[var(--muted)]">)</span>
@@ -999,13 +1004,13 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-[var(--muted)]">해시 시드</span>
-                  <Input
+                  <ToolInput
                     type="number"
                     min={0}
                     max={59}
                     value={hashSeed}
                     onChange={(e) => setHashSeed(Number(e.target.value))}
-                    className={`${inputClass} w-20`}
+                    className="w-20"
                     aria-label="해시 시드값"
                   />
                   <span className="text-[10px] text-[var(--muted)]">실제 값은 잡 이름에 따라 다릅니다</span>

@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
+import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolInput, ToolLabel, ToolPage } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -399,9 +398,6 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
   }, [quickTotalMemory, quickMemoryUnit]);
 
   /* 스타일 클래스 */
-  const inputClass =
-    "h-9 rounded-lg border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 font-mono text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none";
-  const labelClass = "text-xs font-medium text-[var(--muted)]";
   const modeTabClass = (active: boolean) =>
     `cursor-pointer px-4 py-2 text-xs font-semibold transition rounded-lg ${
       active ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600 hover:text-gray-900"
@@ -458,14 +454,14 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
             <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Configuration</h3>
 
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Total Memory</label>
+              <ToolLabel>Total Memory</ToolLabel>
               <div className="flex gap-2">
-                <Input
+                <ToolInput
                   type="number"
                   min={1}
                   value={totalMemory}
                   onChange={(e) => setTotalMemory(Number(e.target.value) || 1)}
-                  className={`${inputClass} flex-1`}
+                  className="flex-1 font-mono"
                 />
                 <div className="flex rounded-lg border border-[color:var(--card-border)] overflow-hidden">
                   <button
@@ -497,65 +493,65 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Loaded Class Count</label>
-              <Input
+              <ToolLabel>Loaded Class Count</ToolLabel>
+              <ToolInput
                 type="number"
                 min={0}
                 value={fwLoadedClassCount}
                 onChange={(e) => setFwLoadedClassCount(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Thread Count</label>
-              <Input
+              <ToolLabel>Thread Count</ToolLabel>
+              <ToolInput
                 type="number"
                 min={1}
                 value={fwThreadCount}
                 onChange={(e) => setFwThreadCount(Number(e.target.value) || 1)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Head Room (%)</label>
-              <Input
+              <ToolLabel>Head Room (%)</ToolLabel>
+              <ToolInput
                 type="number"
                 min={0}
                 max={100}
                 value={fwHeadRoomPercent}
                 onChange={(e) => setFwHeadRoomPercent(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Stack Size (MB)</label>
-              <Input
+              <ToolLabel>Stack Size (MB)</ToolLabel>
+              <ToolInput
                 type="number"
                 min={0}
                 step={0.5}
                 value={fwStackSizeMB}
                 onChange={(e) => setFwStackSizeMB(Number(e.target.value) || 1)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Reserved Code Cache (MB)</label>
-              <Input
+              <ToolLabel>Reserved Code Cache (MB)</ToolLabel>
+              <ToolInput
                 type="number"
                 min={0}
                 value={fwCodeCacheMB}
                 onChange={(e) => setFwCodeCacheMB(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Direct Memory (MB)</label>
-              <Input
+              <ToolLabel>Direct Memory (MB)</ToolLabel>
+              <ToolInput
                 type="number"
                 min={0}
                 value={fwDirectMemoryMB}
                 onChange={(e) => setFwDirectMemoryMB(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
           </ToolCard>
@@ -578,7 +574,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
 
             {/* JVM 플래그 붙여넣기 */}
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Paste JVM Flags (optional)</label>
+              <ToolLabel>Paste JVM Flags (optional)</ToolLabel>
               <Textarea
                 value={flagsInput}
                 onChange={(e) => setFlagsInput(e.target.value)}
@@ -606,114 +602,114 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
               </span>
 
               <div className="flex flex-col gap-1">
-                <label className={labelClass}>Heap (MB)</label>
-                <Input
+                <ToolLabel>Heap (MB)</ToolLabel>
+                <ToolInput
                   type="number"
                   min={0}
                   value={revHeapUsageMB}
                   onChange={(e) => setRevHeapUsageMB(Number(e.target.value) || 0)}
-                  className={inputClass}
+                  className="font-mono"
                 />
               </div>
-              <Input
+              <ToolInput
                 type="number"
                 min={0}
                 max={300}
                 value={heapBuffer}
                 onChange={(e) => setHeapBuffer(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
 
               <div className="flex flex-col gap-1">
-                <label className={labelClass}>Metaspace (MB)</label>
-                <Input
+                <ToolLabel>Metaspace (MB)</ToolLabel>
+                <ToolInput
                   type="number"
                   min={0}
                   value={revMetaspaceUsageMB}
                   onChange={(e) => setRevMetaspaceUsageMB(Number(e.target.value) || 0)}
-                  className={inputClass}
+                  className="font-mono"
                 />
               </div>
-              <Input
+              <ToolInput
                 type="number"
                 min={0}
                 max={300}
                 value={metaspaceBuffer}
                 onChange={(e) => setMetaspaceBuffer(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
 
               <div className="flex flex-col gap-1">
-                <label className={labelClass}>Code Cache (MB)</label>
-                <Input
+                <ToolLabel>Code Cache (MB)</ToolLabel>
+                <ToolInput
                   type="number"
                   min={0}
                   value={revCodeCacheUsageMB}
                   onChange={(e) => setRevCodeCacheUsageMB(Number(e.target.value) || 0)}
-                  className={inputClass}
+                  className="font-mono"
                 />
               </div>
-              <Input
+              <ToolInput
                 type="number"
                 min={0}
                 max={300}
                 value={codeCacheBuffer}
                 onChange={(e) => setCodeCacheBuffer(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
 
               <div className="flex flex-col gap-1">
-                <label className={labelClass}>Direct Memory (MB)</label>
-                <Input
+                <ToolLabel>Direct Memory (MB)</ToolLabel>
+                <ToolInput
                   type="number"
                   min={0}
                   value={revDirectMemoryUsageMB}
                   onChange={(e) => setRevDirectMemoryUsageMB(Number(e.target.value) || 0)}
-                  className={inputClass}
+                  className="font-mono"
                 />
               </div>
-              <Input
+              <ToolInput
                 type="number"
                 min={0}
                 max={300}
                 value={directMemoryBuffer}
                 onChange={(e) => setDirectMemoryBuffer(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
 
             <div className="my-1 border-t border-[color:var(--card-border)]" />
 
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Thread Count</label>
-              <Input
+              <ToolLabel>Thread Count</ToolLabel>
+              <ToolInput
                 type="number"
                 min={1}
                 value={revThreadCount}
                 onChange={(e) => setRevThreadCount(Number(e.target.value) || 1)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Stack Size (MB per thread)</label>
-              <Input
+              <ToolLabel>Stack Size (MB per thread)</ToolLabel>
+              <ToolInput
                 type="number"
                 min={0}
                 step={0.5}
                 value={revStackSizeMB}
                 onChange={(e) => setRevStackSizeMB(Number(e.target.value) || 1)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Head Room (%)</label>
-              <Input
+              <ToolLabel>Head Room (%)</ToolLabel>
+              <ToolInput
                 type="number"
                 min={0}
                 max={100}
                 value={revHeadRoomPercent}
                 onChange={(e) => setRevHeadRoomPercent(Number(e.target.value) || 0)}
-                className={inputClass}
+                className="font-mono"
               />
             </div>
           </ToolCard>
@@ -741,14 +737,14 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
             </p>
 
             <div className="flex flex-col gap-1.5">
-              <label className={labelClass}>Total Memory</label>
+              <ToolLabel>Total Memory</ToolLabel>
               <div className="flex gap-2">
-                <Input
+                <ToolInput
                   type="number"
                   min={1}
                   value={quickTotalMemory}
                   onChange={(e) => setQuickTotalMemory(Number(e.target.value) || 1)}
-                  className={`${inputClass} flex-1`}
+                  className="flex-1 font-mono"
                 />
                 <div className="flex rounded-lg border border-[color:var(--card-border)] overflow-hidden">
                   <button

@@ -56,6 +56,25 @@ const rightStatusClass: Record<LineStatus, string> = {
   changed: "bg-[var(--diff-changed-right)]",
 };
 
+/** LCS DP 테이블 생성 (공통) */
+function buildLcsDp<T>(left: T[], right: T[]): number[][] {
+  const m = left.length;
+  const n = right.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+  for (let i = 1; i <= m; i += 1) {
+    for (let j = 1; j <= n; j += 1) {
+      if (left[i - 1] === right[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  return dp;
+}
+
 class DiffEngine {
   private leftLines: string[];
   private rightLines: string[];
@@ -66,20 +85,7 @@ class DiffEngine {
   }
 
   buildLineDiff(): DiffLine[] {
-    const m = this.leftLines.length;
-    const n = this.rightLines.length;
-    const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-
-    for (let i = 1; i <= m; i += 1) {
-      for (let j = 1; j <= n; j += 1) {
-        if (this.leftLines[i - 1] === this.rightLines[j - 1]) {
-          dp[i][j] = dp[i - 1][j - 1] + 1;
-        } else {
-          dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-        }
-      }
-    }
-
+    const dp = buildLcsDp(this.leftLines, this.rightLines);
     const ops = this.collectOps(dp);
     return this.toRows(ops);
   }
@@ -91,19 +97,9 @@ class DiffEngine {
     const trimmedRight = rightLine.trim();
     const leftWords = trimmedLeft.length ? trimmedLeft.split(/\s+/) : [];
     const rightWords = trimmedRight.length ? trimmedRight.split(/\s+/) : [];
+    const dp = buildLcsDp(leftWords, rightWords);
     const m = leftWords.length;
     const n = rightWords.length;
-    const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-
-    for (let i = 1; i <= m; i += 1) {
-      for (let j = 1; j <= n; j += 1) {
-        if (leftWords[i - 1] === rightWords[j - 1]) {
-          dp[i][j] = dp[i - 1][j - 1] + 1;
-        } else {
-          dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-        }
-      }
-    }
 
     const leftParts: WordPart[] = [];
     const rightParts: WordPart[] = [];
