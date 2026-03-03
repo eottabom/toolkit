@@ -343,6 +343,18 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   const [collapsedPaths, setCollapsedPaths] = useState<Set<string>>(new Set());
   const [leftCopyState, setLeftCopyState] = useState<"idle" | "copied">("idle");
   const [rightCopyState, setRightCopyState] = useState<"idle" | "copied">("idle");
+  const [splitPercent, setSplitPercent] = useState(50);
+  const [expandedPanel, setExpandedPanel] = useState<"none" | "raw" | "tree">("none");
+  const [isLg, setIsLg] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    setIsLg(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsLg(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
   const lineCount = useMemo(() => rawInput.split("\n").length, [rawInput]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
@@ -415,6 +427,33 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
     });
   };
 
+  const isMinified = useMemo(() => !rawInput.includes("\n") && rawInput.trim().length > 0, [rawInput]);
+
+  /** Raw JSON 접기 (Minify) */
+  const handleMinify = () => {
+    try {
+      const parsed = JSON.parse(rawInput) as JsonValue;
+      const minified = JSON.stringify(parsed);
+      setJsonValue(parsed);
+      setRawInput(minified);
+      setParseError("");
+      setErrorLine(null);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Invalid JSON";
+      setParseError(message);
+      setErrorLine(getErrorLine(rawInput, message));
+    }
+  };
+
+  /** Raw JSON 펼치기/접기 토글 */
+  const handleToggleRawFormat = () => {
+    if (isMinified) {
+      handleFormat();
+    } else {
+      handleMinify();
+    }
+  };
+
   /** Raw JSON을 파싱 후 들여쓰기 2칸으로 포맷팅 (Pretty Print) */
   const handleFormat = () => {
     try {
@@ -440,15 +479,16 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
     setCollapsedPaths(new Set());
   };
 
-  /** 트리의 모든 컨테이너 노드를 접기 */
-  const handleCollapseAll = () => {
-    const paths = collectContainerPaths(jsonValue, []);
-    setCollapsedPaths(new Set(paths));
-  };
+  const allContainerPaths = useMemo(() => collectContainerPaths(jsonValue, []), [jsonValue]);
+  const isAllCollapsed = allContainerPaths.length > 0 && allContainerPaths.every((p) => collapsedPaths.has(p));
 
-  /** 트리의 모든 노드를 펼치기 */
-  const handleExpandAll = () => {
-    setCollapsedPaths(new Set());
+  /** 트리 전체 접기/펼치기 토글 */
+  const handleToggleAll = () => {
+    if (isAllCollapsed) {
+      setCollapsedPaths(new Set());
+    } else {
+      setCollapsedPaths(new Set(allContainerPaths));
+    }
   };
 
   /** 트리 뷰의 현재 JSON 값을 클립보드에 복사 */
@@ -461,6 +501,32 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
       setLeftCopyState("idle");
     }
   };
+
+  /** 드래그로 좌우 패널 비율 조절 */
+  const handleDragStart = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    const container = containerRef.current;
+    if (!container) return;
+
+    const onMove = (me: PointerEvent) => {
+      const rect = container.getBoundingClientRect();
+      const x = me.clientX - rect.left;
+      const pct = Math.min(80, Math.max(20, (x / rect.width) * 100));
+      setSplitPercent(pct);
+    };
+
+    const onUp = () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+  }, []);
 
   /** Raw JSON 텍스트를 클립보드에 복사 */
   const handleCopyRaw = async () => {
@@ -494,11 +560,15 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
         chips={["JSON 파싱 & 포맷팅", "트리 뷰 탐색", "인라인 값 편집"]}
       />
 
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section ref={containerRef} className="flex flex-col gap-4 lg:flex-row">
+        <div
+          className={expandedPanel === "tree" ? "hidden lg:hidden" : ""}
+          style={isLg && expandedPanel === "none" ? { flex: `0 0 calc(${splitPercent}% - 8px)`, maxWidth: `calc(${splitPercent}% - 8px)` } : isLg && expandedPanel === "raw" ? { flex: "1 1 100%" } : undefined}
+        >
         <ToolCard className="min-h-[520px] gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Raw JSON</p>
-            <div className="flex gap-2">
+            <p className="shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Raw JSON</p>
+            <div className="flex flex-wrap gap-1.5">
               <ToolActionButton
                 type="button"
                 onClick={handleCopyRaw}
@@ -508,10 +578,10 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
               </ToolActionButton>
               <ToolActionButton
                 type="button"
-                onClick={handleFormat}
+                onClick={handleToggleRawFormat}
                 className="h-7 px-3"
               >
-                Pretty
+                {isMinified ? "Expand all" : "Collapse all"}
               </ToolActionButton>
               <ToolActionButton
                 type="button"
@@ -519,6 +589,13 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                 className="h-7 px-3"
               >
                 Reset sample
+              </ToolActionButton>
+              <ToolActionButton
+                type="button"
+                onClick={() => setExpandedPanel(expandedPanel === "raw" ? "none" : "raw")}
+                className="hidden lg:inline-flex h-7 px-3"
+              >
+                {expandedPanel === "raw" ? "Shrink" : "Expand"}
               </ToolActionButton>
             </div>
           </div>
@@ -573,11 +650,23 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
             <p className="text-xs text-[var(--syntax-valid)]">Valid JSON</p>
           )}
         </ToolCard>
+        </div>
 
+        {/* 리사이즈 핸들 */}
+        {expandedPanel === "none" && (
+          <div
+            onPointerDown={handleDragStart}
+            className="hidden lg:flex shrink-0 w-2 cursor-col-resize items-center justify-center group"
+          >
+            <div className="h-12 w-1 rounded-full bg-[var(--card-border)] transition group-hover:bg-[var(--muted)] group-active:bg-blue-500" />
+          </div>
+        )}
+
+        <div className={expandedPanel === "raw" ? "hidden lg:hidden" : "flex-1 min-w-0"}>
         <ToolCard className="min-h-[520px] gap-4">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Tree Viewer</p>
-            <div className="flex gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Tree Viewer</p>
+            <div className="flex flex-wrap gap-1.5">
               <ToolActionButton
                 type="button"
                 onClick={handleCopyTree}
@@ -587,17 +676,17 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
               </ToolActionButton>
               <ToolActionButton
                 type="button"
-                onClick={handleExpandAll}
+                onClick={handleToggleAll}
                 className="h-7 px-3"
               >
-                Expand all
+                {isAllCollapsed ? "Expand all" : "Collapse all"}
               </ToolActionButton>
               <ToolActionButton
                 type="button"
-                onClick={handleCollapseAll}
-                className="h-7 px-3"
+                onClick={() => setExpandedPanel(expandedPanel === "tree" ? "none" : "tree")}
+                className="hidden lg:inline-flex h-7 px-3"
               >
-                Collapse all
+                {expandedPanel === "tree" ? "Shrink" : "Expand"}
               </ToolActionButton>
             </div>
           </div>
@@ -615,6 +704,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
             />
           </div>
         </ToolCard>
+        </div>
       </section>
     </ToolPage>
   );
