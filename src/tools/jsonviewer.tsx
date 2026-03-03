@@ -332,6 +332,22 @@ function TreeNode({
   );
 }
 
+function getRawPanelStyle(isLg: boolean, expandedPanel: string, splitPercent: number): React.CSSProperties | undefined {
+  if (!isLg) {
+    return undefined;
+  }
+  if (expandedPanel === "raw") {
+    return { flex: "1 1 100%" };
+  }
+  if (expandedPanel === "none") {
+    return {
+      flex: `0 0 calc(${splitPercent}% - 8px)`,
+      maxWidth: `calc(${splitPercent}% - 8px)`,
+    };
+  }
+  return undefined;
+}
+
 /** JSON Viewer 도구의 메인 컴포넌트 — Raw JSON 편집기와 Tree Viewer를 양쪽 패널로 제공 */
 export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   const initialRaw = useMemo(() => JSON.stringify(sampleJson, null, 2), []);
@@ -384,7 +400,9 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   /** 에러 메시지에서 position 값을 읽어 해당 문자 위치가 몇 번째 줄인지 계산 */
   const getErrorLine = (raw: string, message: string): number | null => {
     const match = message.match(/position\s+(\d+)/i);
-    if (!match) return null;
+    if (!match) {
+      return null;
+    }
     const pos = Number(match[1]);
     return raw.slice(0, pos).split("\n").length;
   };
@@ -429,13 +447,12 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
 
   const isMinified = useMemo(() => !rawInput.includes("\n") && rawInput.trim().length > 0, [rawInput]);
 
-  /** Raw JSON 접기 (Minify) */
-  const handleMinify = () => {
+  /** Raw JSON을 파싱하여 지정된 indent로 포맷팅 (공통 헬퍼) */
+  const formatRawJson = (indent?: number) => {
     try {
       const parsed = JSON.parse(rawInput) as JsonValue;
-      const minified = JSON.stringify(parsed);
       setJsonValue(parsed);
-      setRawInput(minified);
+      setRawInput(JSON.stringify(parsed, null, indent));
       setParseError("");
       setErrorLine(null);
     } catch (error) {
@@ -445,30 +462,8 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
     }
   };
 
-  /** Raw JSON 펼치기/접기 토글 */
-  const handleToggleRawFormat = () => {
-    if (isMinified) {
-      handleFormat();
-    } else {
-      handleMinify();
-    }
-  };
-
-  /** Raw JSON을 파싱 후 들여쓰기 2칸으로 포맷팅 (Pretty Print) */
-  const handleFormat = () => {
-    try {
-      const parsed = JSON.parse(rawInput) as JsonValue;
-      const pretty = JSON.stringify(parsed, null, 2);
-      setJsonValue(parsed);
-      setRawInput(pretty);
-      setParseError("");
-      setErrorLine(null);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Invalid JSON";
-      setParseError(message);
-      setErrorLine(getErrorLine(rawInput, message));
-    }
-  };
+  const handleFormat = () => formatRawJson(2);
+  const handleToggleRawFormat = () => formatRawJson(isMinified ? 2 : undefined);
 
   /** 모든 상태를 초기 샘플 JSON으로 되돌리기 */
   const handleReset = () => {
@@ -506,10 +501,13 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   const handleDragStart = useCallback((e: React.PointerEvent) => {
     e.preventDefault();
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+      return;
+    }
+
+    const rect = container.getBoundingClientRect();
 
     const onMove = (me: PointerEvent) => {
-      const rect = container.getBoundingClientRect();
       const x = me.clientX - rect.left;
       const pct = Math.min(80, Math.max(20, (x / rect.width) * 100));
       setSplitPercent(pct);
@@ -563,7 +561,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
       <section ref={containerRef} className="flex flex-col gap-4 lg:flex-row">
         <div
           className={expandedPanel === "tree" ? "hidden lg:hidden" : ""}
-          style={isLg && expandedPanel === "none" ? { flex: `0 0 calc(${splitPercent}% - 8px)`, maxWidth: `calc(${splitPercent}% - 8px)` } : isLg && expandedPanel === "raw" ? { flex: "1 1 100%" } : undefined}
+          style={getRawPanelStyle(isLg, expandedPanel, splitPercent)}
         >
         <ToolCard className="min-h-[520px] gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
