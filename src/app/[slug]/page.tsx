@@ -38,7 +38,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-10 sm:px-10">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+      <div className="mx-auto flex max-w-[1680px] flex-col gap-6">
         <Button
           asChild
           variant="link"

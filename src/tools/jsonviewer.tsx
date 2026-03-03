@@ -332,6 +332,22 @@ function TreeNode({
   );
 }
 
+function getRawPanelStyle(isLg: boolean, expandedPanel: string, splitPercent: number): React.CSSProperties | undefined {
+  if (!isLg) {
+    return undefined;
+  }
+  if (expandedPanel === "raw") {
+    return { flex: "1 1 100%" };
+  }
+  if (expandedPanel === "none") {
+    return {
+      flex: `0 0 calc(${splitPercent}% - 8px)`,
+      maxWidth: `calc(${splitPercent}% - 8px)`,
+    };
+  }
+  return undefined;
+}
+
 /** JSON Viewer 도구의 메인 컴포넌트 — Raw JSON 편집기와 Tree Viewer를 양쪽 패널로 제공 */
 export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   const initialRaw = useMemo(() => JSON.stringify(sampleJson, null, 2), []);
@@ -343,6 +359,18 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   const [collapsedPaths, setCollapsedPaths] = useState<Set<string>>(new Set());
   const [leftCopyState, setLeftCopyState] = useState<"idle" | "copied">("idle");
   const [rightCopyState, setRightCopyState] = useState<"idle" | "copied">("idle");
+  const [splitPercent, setSplitPercent] = useState(50);
+  const [expandedPanel, setExpandedPanel] = useState<"none" | "raw" | "tree">("none");
+  const [isLg, setIsLg] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    setIsLg(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsLg(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
   const lineCount = useMemo(() => rawInput.split("\n").length, [rawInput]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const gutterRef = useRef<HTMLDivElement>(null);
@@ -372,7 +400,9 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   /** 에러 메시지에서 position 값을 읽어 해당 문자 위치가 몇 번째 줄인지 계산 */
   const getErrorLine = (raw: string, message: string): number | null => {
     const match = message.match(/position\s+(\d+)/i);
-    if (!match) return null;
+    if (!match) {
+      return null;
+    }
     const pos = Number(match[1]);
     return raw.slice(0, pos).split("\n").length;
   };
@@ -415,13 +445,14 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
     });
   };
 
-  /** Raw JSON을 파싱 후 들여쓰기 2칸으로 포맷팅 (Pretty Print) */
-  const handleFormat = () => {
+  const isMinified = useMemo(() => !rawInput.includes("\n") && rawInput.trim().length > 0, [rawInput]);
+
+  /** Raw JSON을 파싱하여 지정된 indent로 포맷팅 (공통 헬퍼) */
+  const formatRawJson = (indent?: number) => {
     try {
       const parsed = JSON.parse(rawInput) as JsonValue;
-      const pretty = JSON.stringify(parsed, null, 2);
       setJsonValue(parsed);
-      setRawInput(pretty);
+      setRawInput(JSON.stringify(parsed, null, indent));
       setParseError("");
       setErrorLine(null);
     } catch (error) {
@@ -430,6 +461,9 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
       setErrorLine(getErrorLine(rawInput, message));
     }
   };
+
+  const handleFormat = () => formatRawJson(2);
+  const handleToggleRawFormat = () => formatRawJson(isMinified ? 2 : undefined);
 
   /** 모든 상태를 초기 샘플 JSON으로 되돌리기 */
   const handleReset = () => {
@@ -440,15 +474,16 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
     setCollapsedPaths(new Set());
   };
 
-  /** 트리의 모든 컨테이너 노드를 접기 */
-  const handleCollapseAll = () => {
-    const paths = collectContainerPaths(jsonValue, []);
-    setCollapsedPaths(new Set(paths));
-  };
+  const allContainerPaths = useMemo(() => collectContainerPaths(jsonValue, []), [jsonValue]);
+  const isAllCollapsed = allContainerPaths.length > 0 && allContainerPaths.every((p) => collapsedPaths.has(p));
 
-  /** 트리의 모든 노드를 펼치기 */
-  const handleExpandAll = () => {
-    setCollapsedPaths(new Set());
+  /** 트리 전체 접기/펼치기 토글 */
+  const handleToggleAll = () => {
+    if (isAllCollapsed) {
+      setCollapsedPaths(new Set());
+    } else {
+      setCollapsedPaths(new Set(allContainerPaths));
+    }
   };
 
   /** 트리 뷰의 현재 JSON 값을 클립보드에 복사 */
@@ -461,6 +496,35 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
       setLeftCopyState("idle");
     }
   };
+
+  /** 드래그로 좌우 패널 비율 조절 */
+  const handleDragStart = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const rect = container.getBoundingClientRect();
+
+    const onMove = (me: PointerEvent) => {
+      const x = me.clientX - rect.left;
+      const pct = Math.min(80, Math.max(20, (x / rect.width) * 100));
+      setSplitPercent(pct);
+    };
+
+    const onUp = () => {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+  }, []);
 
   /** Raw JSON 텍스트를 클립보드에 복사 */
   const handleCopyRaw = async () => {
@@ -494,11 +558,15 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
         chips={["JSON 파싱 & 포맷팅", "트리 뷰 탐색", "인라인 값 편집"]}
       />
 
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section ref={containerRef} className="flex flex-col gap-4 lg:flex-row">
+        <div
+          className={expandedPanel === "tree" ? "hidden lg:hidden" : ""}
+          style={getRawPanelStyle(isLg, expandedPanel, splitPercent)}
+        >
         <ToolCard className="min-h-[520px] gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Raw JSON</p>
-            <div className="flex gap-2">
+            <p className="shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Raw JSON</p>
+            <div className="flex flex-wrap gap-1.5">
               <ToolActionButton
                 type="button"
                 onClick={handleCopyRaw}
@@ -508,10 +576,10 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
               </ToolActionButton>
               <ToolActionButton
                 type="button"
-                onClick={handleFormat}
+                onClick={handleToggleRawFormat}
                 className="h-7 px-3"
               >
-                Pretty
+                {isMinified ? "Expand all" : "Collapse all"}
               </ToolActionButton>
               <ToolActionButton
                 type="button"
@@ -519,6 +587,13 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                 className="h-7 px-3"
               >
                 Reset sample
+              </ToolActionButton>
+              <ToolActionButton
+                type="button"
+                onClick={() => setExpandedPanel(expandedPanel === "raw" ? "none" : "raw")}
+                className="hidden lg:inline-flex h-7 px-3"
+              >
+                {expandedPanel === "raw" ? "Shrink" : "Expand"}
               </ToolActionButton>
             </div>
           </div>
@@ -573,11 +648,23 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
             <p className="text-xs text-[var(--syntax-valid)]">Valid JSON</p>
           )}
         </ToolCard>
+        </div>
 
+        {/* 리사이즈 핸들 */}
+        {expandedPanel === "none" && (
+          <div
+            onPointerDown={handleDragStart}
+            className="hidden lg:flex shrink-0 w-2 cursor-col-resize items-center justify-center group"
+          >
+            <div className="h-12 w-1 rounded-full bg-[var(--card-border)] transition group-hover:bg-[var(--muted)] group-active:bg-blue-500" />
+          </div>
+        )}
+
+        <div className={expandedPanel === "raw" ? "hidden lg:hidden" : "flex-1 min-w-0"}>
         <ToolCard className="min-h-[520px] gap-4">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Tree Viewer</p>
-            <div className="flex gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Tree Viewer</p>
+            <div className="flex flex-wrap gap-1.5">
               <ToolActionButton
                 type="button"
                 onClick={handleCopyTree}
@@ -587,17 +674,17 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
               </ToolActionButton>
               <ToolActionButton
                 type="button"
-                onClick={handleExpandAll}
+                onClick={handleToggleAll}
                 className="h-7 px-3"
               >
-                Expand all
+                {isAllCollapsed ? "Expand all" : "Collapse all"}
               </ToolActionButton>
               <ToolActionButton
                 type="button"
-                onClick={handleCollapseAll}
-                className="h-7 px-3"
+                onClick={() => setExpandedPanel(expandedPanel === "tree" ? "none" : "tree")}
+                className="hidden lg:inline-flex h-7 px-3"
               >
-                Collapse all
+                {expandedPanel === "tree" ? "Shrink" : "Expand"}
               </ToolActionButton>
             </div>
           </div>
@@ -615,6 +702,7 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
             />
           </div>
         </ToolCard>
+        </div>
       </section>
     </ToolPage>
   );
