@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolInput, ToolLabel, ToolPage } from "@/components/tool-ui";
+import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolInput, ToolLabel, ToolOutput, ToolPage } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -185,13 +185,13 @@ function ResultPanel({
             {isCopied() ? "Copied" : "Copy"}
           </ToolActionButton>
         </div>
-        <div
-          className={`whitespace-pre-wrap rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-3 font-mono text-xs leading-relaxed ${
+        <ToolOutput
+          className={`whitespace-pre-wrap break-words rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-3 font-mono text-xs leading-relaxed ${
             isError ? "text-red-500 dark:text-red-400" : "text-[var(--foreground)]"
           }`}
         >
           {isError ? "Cannot generate flags — heap is negative." : jvmFlags}
-        </div>
+        </ToolOutput>
       </div>
 
       {/* 계산식 */}

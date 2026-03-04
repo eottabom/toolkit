@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolPage, ToolTextarea } from "@/components/tool-ui";
+import { ToolActionButton, ToolCard, ToolDiffText, ToolHeader, ToolInfoPanel, ToolPage, ToolTextarea } from "@/components/tool-ui";
 
 type LineStatus = "same" | "changed" | "added" | "removed";
 
@@ -345,7 +345,7 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
           <div className="px-4 py-3">Right</div>
         </div>
         <div className="divide-y divide-[color:var(--card-border)]">
-          {diffRows.map((row, index) => {
+          {diffRows.map((row) => {
             const wordDiff =
               row.status === "changed" && showWordDiff ? DiffEngine.buildWordDiff(row.left, row.right) : null;
 
@@ -354,9 +354,9 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
                 key={`${row.leftNumber ?? "x"}-${row.rightNumber ?? "y"}-${row.status}`}
                 className="grid grid-cols-2 text-xs font-mono"
               >
-                <div className={`flex items-start gap-3 px-4 py-2 ${leftStatusClass[row.status]}`}>
+                <div className={`flex min-w-0 items-start gap-3 px-4 py-2 ${leftStatusClass[row.status]}`}>
                   <span className="w-6 text-right text-[var(--muted)]">{row.leftNumber ?? ""}</span>
-                  <span className="whitespace-pre-wrap text-[var(--foreground)]">
+                  <ToolDiffText className="min-w-0 flex-1">
                     {wordDiff ? (
                       <>
                         {wordDiff.leadingLeft && <span>{wordDiff.leadingLeft}</span>}
@@ -365,11 +365,11 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
                     ) : (
                       row.left || " "
                     )}
-                  </span>
+                  </ToolDiffText>
                 </div>
-                <div className={`flex items-start gap-3 px-4 py-2 ${rightStatusClass[row.status]}`}>
+                <div className={`flex min-w-0 items-start gap-3 px-4 py-2 ${rightStatusClass[row.status]}`}>
                   <span className="w-6 text-right text-[var(--muted)]">{row.rightNumber ?? ""}</span>
-                  <span className="whitespace-pre-wrap text-[var(--foreground)]">
+                  <ToolDiffText className="min-w-0 flex-1">
                     {wordDiff ? (
                       <>
                         {wordDiff.leadingRight && <span>{wordDiff.leadingRight}</span>}
@@ -378,7 +378,7 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
                     ) : (
                       row.right || " "
                     )}
-                  </span>
+                  </ToolDiffText>
                 </div>
               </div>
             );
