@@ -2,6 +2,7 @@
 
 import {useMemo, useState} from "react";
 import Link from "next/link";
+import { RECENT_TOOL_MAX, RECENT_TOOL_SLUGS_KEY } from "@/lib/constants";
 import {tools} from "@/lib/tools";
 import {useTheme} from "@/components/theme-provider";
 import {TagFilterButton} from "@/components/tag-filter-button";
@@ -9,9 +10,8 @@ import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 
-const RECENT_TOOL_SLUGS_KEY = "recent-tool-slugs";
-const RECENT_TOOL_MAX = 10;
 const SEARCH_PREVIEW_COUNT = 3;
+const TOOL_SLUG_SET = new Set(tools.map((tool) => tool.slug));
 const SHUFFLED_TOOL_SLUGS = [...tools]
   .sort(() => Math.random() - 0.5)
   .map((tool) => tool.slug);
@@ -33,10 +33,9 @@ export default function Home() {
       if (!Array.isArray(parsed)) {
         return [];
       }
-      const validSlugs = parsed
-        .filter((value): value is string => typeof value === "string")
-        .filter((slug, index, list) => list.indexOf(slug) === index)
-        .filter((slug) => tools.some((tool) => tool.slug === slug));
+      const stringSlugs = parsed.filter((value): value is string => typeof value === "string");
+      const uniqueSlugs = [...new Set(stringSlugs)];
+      const validSlugs = uniqueSlugs.filter((slug) => TOOL_SLUG_SET.has(slug));
       return validSlugs.slice(0, RECENT_TOOL_MAX);
     } catch (error) {
       console.error("Failed to read recent tools cache:", error);
