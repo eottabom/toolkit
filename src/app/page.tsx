@@ -9,10 +9,42 @@ import {Button} from "@/components/ui/button";
 import {Card} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 
+const RECENT_TOOL_SLUGS_KEY = "recent-tool-slugs";
+const RECENT_TOOL_MAX = 10;
+const SEARCH_PREVIEW_COUNT = 3;
+const SHUFFLED_TOOL_SLUGS = [...tools]
+  .sort(() => Math.random() - 0.5)
+  .map((tool) => tool.slug);
+
 export default function Home() {
   const {theme, mounted, toggleTheme} = useTheme();
   const [query, setQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const recentToolSlugs = useMemo(() => {
+    if (!mounted) {
+      return [];
+    }
+    try {
+      const raw = localStorage.getItem(RECENT_TOOL_SLUGS_KEY);
+      if (!raw) {
+        return [];
+      }
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+      const validSlugs = parsed
+        .filter((value): value is string => typeof value === "string")
+        .filter((slug, index, list) => list.indexOf(slug) === index)
+        .filter((slug) => tools.some((tool) => tool.slug === slug));
+      return validSlugs.slice(0, RECENT_TOOL_MAX);
+    } catch (error) {
+      console.error("Failed to read recent tools cache:", error);
+      return [];
+    }
+  }, [mounted]);
+
+  const randomToolSlugs = SHUFFLED_TOOL_SLUGS;
 
   const allTags = useMemo(() => [...new Set(tools.map((t) => t.tag))].sort(), []);
 
@@ -42,6 +74,25 @@ export default function Home() {
       .filter((t) => t.createdAt && t.createdAt >= oneMonthAgo)
       .sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? ""));
   }, []);
+
+  const isFiltering = query.trim().length > 0 || selectedTag !== null;
+  const fallbackTools = useMemo(() => {
+    const sourceSlugs = recentToolSlugs.length > 0 ? recentToolSlugs : randomToolSlugs;
+    const sourceTools = sourceSlugs
+      .map((slug) => tools.find((tool) => tool.slug === slug))
+      .filter((tool): tool is (typeof tools)[number] => Boolean(tool));
+    return sourceTools.slice(0, SEARCH_PREVIEW_COUNT);
+  }, [recentToolSlugs, randomToolSlugs]);
+
+  const searchPreviewTools = useMemo(() => {
+    if (isFiltering) {
+      return filteredTools.slice(0, SEARCH_PREVIEW_COUNT);
+    }
+    if (!mounted) {
+      return tools.slice(0, SEARCH_PREVIEW_COUNT);
+    }
+    return fallbackTools;
+  }, [filteredTools, fallbackTools, isFiltering, mounted]);
 
   const toolTagStats = useMemo(() => {
     const colorPalette = ["#f97316", "#10b981", "#3b82f6", "#f59e0b", "#ec4899", "#8b5cf6", "#14b8a6"];
@@ -184,7 +235,7 @@ export default function Home() {
                 </Button>
               </div>
               <div className="flex flex-col gap-2">
-                {filteredTools.slice(0, 3).map((tool) => (
+                {searchPreviewTools.map((tool) => (
                   <Link
                     key={tool.slug}
                     href={`/${tool.slug}`}
@@ -197,7 +248,7 @@ export default function Home() {
                     <span className="text-xs text-[var(--muted)]">Open →</span>
                   </Link>
                 ))}
-                {filteredTools.length === 0 && (
+                {searchPreviewTools.length === 0 && (
                   <div
                     className="rounded-2xl border border-dashed border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 text-sm text-[var(--muted)]">
                     No tools found. Try a different keyword.
