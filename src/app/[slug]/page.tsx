@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { tools } from "@/lib/tools";
 import { toolPages } from "@/tools";
+import { AdsenseAutoRelaxed } from "@/components/adsense-auto-relaxed";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -61,6 +62,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
             </p>
           </Card>
         )}
+        <AdsenseAutoRelaxed />
       </div>
     </div>
   );
