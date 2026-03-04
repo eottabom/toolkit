@@ -172,7 +172,8 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
       if (ALGORITHMS.includes(headerAlg as Algorithm)) {
         setVerifyAlg(headerAlg as Algorithm);
       }
-    } catch {
+    } catch (error) {
+      console.error("Failed to auto-detect algorithm from JWT header:", error);
       // JWT가 유효하지 않으면 알고리즘 자동 반영 생략
     }
   };
