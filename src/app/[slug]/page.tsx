@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { tools } from "@/lib/tools";
 import { toolPages } from "@/tools";
 import { AdsenseAutoRelaxed } from "@/components/adsense-auto-relaxed";
+import { RecentToolTracker } from "@/components/recent-tool-tracker";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -40,6 +41,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-10 sm:px-10">
       <div className="mx-auto flex max-w-[1680px] flex-col gap-6">
+        <RecentToolTracker slug={tool.slug} />
         <Button
           asChild
           variant="link"

@@ -50,8 +50,9 @@ export function ToolCard({ className, children }: { className?: string; children
 export function ToolBadge({ className, children }: { className?: string; children: ReactNode }) {
   return (
     <Badge
+      variant="outline"
       className={cn(
-        "rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 hover:bg-emerald-500/15 dark:bg-emerald-400/25 dark:text-emerald-200",
+        "self-start cursor-default rounded-full border border-transparent bg-[var(--accent-2)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white",
         className,
       )}
     >
