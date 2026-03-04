@@ -361,12 +361,13 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
   const [rightCopyState, setRightCopyState] = useState<"idle" | "copied">("idle");
   const [splitPercent, setSplitPercent] = useState(50);
   const [expandedPanel, setExpandedPanel] = useState<"none" | "raw" | "tree">("none");
-  const [isLg, setIsLg] = useState(false);
+  const [isLg, setIsLg] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(min-width: 1024px)").matches : false,
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mql = window.matchMedia("(min-width: 1024px)");
-    setIsLg(mql.matches);
     const handler = (e: MediaQueryListEvent) => setIsLg(e.matches);
     mql.addEventListener("change", handler);
     return () => mql.removeEventListener("change", handler);
@@ -462,8 +463,14 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
     }
   };
 
-  const handleFormat = () => formatRawJson(2);
   const handleToggleRawFormat = () => formatRawJson(isMinified ? 2 : undefined);
+
+  /** Raw 입력을 비워 placeholder 상태로 초기화 */
+  const handleClearRaw = () => {
+    setRawInput("");
+    setParseError("");
+    setErrorLine(null);
+  };
 
   /** 모든 상태를 초기 샘플 JSON으로 되돌리기 */
   const handleReset = () => {
@@ -587,6 +594,13 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
                 className="h-7 px-3"
               >
                 Reset sample
+              </ToolActionButton>
+              <ToolActionButton
+                type="button"
+                onClick={handleClearRaw}
+                className="h-7 px-3"
+              >
+                Clear
               </ToolActionButton>
               <ToolActionButton
                 type="button"
