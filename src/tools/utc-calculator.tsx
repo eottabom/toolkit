@@ -154,6 +154,8 @@ function toUtcDateFromZonedInput(value: string, timeZone: string): Date | null {
     return new Date(utcMs);
   }
 
+  // Around DST transitions, local times can be ambiguous/non-existent.
+  // Re-apply offset using the previous UTC guess until it stabilizes.
   let utcMs = Date.UTC(parsed.year, parsed.month - 1, parsed.day, parsed.hour, parsed.minute, parsed.second);
   for (let i = 0; i < 3; i += 1) {
     const offset = getOffsetMinutes(timeZone, new Date(utcMs));
@@ -463,14 +465,13 @@ function CurrentTimePanel({
 
 export default function UtcCalculator({ tool }: { tool: ToolItem }) {
   const { copy, isCopied } = useCopyToClipboard();
+  const browserTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC", []);
   const [utcInput, setUtcInput] = useState(nowUtcInput());
   const [utcPickerInput, setUtcPickerInput] = useState(nowUtcPickerInput());
-  const [targetZone, setTargetZone] = useState("Asia/Seoul");
-  const initialLocalInput = useMemo(() => nowInZoneInput("Asia/Seoul"), []);
-  const [localInput, setLocalInput] = useState(initialLocalInput);
-  const [localPickerInput, setLocalPickerInput] = useState(initialLocalInput);
-  const [sourceZone, setSourceZone] = useState("Asia/Seoul");
-  const browserTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC", []);
+  const [targetZone, setTargetZone] = useState(browserTimeZone);
+  const [localInput, setLocalInput] = useState(() => nowInZoneInput(browserTimeZone));
+  const [localPickerInput, setLocalPickerInput] = useState(() => nowInZoneInput(browserTimeZone));
+  const [sourceZone, setSourceZone] = useState(browserTimeZone);
 
   const timeZones = useMemo(() => getTimeZoneList(browserTimeZone), [browserTimeZone]);
   const optionsReferenceDate = useMemo(() => new Date(), []);
