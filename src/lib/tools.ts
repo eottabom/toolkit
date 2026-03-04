@@ -63,4 +63,11 @@ export const tools: ToolItem[] = [
     slug: "cron-generator",
     createdAt: "2026-02-21",
   },
+  {
+    title: "UTC Calculator",
+    desc: "Convert UTC and local timezone datetimes for logs, incidents, and schedules.",
+    tag: "DevOps",
+    slug: "utc-calculator",
+    createdAt: "2026-03-04",
+  },
 ];

@@ -7,6 +7,7 @@ import JavaMemoryCalculator from "./java-memory-calculator";
 import JsonViewerTool from "./jsonviewer";
 import JwtTool from "./jwt";
 import K6Generator from "./k6-generator";
+import UtcCalculator from "./utc-calculator";
 import UrlTool from "./url";
 
 type ToolComponentProps = {
@@ -22,4 +23,5 @@ export const toolPages: Record<string, ComponentType<ToolComponentProps>> = {
   "java-memory-calculator": JavaMemoryCalculator,
   "k6-generator": K6Generator,
   "cron-generator": CronGenerator,
+  "utc-calculator": UtcCalculator,
 };

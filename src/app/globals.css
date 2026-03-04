@@ -116,6 +116,18 @@ body {
   font-family: var(--font-sans);
 }
 
+input[type="datetime-local"] {
+  color-scheme: light;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+html.theme-dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 @keyframes float-slow {
   0% {
     transform: translateY(0px);
