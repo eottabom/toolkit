@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ToolActionButton,
   ToolAddButton,
   ToolBadge,
   ToolCard,
+  ToolCodeOutput,
   ToolHeader,
   ToolInfoPanel,
   ToolInput,
@@ -403,19 +404,15 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
     () => generateScript(method, url, headers, body, scenarios, thresholds, checks),
     [method, url, headers, body, scenarios, thresholds, checks],
   );
-  const [isCleared, setIsCleared] = useState(false);
-  const outputScript = isCleared ? "" : script;
+  const [clearedScript, setClearedScript] = useState<string | null>(null);
+  const outputScript = clearedScript === script ? "" : script;
   const activeScript = scriptTab === "custom" ? customScript : outputScript;
 
   const handleCopy = useCallback(async () => {
     await copy(activeScript);
   }, [copy, activeScript]);
 
-  const handleClear = () => setIsCleared(true);
-
-  useEffect(() => {
-    if (isCleared) setIsCleared(false);
-  }, [script, isCleared]);
+  const handleClear = () => setClearedScript(script);
 
   /* 헤더 헬퍼 */
   const addHeader = () => {
@@ -657,9 +654,9 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                 className="min-h-[500px] w-full resize-none rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs leading-relaxed text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none"
               />
             ) : (
-              <pre className="min-h-[500px] overflow-auto whitespace-pre rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs leading-relaxed text-[var(--foreground)]">
+              <ToolCodeOutput className="min-h-[500px]">
                 {outputScript || "// 아직 생성된 스크립트가 없습니다."}
-              </pre>
+              </ToolCodeOutput>
             )}
           </ToolCard>
         </div>

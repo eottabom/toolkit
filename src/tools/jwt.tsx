@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPage, ToolSelect } from "@/components/tool-ui";
@@ -110,8 +110,6 @@ async function encodeJwt(headerJson: string, payloadJson: string, secret: string
   return `${data}.${sigB64}`;
 }
 
-type CopyTarget = "header" | "payload" | "signature" | "encoded";
-
 export default function JwtTool({ tool }: { tool: ToolItem }) {
   // Decode
   const [jwtInput, setJwtInput] = useState("");
@@ -142,13 +140,6 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
     }
   }, [jwtInput]);
 
-  // Decode 시 Header의 alg를 자동으로 Verify 알고리즘에 반영
-  useEffect(() => {
-    if (decoded?.headerAlg && ALGORITHMS.includes(decoded.headerAlg as Algorithm)) {
-      setVerifyAlg(decoded.headerAlg as Algorithm);
-    }
-  }, [decoded?.headerAlg]);
-
   const decodeError = useMemo(() => {
     if (!jwtInput.trim()) {
       return "";
@@ -173,10 +164,28 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
     }
   }, [jwtInput, verifySecret, verifyAlg]);
 
-  // Secret 키나 알고리즘이 변경되면 검증 결과 초기화
-  useEffect(() => {
+  const handleJwtInputChange = (value: string) => {
+    setJwtInput(value);
     setVerifyResult("idle");
-  }, [verifySecret, verifyAlg, jwtInput]);
+    try {
+      const { headerAlg } = decodeJwt(value);
+      if (ALGORITHMS.includes(headerAlg as Algorithm)) {
+        setVerifyAlg(headerAlg as Algorithm);
+      }
+    } catch {
+      // JWT가 유효하지 않으면 알고리즘 자동 반영 생략
+    }
+  };
+
+  const handleVerifyAlgChange = (alg: Algorithm) => {
+    setVerifyAlg(alg);
+    setVerifyResult("idle");
+  };
+
+  const handleVerifySecretChange = (value: string) => {
+    setVerifySecret(value);
+    setVerifyResult("idle");
+  };
 
   const handleEncAlgChange = (alg: Algorithm) => {
     setEncAlg(alg);
@@ -242,13 +251,13 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
         <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
             <ToolBadge>Decode JWT</ToolBadge>
-            <ToolActionButton type="button" onClick={() => setJwtInput("")}>
+            <ToolActionButton type="button" onClick={() => handleJwtInputChange("")}>
               Clear
             </ToolActionButton>
           </div>
           <Textarea
             value={jwtInput}
-            onChange={(e) => setJwtInput(e.target.value)}
+            onChange={(e) => handleJwtInputChange(e.target.value)}
             placeholder="Paste a JWT token (e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.xxx)"
             className={`${textareaClass} min-h-[100px]`}
           />
@@ -290,7 +299,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                   <div className="flex items-center gap-2">
                     <ToolSelect
                       value={verifyAlg}
-                      onChange={(e) => setVerifyAlg(e.target.value as Algorithm)}
+                      onChange={(e) => handleVerifyAlgChange(e.target.value as Algorithm)}
                       className="h-8 w-auto rounded-full text-[11px]"
                     >
                       {ALGORITHMS.map((a) => (
@@ -309,9 +318,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                 </div>
 
                 {/* Raw signature */}
-                <div className="break-all rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]">
-                  {decoded.signature}
-                </div>
+                <ToolOutput>{decoded.signature}</ToolOutput>
 
                 {/* Algorithm formula */}
                 <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs leading-relaxed text-[var(--muted)]">
@@ -330,7 +337,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                 <input
                   type="text"
                   value={verifySecret}
-                  onChange={(e) => setVerifySecret(e.target.value)}
+                  onChange={(e) => handleVerifySecretChange(e.target.value)}
                   placeholder="Enter secret key to verify signature"
                   className="w-full rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-4 py-3 font-mono text-xs text-[var(--foreground)] outline-none focus:border-[color:var(--card-border-hover)]"
                 />
@@ -480,7 +487,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                 {isCopied("encoded") ? "Copied" : "Copy"}
               </ToolActionButton>
             </div>
-            <ToolOutput className="min-h-[140px] break-all">{encodedJwt}</ToolOutput>
+            <ToolOutput className="min-h-[140px]">{encodedJwt}</ToolOutput>
           </ToolCard>
         )}
       </section>

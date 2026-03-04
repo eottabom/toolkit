@@ -102,13 +102,36 @@ export function ToolOutput({
   return (
     <div
       className={cn(
-        "whitespace-pre-wrap rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]",
+        "w-full overflow-x-hidden whitespace-pre-wrap break-words rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs text-[var(--foreground)]",
         className,
       )}
     >
       {children}
     </div>
   );
+}
+
+export function ToolCodeOutput({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <pre
+      className={cn(
+        "w-full overflow-auto whitespace-pre-wrap break-words rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-4 font-mono text-xs leading-relaxed text-[var(--foreground)]",
+        className,
+      )}
+    >
+      {children}
+    </pre>
+  );
+}
+
+export function ToolDiffText({ className, children }: { className?: string; children: ReactNode }) {
+  return <span className={cn("whitespace-pre-wrap break-words text-[var(--foreground)]", className)}>{children}</span>;
 }
 
 export function ToolLabel({ className, children }: { className?: string; children: ReactNode }) {
