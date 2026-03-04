@@ -466,8 +466,8 @@ function CurrentTimePanel({
 export default function UtcCalculator({ tool }: { tool: ToolItem }) {
   const { copy, isCopied } = useCopyToClipboard();
   const browserTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC", []);
-  const [utcInput, setUtcInput] = useState(nowUtcInput());
-  const [utcPickerInput, setUtcPickerInput] = useState(nowUtcPickerInput());
+  const [utcInput, setUtcInput] = useState(() => nowUtcInput());
+  const [utcPickerInput, setUtcPickerInput] = useState(() => nowUtcPickerInput());
   const [targetZone, setTargetZone] = useState(browserTimeZone);
   const [localInput, setLocalInput] = useState(() => nowInZoneInput(browserTimeZone));
   const [localPickerInput, setLocalPickerInput] = useState(() => nowInZoneInput(browserTimeZone));
