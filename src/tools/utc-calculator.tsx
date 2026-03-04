@@ -41,8 +41,8 @@ const COMMON_TIME_ZONES = [
 ] as const;
 
 function getTimeZoneList(browserTimeZone: string) {
-  const intlWithSupported = Intl as Intl.DateTimeFormatConstructor & {
-    supportedValuesOf?: (key: string) => string[];
+  const intlWithSupported = Intl as typeof Intl & {
+    supportedValuesOf?: (key: "timeZone") => string[];
   };
   const supported = intlWithSupported.supportedValuesOf?.("timeZone") ?? [];
   const merged = [...COMMON_TIME_ZONES, browserTimeZone, ...supported];
