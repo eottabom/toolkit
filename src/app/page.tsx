@@ -12,6 +12,7 @@ import {Input} from "@/components/ui/input";
 
 const SEARCH_PREVIEW_COUNT = 3;
 const TOOL_SLUG_SET = new Set(tools.map((tool) => tool.slug));
+const TOOL_BY_SLUG = new Map(tools.map((tool) => [tool.slug, tool]));
 const SHUFFLED_TOOL_SLUGS = [...tools]
   .sort(() => Math.random() - 0.5)
   .map((tool) => tool.slug);
@@ -78,7 +79,7 @@ export default function Home() {
   const fallbackTools = useMemo(() => {
     const sourceSlugs = recentToolSlugs.length > 0 ? recentToolSlugs : randomToolSlugs;
     const sourceTools = sourceSlugs
-      .map((slug) => tools.find((tool) => tool.slug === slug))
+      .map((slug) => TOOL_BY_SLUG.get(slug))
       .filter((tool): tool is (typeof tools)[number] => Boolean(tool));
     return sourceTools.slice(0, SEARCH_PREVIEW_COUNT);
   }, [recentToolSlugs, randomToolSlugs]);
