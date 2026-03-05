@@ -304,7 +304,8 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
               <ToolActionButton
                 type="button"
                 onClick={() => handleClear("left")}
-                className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] px-2 py-1 font-normal"
+                tone="orange"
+                className="px-2 py-1 font-normal"
               >
                 {clearState === "left" ? "Cleared" : "Clear"}
               </ToolActionButton>
@@ -323,7 +324,8 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
               <ToolActionButton
                 type="button"
                 onClick={() => handleClear("right")}
-                className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] px-2 py-1 font-normal"
+                tone="orange"
+                className="px-2 py-1 font-normal"
               >
                 {clearState === "right" ? "Cleared" : "Clear"}
               </ToolActionButton>

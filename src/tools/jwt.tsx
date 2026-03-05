@@ -255,7 +255,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleJwtInputChange("")}
-              className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
+              tone="orange"
             >
               Clear
             </ToolActionButton>

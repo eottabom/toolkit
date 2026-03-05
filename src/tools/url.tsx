@@ -92,7 +92,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleClear("plain")}
-              className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
+              tone="orange"
             >
               {clearState === "plain" ? "Cleared" : "Clear"}
             </ToolActionButton>
@@ -139,7 +139,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleClear("encoded")}
-              className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
+              tone="orange"
             >
               {clearState === "encoded" ? "Cleared" : "Clear"}
             </ToolActionButton>

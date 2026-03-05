@@ -91,7 +91,7 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleClear("plain")}
-              className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
+              tone="orange"
             >
               {clearState === "plain" ? "Cleared" : "Clear"}
             </ToolActionButton>
@@ -133,7 +133,7 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleClear("base64")}
-              className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
+              tone="orange"
             >
               {clearState === "base64" ? "Cleared" : "Clear"}
             </ToolActionButton>

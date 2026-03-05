@@ -599,7 +599,8 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
               <ToolActionButton
                 type="button"
                 onClick={handleClearRaw}
-                className="h-8 border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] px-3"
+                tone="orange"
+                className="h-8 px-3"
               >
                 Clear
               </ToolActionButton>

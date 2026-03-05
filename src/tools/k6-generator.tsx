@@ -631,7 +631,7 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                   <ToolActionButton
                     type="button"
                     onClick={() => setCustomScript("")}
-                    className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
+                    tone="orange"
                   >
                     Clear
                   </ToolActionButton>
@@ -639,7 +639,7 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
                   <ToolActionButton
                     type="button"
                     onClick={handleClear}
-                    className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
+                    tone="orange"
                   >
                     Clear
                   </ToolActionButton>
