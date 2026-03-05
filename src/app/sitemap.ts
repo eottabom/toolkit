@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const toolPages = tools.map((tool) => ({
-    url: `${BASE_URL}/${tool.slug}/`,
+    url: `${BASE_URL}${tool.slug}/`,
     lastModified: tool.createdAt ?? new Date().toISOString(),
     changeFrequency: "weekly" as const,
     priority: 0.8,
