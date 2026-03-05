@@ -30,8 +30,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var stored=localStorage.getItem("theme-mode");var isDark=stored?stored==="dark":true;document.documentElement.classList.toggle("theme-dark",isDark);}catch(_){document.documentElement.classList.add("theme-dark");}})();`,
+          }}
+        />
         <Script
           async
           strategy="afterInteractive"

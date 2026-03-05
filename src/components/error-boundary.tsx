@@ -25,7 +25,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <p className="text-sm text-[var(--muted)]">문제가 발생했습니다.</p>
           <Button
             onClick={() => this.setState({ hasError: false })}
-            className="rounded-2xl bg-blue-600 px-6 text-sm font-semibold text-white hover:bg-blue-700"
+            className="rounded-xl border border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] px-6 text-sm font-semibold text-[var(--foreground)] transition hover:brightness-95"
           >
             다시 시도
           </Button>

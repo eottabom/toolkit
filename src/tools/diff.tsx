@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ToolActionButton, ToolCard, ToolDiffText, ToolHeader, ToolInfoPanel, ToolPage, ToolTextarea } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolDiffText, ToolHeader, ToolInfoPanel, ToolPage, ToolTextarea } from "@/components/tool-ui";
 
 type LineStatus = "same" | "changed" | "added" | "removed";
 
@@ -290,7 +290,7 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
       </div>
 
       <ToolInfoPanel
-        icon="Δ"
+        icon="⇄"
         title="Text Diff"
         description="두 텍스트를 나란히 비교하여 변경된 부분을 하이라이트합니다. 추가/삭제/수정된 라인과 단어 단위 차이를 시각적으로 확인할 수 있습니다."
         chips={["라인 단위 비교", "단어 단위 하이라이트", "변경 사항만 필터"]}
@@ -299,13 +299,12 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
       <section className="grid gap-4 lg:grid-cols-2">
         <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-            <span>Left</span>
-            <div className="flex items-center gap-3">
-              <span>Original</span>
+            <ToolBadge tone="orange">Original</ToolBadge>
+            <div className="flex items-center gap-2">
               <ToolActionButton
                 type="button"
                 onClick={() => handleClear("left")}
-                className="px-2 py-1 font-normal"
+                className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] px-2 py-1 font-normal"
               >
                 {clearState === "left" ? "Cleared" : "Clear"}
               </ToolActionButton>
@@ -319,13 +318,12 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
         </ToolCard>
         <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-            <span>Right</span>
-            <div className="flex items-center gap-3">
-              <span>Updated</span>
+            <ToolBadge tone="teal">Updated</ToolBadge>
+            <div className="flex items-center gap-2">
               <ToolActionButton
                 type="button"
                 onClick={() => handleClear("right")}
-                className="px-2 py-1 font-normal"
+                className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] px-2 py-1 font-normal"
               >
                 {clearState === "right" ? "Cleared" : "Clear"}
               </ToolActionButton>
@@ -341,8 +339,12 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
 
       <Card className="overflow-hidden rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] shadow-[var(--card-shadow)]">
         <div className="grid grid-cols-2 border-b border-[color:var(--card-border)] bg-[var(--surface-muted)] text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
-          <div className="px-4 py-3">Left</div>
-          <div className="px-4 py-3">Right</div>
+          <div className="px-4 py-3">
+            <ToolBadge tone="orange">Original</ToolBadge>
+          </div>
+          <div className="px-4 py-3">
+            <ToolBadge tone="teal">Updated</ToolBadge>
+          </div>
         </div>
         <div className="divide-y divide-[color:var(--card-border)]">
           {diffRows.map((row) => {

@@ -92,6 +92,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleClear("plain")}
+              className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
             >
               {clearState === "plain" ? "Cleared" : "Clear"}
             </ToolActionButton>
@@ -110,6 +111,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => copy(encoded, "encoded")}
+              tone="teal"
             >
               {isCopied("encoded") ? "Copied" : "Copy"}
             </ToolActionButton>
@@ -137,6 +139,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleClear("encoded")}
+              className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
             >
               {clearState === "encoded" ? "Cleared" : "Clear"}
             </ToolActionButton>
@@ -155,6 +158,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => copy(decoded, "decoded")}
+              tone="teal"
             >
               {isCopied("decoded") ? "Copied" : "Copy"}
             </ToolActionButton>

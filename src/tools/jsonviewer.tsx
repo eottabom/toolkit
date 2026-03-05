@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { ToolItem } from "@/lib/tools";
-import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolPage } from "@/components/tool-ui";
 
 type JsonPrimitive = string | number | boolean | null;
 type JsonObject = { [key: string]: JsonValue };
@@ -572,40 +572,41 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
         >
         <ToolCard className="min-h-[520px] gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Raw JSON</p>
+            <ToolBadge tone="neutral">Raw JSON</ToolBadge>
             <div className="flex flex-wrap gap-1.5">
               <ToolActionButton
                 type="button"
                 onClick={handleCopyRaw}
-                className="h-7 px-3"
+                tone="teal"
+                className="h-8 px-3"
               >
                 {rightCopyState === "copied" ? "Copied" : "Copy"}
               </ToolActionButton>
               <ToolActionButton
                 type="button"
                 onClick={handleToggleRawFormat}
-                className="h-7 px-3"
+                className="h-8 px-3"
               >
                 {isMinified ? "Expand all" : "Collapse all"}
               </ToolActionButton>
               <ToolActionButton
                 type="button"
                 onClick={handleReset}
-                className="h-7 px-3"
+                className="h-8 px-3"
               >
                 Reset sample
               </ToolActionButton>
               <ToolActionButton
                 type="button"
                 onClick={handleClearRaw}
-                className="h-7 px-3"
+                className="h-8 border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] px-3"
               >
                 Clear
               </ToolActionButton>
               <ToolActionButton
                 type="button"
                 onClick={() => setExpandedPanel(expandedPanel === "raw" ? "none" : "raw")}
-                className="hidden lg:inline-flex h-7 px-3"
+                className="hidden lg:inline-flex h-8 px-3"
               >
                 {expandedPanel === "raw" ? "Shrink" : "Expand"}
               </ToolActionButton>
@@ -677,26 +678,27 @@ export default function JsonViewerTool({ tool }: { tool: ToolItem }) {
         <div className={expandedPanel === "raw" ? "hidden lg:hidden" : "flex-1 min-w-0"}>
         <ToolCard className="min-h-[520px] gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Tree Viewer</p>
+            <ToolBadge tone="neutral">Tree Viewer</ToolBadge>
             <div className="flex flex-wrap gap-1.5">
               <ToolActionButton
                 type="button"
                 onClick={handleCopyTree}
-                className="h-7 px-3"
+                tone="teal"
+                className="h-8 px-3"
               >
                 {leftCopyState === "copied" ? "Copied" : "Copy"}
               </ToolActionButton>
               <ToolActionButton
                 type="button"
                 onClick={handleToggleAll}
-                className="h-7 px-3"
+                className="h-8 px-3"
               >
                 {isAllCollapsed ? "Expand all" : "Collapse all"}
               </ToolActionButton>
               <ToolActionButton
                 type="button"
                 onClick={() => setExpandedPanel(expandedPanel === "tree" ? "none" : "tree")}
-                className="hidden lg:inline-flex h-7 px-3"
+                className="hidden lg:inline-flex h-8 px-3"
               >
                 {expandedPanel === "tree" ? "Shrink" : "Expand"}
               </ToolActionButton>

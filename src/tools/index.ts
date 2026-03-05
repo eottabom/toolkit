@@ -23,5 +23,5 @@ export const toolPages: Record<string, ComponentType<ToolComponentProps>> = {
   "java-memory-calculator": JavaMemoryCalculator,
   "k6-generator": K6Generator,
   "cron-generator": CronGenerator,
-  "utc-calculator": UtcCalculator,
+  "utc-unix-calculator": UtcCalculator,
 };

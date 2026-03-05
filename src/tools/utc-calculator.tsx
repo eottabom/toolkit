@@ -231,6 +231,24 @@ function nowInZoneInput(timeZone: string) {
   return formatDateTimeInput(getDatePartsInZone(new Date(), timeZone));
 }
 
+function parseUnixTimestampInput(value: string): Date | null {
+  const raw = value.trim();
+  if (!raw || !/^-?\d+$/.test(raw)) {
+    return null;
+  }
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+  const abs = Math.abs(parsed);
+  const ms = abs < 100_000_000_000 ? parsed * 1000 : parsed;
+  const date = new Date(ms);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date;
+}
+
 function TimeZonePicker({
   value,
   onChange,
@@ -429,11 +447,8 @@ function CurrentTimePanel({
 
   return (
     <ToolCard>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <ToolBadge>Current Time</ToolBadge>
-        <ToolActionButton type="button" onClick={() => setNowIso(new Date().toISOString())}>
-          Refresh Now
-        </ToolActionButton>
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         <div className="rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] p-3">
@@ -472,6 +487,10 @@ export default function UtcCalculator({ tool }: { tool: ToolItem }) {
   const [localInput, setLocalInput] = useState(() => nowInZoneInput(browserTimeZone));
   const [localPickerInput, setLocalPickerInput] = useState(() => nowInZoneInput(browserTimeZone));
   const [sourceZone, setSourceZone] = useState(browserTimeZone);
+  const [unixInput, setUnixInput] = useState(() => String(Math.trunc(Date.now() / 1000)));
+  const [unixTargetZone, setUnixTargetZone] = useState(browserTimeZone);
+  const [unixLocalInput, setUnixLocalInput] = useState(() => nowInZoneInput(browserTimeZone));
+  const [unixSourceZone, setUnixSourceZone] = useState(browserTimeZone);
 
   const timeZones = useMemo(() => getTimeZoneList(browserTimeZone), [browserTimeZone]);
   const optionsReferenceDate = useMemo(() => new Date(), []);
@@ -520,6 +539,38 @@ export default function UtcCalculator({ tool }: { tool: ToolItem }) {
     };
   }, [localInput, sourceZone, timeZoneSet]);
 
+  const unixToDate = useMemo(() => {
+    if (!timeZoneSet.has(unixTargetZone) && parseUtcOffsetMinutes(unixTargetZone) === null) {
+      return { error: "Invalid target timezone. Use IANA timezone or UTC offset (e.g. UTC+8)." };
+    }
+    const parsed = parseUnixTimestampInput(unixInput);
+    if (!parsed) {
+      return { error: "Invalid Unix timestamp. Use seconds(10) or milliseconds(13)." };
+    }
+    return {
+      zonedText: formatDateTime(getDatePartsInZone(parsed, unixTargetZone)),
+      iso: parsed.toISOString(),
+      epochSec: String(Math.trunc(parsed.getTime() / 1000)),
+      epochMs: String(parsed.getTime()),
+      offset: getOffsetLabel(unixTargetZone, parsed),
+    };
+  }, [timeZoneSet, unixInput, unixTargetZone]);
+
+  const dateToUnix = useMemo(() => {
+    if (!timeZoneSet.has(unixSourceZone) && parseUtcOffsetMinutes(unixSourceZone) === null) {
+      return { error: "Invalid source timezone. Use IANA timezone or UTC offset (e.g. UTC+8)." };
+    }
+    const utcDate = toUtcDateFromZonedInput(unixLocalInput, unixSourceZone);
+    if (!utcDate) {
+      return { error: "Invalid local input. Use YYYY-MM-DDTHH:mm:ss format." };
+    }
+    return {
+      iso: utcDate.toISOString(),
+      epochSec: String(Math.trunc(utcDate.getTime() / 1000)),
+      epochMs: String(utcDate.getTime()),
+    };
+  }, [timeZoneSet, unixLocalInput, unixSourceZone]);
+
   return (
     <ToolPage>
       <ToolHeader
@@ -531,8 +582,8 @@ export default function UtcCalculator({ tool }: { tool: ToolItem }) {
       <ToolInfoPanel
         icon="T"
         title="UTC Time Calculator"
-        description="현재 브라우저 로컬시간과 UTC를 함께 확인하고, 원하는 타임존으로 시간을 변환할 수 있습니다. 드롭다운을 클릭한 뒤 검색해 선택하거나 UTC+8 같은 오프셋을 직접 입력할 수 있습니다."
-        chips={["현재 로컬 + UTC", "UTC → Local", "Local → UTC"]}
+        description="현재 브라우저 로컬시간과 UTC를 함께 확인하고, 원하는 타임존으로 시간을 변환할 수 있습니다. Unix timestamp(초/밀리초)와 날짜/시간의 양방향 변환도 지원합니다."
+        chips={["현재 로컬 + UTC", "UTC → Local", "Local → UTC", "Unix ↔ DateTime"]}
       />
 
       <CurrentTimePanel browserTimeZone={browserTimeZone} timeZoneOptions={timeZoneOptions} />
@@ -540,9 +591,11 @@ export default function UtcCalculator({ tool }: { tool: ToolItem }) {
       <section className="grid gap-4 lg:grid-cols-2">
         <ToolCard className="lg:order-2">
           <div className="flex items-center justify-between">
-            <ToolBadge>UTC → Local</ToolBadge>
+            <ToolBadge tone="sky">UTC → Local</ToolBadge>
             <ToolActionButton
               type="button"
+              tone="purple"
+              className="cursor-default"
               onClick={() => {
                 setUtcInput(nowUtcInput());
                 setUtcPickerInput(nowUtcPickerInput());
@@ -587,18 +640,20 @@ export default function UtcCalculator({ tool }: { tool: ToolItem }) {
             <p className="text-xs text-[color:var(--error)]">{utcToLocal.error}</p>
           ) : (
             <>
-              <ToolOutput>{utcToLocal.localText}</ToolOutput>
+              <ToolOutput className="border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] font-semibold">
+                {utcToLocal.localText}
+              </ToolOutput>
               <p className="text-xs text-[var(--muted)]">
                 {targetZone} ({utcToLocal.offset})
               </p>
               <div className="flex flex-wrap gap-2">
-                <ToolActionButton type="button" onClick={() => copy(utcToLocal.localInputText, "utc-local")}>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(utcToLocal.localInputText, "utc-local")}>
                   {isCopied("utc-local") ? "Copied" : "Copy Local"}
                 </ToolActionButton>
-                <ToolActionButton type="button" onClick={() => copy(utcToLocal.utcIso, "utc-iso")}>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(utcToLocal.utcIso, "utc-iso")}>
                   {isCopied("utc-iso") ? "Copied" : "Copy UTC ISO"}
                 </ToolActionButton>
-                <ToolActionButton type="button" onClick={() => copy(utcToLocal.epochMs, "utc-epoch")}>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(utcToLocal.epochMs, "utc-epoch")}>
                   {isCopied("utc-epoch") ? "Copied" : "Copy Epoch"}
                 </ToolActionButton>
               </div>
@@ -608,9 +663,11 @@ export default function UtcCalculator({ tool }: { tool: ToolItem }) {
 
         <ToolCard className="lg:order-1">
           <div className="flex items-center justify-between">
-            <ToolBadge>Local → UTC</ToolBadge>
+            <ToolBadge tone="orange">Local → UTC</ToolBadge>
             <ToolActionButton
               type="button"
+              tone="purple"
+              className="cursor-default"
               onClick={() => {
                 const nowLocal = nowInZoneInput(sourceZone);
                 setLocalInput(nowLocal);
@@ -656,17 +713,125 @@ export default function UtcCalculator({ tool }: { tool: ToolItem }) {
             <p className="text-xs text-[color:var(--error)]">{localToUtc.error}</p>
           ) : (
             <>
-              <ToolOutput>{localToUtc.utcIso}</ToolOutput>
+              <ToolOutput className="border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] font-semibold">
+                {localToUtc.utcIso}
+              </ToolOutput>
               <p className="text-xs text-[var(--muted)]">Normalized Local: {localToUtc.normalizedLocal}</p>
               <div className="flex flex-wrap gap-2">
-                <ToolActionButton type="button" onClick={() => copy(localToUtc.utcInputText, "local-utc")}>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(localToUtc.utcInputText, "local-utc")}>
                   {isCopied("local-utc") ? "Copied" : "Copy UTC"}
                 </ToolActionButton>
-                <ToolActionButton type="button" onClick={() => copy(localToUtc.utcIso, "local-iso")}>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(localToUtc.utcIso, "local-iso")}>
                   {isCopied("local-iso") ? "Copied" : "Copy ISO"}
                 </ToolActionButton>
-                <ToolActionButton type="button" onClick={() => copy(localToUtc.epochMs, "local-epoch")}>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(localToUtc.epochMs, "local-epoch")}>
                   {isCopied("local-epoch") ? "Copied" : "Copy Epoch"}
+                </ToolActionButton>
+              </div>
+            </>
+          )}
+        </ToolCard>
+      </section>
+
+      <ToolInfoPanel
+        icon="U"
+        title="Unix Timestamp Converter"
+        description="Unix timestamp(초/밀리초)와 날짜/시간을 원하는 타임존 기준으로 상호 변환합니다."
+        chips={["Unix → Date/Time", "Date/Time → Unix", "Seconds / Milliseconds"]}
+      />
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <ToolCard>
+          <div className="flex items-center justify-between">
+            <ToolBadge tone="teal">Unix → Date/Time</ToolBadge>
+            <ToolActionButton
+              type="button"
+              tone="purple"
+              className="cursor-default"
+              onClick={() => setUnixInput(String(Math.trunc(Date.now() / 1000)))}
+            >
+              Now(Unix)
+            </ToolActionButton>
+          </div>
+          <ToolInput
+            value={unixInput}
+            onChange={(e) => setUnixInput(e.target.value)}
+            placeholder="1710153600 or 1710153600000"
+            className="font-mono"
+          />
+          <TimeZonePicker
+            value={unixTargetZone}
+            onChange={setUnixTargetZone}
+            options={timeZoneOptions}
+            placeholder="Search timezone or type UTC+8"
+          />
+          {"error" in unixToDate ? (
+            <p className="text-xs text-[color:var(--error)]">{unixToDate.error}</p>
+          ) : (
+            <>
+              <ToolOutput className="border-[color:var(--unix-to-date-output-border)] bg-[var(--unix-to-date-output-bg)] font-semibold">
+                {unixToDate.zonedText}
+              </ToolOutput>
+              <p className="text-xs text-[var(--muted)]">
+                {unixTargetZone} ({unixToDate.offset})
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(unixToDate.iso, "unix-iso")}>
+                  {isCopied("unix-iso") ? "Copied" : "Copy ISO"}
+                </ToolActionButton>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(unixToDate.epochSec, "unix-sec")}>
+                  {isCopied("unix-sec") ? "Copied" : "Copy Sec"}
+                </ToolActionButton>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(unixToDate.epochMs, "unix-ms")}>
+                  {isCopied("unix-ms") ? "Copied" : "Copy Ms"}
+                </ToolActionButton>
+              </div>
+            </>
+          )}
+        </ToolCard>
+
+        <ToolCard>
+          <div className="flex items-center justify-between">
+            <ToolBadge>Date/Time → Unix</ToolBadge>
+            <ToolActionButton
+              type="button"
+              tone="purple"
+              className="cursor-default"
+              onClick={() => setUnixLocalInput(nowInZoneInput(unixSourceZone))}
+            >
+              Now(Local)
+            </ToolActionButton>
+          </div>
+          <ToolInput
+            type="datetime-local"
+            step={1}
+            value={unixLocalInput}
+            onChange={(e) => setUnixLocalInput(e.target.value)}
+            className="pr-9 font-mono"
+          />
+          <TimeZonePicker
+            value={unixSourceZone}
+            onChange={setUnixSourceZone}
+            options={timeZoneOptions}
+            placeholder="Search timezone or type UTC+8"
+          />
+          {"error" in dateToUnix ? (
+            <p className="text-xs text-[color:var(--error)]">{dateToUnix.error}</p>
+          ) : (
+            <>
+              <ToolOutput className="border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] font-semibold">
+                {dateToUnix.epochSec}
+              </ToolOutput>
+              <p className="text-xs text-[var(--muted)]">Milliseconds: {dateToUnix.epochMs}</p>
+              <div className="flex flex-wrap gap-2">
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(dateToUnix.epochSec, "date-unix-sec")}>
+                  {isCopied("date-unix-sec") ? "Copied" : "Copy Sec"}
+                </ToolActionButton>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(dateToUnix.epochMs, "date-unix-ms")}>
+                  {isCopied("date-unix-ms") ? "Copied" : "Copy Ms"}
+                </ToolActionButton>
+                <ToolActionButton type="button" tone="teal" onClick={() => copy(dateToUnix.iso, "date-unix-iso")}>
+                  {isCopied("date-unix-iso") ? "Copied" : "Copy ISO"}
                 </ToolActionButton>
               </div>
             </>

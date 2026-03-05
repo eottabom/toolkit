@@ -64,10 +64,10 @@ export const tools: ToolItem[] = [
     createdAt: "2026-02-21",
   },
   {
-    title: "UTC Calculator",
-    desc: "Convert UTC and local timezone datetimes for logs, incidents, and schedules.",
+    title: "UTC & Unix Time Calculator",
+    desc: "Convert UTC/local datetimes and Unix timestamps (seconds/milliseconds) across timezones for logs, incidents, and schedules.",
     tag: "DevOps",
-    slug: "utc-calculator",
+    slug: "utc-unix-calculator",
     createdAt: "2026-03-04",
   },
 ];
