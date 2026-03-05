@@ -8,6 +8,33 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
+type ToolBadgeTone = "default" | "sky" | "orange" | "teal" | "green" | "red" | "purple" | "neutral" | "rose" | "cyan" | "lime";
+type ToolActionTone = "sky" | "orange" | "teal" | "green" | "red" | "purple" | "neutral";
+
+const TOOL_BADGE_TONE_CLASS: Record<ToolBadgeTone, string> = {
+  default: "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] text-[var(--foreground)]",
+  sky: "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]",
+  orange: "border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] text-[var(--foreground)]",
+  teal: "border-[color:var(--unix-to-date-output-border)] bg-[var(--unix-to-date-output-bg)] text-[var(--foreground)]",
+  green: "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] text-[var(--foreground)]",
+  red: "border-[color:var(--danger-output-border)] bg-[var(--danger-output-bg)] text-[var(--foreground)]",
+  purple: "border-[color:var(--purple-output-border)] bg-[var(--purple-output-bg)] text-[var(--foreground)]",
+  neutral: "border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--foreground)]",
+  rose: "border-rose-300/70 bg-rose-100/70 text-[var(--foreground)] dark:border-rose-300/40 dark:bg-rose-300/15",
+  cyan: "border-cyan-300/70 bg-cyan-100/70 text-[var(--foreground)] dark:border-cyan-300/40 dark:bg-cyan-300/15",
+  lime: "border-lime-300/70 bg-lime-100/70 text-[var(--foreground)] dark:border-lime-300/40 dark:bg-lime-300/15",
+};
+
+const TOOL_ACTION_TONE_CLASS: Record<ToolActionTone, string> = {
+  sky: "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)]",
+  orange: "border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]",
+  teal: "border-[color:var(--unix-to-date-output-border)] bg-[var(--unix-to-date-output-bg)]",
+  green: "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)]",
+  red: "border-[color:var(--danger-output-border)] bg-[var(--danger-output-bg)]",
+  purple: "border-[color:var(--purple-output-border)] bg-[var(--purple-output-bg)]",
+  neutral: "border-[color:var(--card-border)] bg-[var(--surface-muted)]",
+};
+
 export function ToolPage({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn("flex flex-col gap-8", className)}>{children}</div>;
 }
@@ -54,30 +81,9 @@ export function ToolBadge({
 }: {
   className?: string;
   children: ReactNode;
-  tone?: "default" | "sky" | "orange" | "teal" | "green" | "red" | "purple" | "neutral" | "rose" | "cyan" | "lime";
+  tone?: ToolBadgeTone;
 }) {
-  const toneClass =
-    tone === "sky"
-      ? "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
-      : tone === "orange"
-        ? "border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] text-[var(--foreground)]"
-        : tone === "teal"
-          ? "border-[color:var(--unix-to-date-output-border)] bg-[var(--unix-to-date-output-bg)] text-[var(--foreground)]"
-          : tone === "green"
-            ? "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] text-[var(--foreground)]"
-            : tone === "red"
-              ? "border-[color:var(--danger-output-border)] bg-[var(--danger-output-bg)] text-[var(--foreground)]"
-                : tone === "purple"
-                ? "border-[color:var(--purple-output-border)] bg-[var(--purple-output-bg)] text-[var(--foreground)]"
-                : tone === "rose"
-                    ? "border-rose-300/70 bg-rose-100/70 text-[var(--foreground)] dark:border-rose-300/40 dark:bg-rose-300/15"
-                    : tone === "cyan"
-                        ? "border-cyan-300/70 bg-cyan-100/70 text-[var(--foreground)] dark:border-cyan-300/40 dark:bg-cyan-300/15"
-                        : tone === "lime"
-                          ? "border-lime-300/70 bg-lime-100/70 text-[var(--foreground)] dark:border-lime-300/40 dark:bg-lime-300/15"
-                : tone === "neutral"
-                  ? "border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
-            : "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] text-[var(--foreground)]";
+  const toneClass = TOOL_BADGE_TONE_CLASS[tone] ?? TOOL_BADGE_TONE_CLASS.default;
   return (
     <Badge
       variant="outline"
@@ -98,22 +104,9 @@ export function ToolActionButton({
   tone = "sky",
   ...props
 }: ComponentProps<typeof Button> & {
-  tone?: "sky" | "orange" | "teal" | "green" | "red" | "purple" | "neutral";
+  tone?: ToolActionTone;
 }) {
-  const toneClass =
-    tone === "sky"
-      ? "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)]"
-      : tone === "orange"
-        ? "border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]"
-        : tone === "teal"
-          ? "border-[color:var(--unix-to-date-output-border)] bg-[var(--unix-to-date-output-bg)]"
-          : tone === "green"
-            ? "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)]"
-            : tone === "red"
-              ? "border-[color:var(--danger-output-border)] bg-[var(--danger-output-bg)]"
-              : tone === "purple"
-                ? "border-[color:var(--purple-output-border)] bg-[var(--purple-output-bg)]"
-                : "border-[color:var(--card-border)] bg-[var(--surface-muted)]";
+  const toneClass = TOOL_ACTION_TONE_CLASS[tone] ?? TOOL_ACTION_TONE_CLASS.sky;
   return (
     <Button
       variant="ghost"
