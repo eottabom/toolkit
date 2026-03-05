@@ -8,6 +8,33 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
+type ToolBadgeTone = "default" | "sky" | "orange" | "teal" | "green" | "red" | "purple" | "neutral" | "rose" | "cyan" | "lime";
+type ToolActionTone = "sky" | "orange" | "teal" | "green" | "red" | "purple" | "neutral";
+
+const TOOL_BADGE_TONE_CLASS: Record<ToolBadgeTone, string> = {
+  default: "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] text-[var(--foreground)]",
+  sky: "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]",
+  orange: "border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)] text-[var(--foreground)]",
+  teal: "border-[color:var(--unix-to-date-output-border)] bg-[var(--unix-to-date-output-bg)] text-[var(--foreground)]",
+  green: "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] text-[var(--foreground)]",
+  red: "border-[color:var(--danger-output-border)] bg-[var(--danger-output-bg)] text-[var(--foreground)]",
+  purple: "border-[color:var(--purple-output-border)] bg-[var(--purple-output-bg)] text-[var(--foreground)]",
+  neutral: "border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--foreground)]",
+  rose: "border-rose-300/70 bg-rose-100/70 text-[var(--foreground)] dark:border-rose-300/40 dark:bg-rose-300/15",
+  cyan: "border-cyan-300/70 bg-cyan-100/70 text-[var(--foreground)] dark:border-cyan-300/40 dark:bg-cyan-300/15",
+  lime: "border-lime-300/70 bg-lime-100/70 text-[var(--foreground)] dark:border-lime-300/40 dark:bg-lime-300/15",
+};
+
+const TOOL_ACTION_TONE_CLASS: Record<ToolActionTone, string> = {
+  sky: "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)]",
+  orange: "border-[color:var(--local-to-utc-output-border)] bg-[var(--local-to-utc-output-bg)]",
+  teal: "border-[color:var(--unix-to-date-output-border)] bg-[var(--unix-to-date-output-bg)]",
+  green: "border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)]",
+  red: "border-[color:var(--danger-output-border)] bg-[var(--danger-output-bg)]",
+  purple: "border-[color:var(--purple-output-border)] bg-[var(--purple-output-bg)]",
+  neutral: "border-[color:var(--card-border)] bg-[var(--surface-muted)]",
+};
+
 export function ToolPage({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn("flex flex-col gap-8", className)}>{children}</div>;
 }
@@ -47,12 +74,22 @@ export function ToolCard({ className, children }: { className?: string; children
   );
 }
 
-export function ToolBadge({ className, children }: { className?: string; children: ReactNode }) {
+export function ToolBadge({
+  className,
+  children,
+  tone = "default",
+}: {
+  className?: string;
+  children: ReactNode;
+  tone?: ToolBadgeTone;
+}) {
+  const toneClass = TOOL_BADGE_TONE_CLASS[tone] ?? TOOL_BADGE_TONE_CLASS.default;
   return (
     <Badge
       variant="outline"
       className={cn(
-        "self-start cursor-default rounded-full border border-transparent bg-[var(--accent-2)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white",
+        "self-start cursor-default rounded-xl border px-3 py-1 text-xs font-semibold tracking-[0.06em]",
+        toneClass,
         className,
       )}
     >
@@ -64,14 +101,19 @@ export function ToolBadge({ className, children }: { className?: string; childre
 export function ToolActionButton({
   className,
   children,
+  tone = "sky",
   ...props
-}: ComponentProps<typeof Button>) {
+}: ComponentProps<typeof Button> & {
+  tone?: ToolActionTone;
+}) {
+  const toneClass = TOOL_ACTION_TONE_CLASS[tone] ?? TOOL_ACTION_TONE_CLASS.sky;
   return (
     <Button
       variant="ghost"
       size="sm"
       className={cn(
-        "cursor-pointer h-auto rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)] transition hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]",
+        "cursor-pointer h-auto rounded-xl border px-3 py-1 text-xs font-semibold text-[var(--foreground)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--card-border-hover)] disabled:cursor-not-allowed disabled:opacity-50",
+        toneClass,
         className,
       )}
       {...props}
@@ -152,7 +194,7 @@ export function ToolInput({ className, ...props }: ComponentProps<typeof Input>)
   return (
     <Input
       className={cn(
-        "h-9 rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none",
+        "tool-input h-9 rounded-xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-3 text-sm text-[var(--foreground)] focus:border-[color:var(--card-border-hover)] focus:outline-none",
         className,
       )}
       {...props}
@@ -190,7 +232,7 @@ export function ToolAddButton({ className, children, ...props }: ComponentProps<
       variant="ghost"
       size="sm"
       className={cn(
-        "cursor-pointer h-auto rounded-full bg-blue-600 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-blue-700",
+        "cursor-pointer h-auto rounded-xl border border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] px-3 py-1 text-xs font-semibold text-[var(--foreground)] transition hover:brightness-95",
         className,
       )}
       {...props}
@@ -200,14 +242,14 @@ export function ToolAddButton({ className, children, ...props }: ComponentProps<
   );
 }
 
-export function ToolRemoveButton({ className, children = "삭제", ...props }: ComponentProps<typeof Button>) {
+export function ToolRemoveButton({ className, children = "Remove", ...props }: ComponentProps<typeof Button>) {
   return (
     <Button
       type="button"
       variant="ghost"
       size="sm"
       className={cn(
-        "cursor-pointer h-7 rounded-full bg-red-500 px-2 text-[10px] font-semibold text-white transition hover:bg-red-600",
+        "cursor-pointer h-8 rounded-xl border border-[rgba(239,68,68,0.35)] bg-[rgba(239,68,68,0.12)] px-3 text-xs font-semibold text-[var(--foreground)] transition hover:brightness-95 dark:border-[rgba(248,113,113,0.45)] dark:bg-[rgba(248,113,113,0.18)]",
         className,
       )}
       {...props}

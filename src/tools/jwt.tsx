@@ -252,7 +252,11 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
         <ToolCard>
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)] font-semibold">
             <ToolBadge>Decode JWT</ToolBadge>
-            <ToolActionButton type="button" onClick={() => handleJwtInputChange("")}>
+            <ToolActionButton
+              type="button"
+              onClick={() => handleJwtInputChange("")}
+              tone="orange"
+            >
               Clear
             </ToolActionButton>
           </div>
@@ -274,6 +278,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                   <ToolActionButton
                     type="button"
                     onClick={() => copy(decoded.header, "header")}
+                    tone="teal"
                   >
                     {isCopied("header") ? "Copied" : "Copy"}
                   </ToolActionButton>
@@ -287,6 +292,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                   <ToolActionButton
                     type="button"
                     onClick={() => copy(decoded.payload, "payload")}
+                    tone="teal"
                   >
                     {isCopied("payload") ? "Copied" : "Copy"}
                   </ToolActionButton>
@@ -312,6 +318,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                     <ToolActionButton
                       type="button"
                       onClick={() => copy(decoded.signature, "signature")}
+                      tone="teal"
                     >
                       {isCopied("signature") ? "Copied" : "Copy"}
                     </ToolActionButton>
@@ -413,10 +420,10 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                 key={alg}
                 type="button"
                 onClick={() => handleEncAlgChange(alg)}
-                className={`rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition ${
+                className={`cursor-pointer rounded-xl border px-4 py-1.5 text-xs font-semibold tracking-[0.06em] transition hover:brightness-95 ${
                   encAlg === alg
-                    ? "bg-[var(--foreground)] text-[var(--background)]"
-                    : "border border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:border-[color:var(--card-border-hover)] hover:text-[var(--foreground)]"
+                    ? "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+                    : "border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
                 }`}
               >
                 {alg}
@@ -484,6 +491,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               <ToolActionButton
                 type="button"
                 onClick={() => copy(encodedJwt, "encoded")}
+                tone="teal"
               >
                 {isCopied("encoded") ? "Copied" : "Copy"}
               </ToolActionButton>

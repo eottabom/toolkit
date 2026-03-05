@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { ToolActionButton, ToolCard, ToolHeader, ToolInfoPanel, ToolInput, ToolLabel, ToolOutput, ToolPage } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolInput, ToolLabel, ToolOutput, ToolPage } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -96,7 +96,7 @@ function ResultPanel({
 
   return (
     <ToolCard className="gap-4">
-      <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Memory Allocation</h3>
+      <ToolBadge tone="neutral">Memory Allocation</ToolBadge>
 
       {/* 추천 모드 결과 */}
       {recommendedTotal !== undefined && (
@@ -176,10 +176,11 @@ function ResultPanel({
       {/* JVM 플래그 */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">JVM Flags</h4>
+          <ToolBadge tone="neutral">JVM Flags</ToolBadge>
           <ToolActionButton
             type="button"
             onClick={() => copy(jvmFlags)}
+            tone="teal"
             disabled={isError}
           >
             {isCopied() ? "Copied" : "Copy"}
@@ -399,8 +400,10 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
 
   /* 스타일 클래스 */
   const modeTabClass = (active: boolean) =>
-    `cursor-pointer px-4 py-2 text-xs font-semibold transition rounded-lg ${
-      active ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600 hover:text-gray-900"
+    `cursor-pointer rounded-xl border px-4 py-2 text-xs font-semibold transition hover:brightness-95 ${
+      active
+        ? "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+        : "border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
     }`;
 
   return (
@@ -451,7 +454,7 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
       {mode === "calculate" && (
         <section className="grid gap-4 lg:grid-cols-2">
           <ToolCard className="gap-4">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--muted)]">Configuration</h3>
+            <ToolBadge tone="neutral">Configuration</ToolBadge>
 
             <div className="flex flex-col gap-1.5">
               <ToolLabel>Total Memory</ToolLabel>
@@ -472,7 +475,11 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
                         setTotalMemory(totalMemory * 1024);
                       }
                     }}
-                    className={`cursor-pointer px-3 py-1 text-xs font-semibold transition ${memoryUnit === "MB" ? "bg-blue-600 text-white" : "bg-[var(--surface-muted)] text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                    className={`cursor-pointer px-3 py-1 text-xs font-semibold transition hover:brightness-95 ${
+                      memoryUnit === "MB"
+                        ? "bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+                        : "bg-[var(--surface-muted)] text-[var(--muted)]"
+                    }`}
                   >
                     MB
                   </button>
@@ -484,7 +491,11 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
                         setTotalMemory(Math.max(1, Math.round(totalMemory / 1024)));
                       }
                     }}
-                    className={`cursor-pointer px-3 py-1 text-xs font-semibold transition ${memoryUnit === "GB" ? "bg-blue-600 text-white" : "bg-[var(--surface-muted)] text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                    className={`cursor-pointer px-3 py-1 text-xs font-semibold transition hover:brightness-95 ${
+                      memoryUnit === "GB"
+                        ? "bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+                        : "bg-[var(--surface-muted)] text-[var(--muted)]"
+                    }`}
                   >
                     GB
                   </button>
@@ -755,7 +766,11 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
                         setQuickTotalMemory(quickTotalMemory * 1024);
                       }
                     }}
-                    className={`cursor-pointer px-3 py-1 text-xs font-semibold transition ${quickMemoryUnit === "MB" ? "bg-blue-600 text-white" : "bg-[var(--surface-muted)] text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                    className={`cursor-pointer px-3 py-1 text-xs font-semibold transition hover:brightness-95 ${
+                      quickMemoryUnit === "MB"
+                        ? "bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+                        : "bg-[var(--surface-muted)] text-[var(--muted)]"
+                    }`}
                   >
                     MB
                   </button>
@@ -767,7 +782,11 @@ export default function JavaMemoryCalculator({ tool }: { tool: ToolItem }) {
                         setQuickTotalMemory(Math.max(1, Math.round(quickTotalMemory / 1024)));
                       }
                     }}
-                    className={`cursor-pointer px-3 py-1 text-xs font-semibold transition ${quickMemoryUnit === "GB" ? "bg-blue-600 text-white" : "bg-[var(--surface-muted)] text-[var(--muted)] hover:text-[var(--foreground)]"}`}
+                    className={`cursor-pointer px-3 py-1 text-xs font-semibold transition hover:brightness-95 ${
+                      quickMemoryUnit === "GB"
+                        ? "bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+                        : "bg-[var(--surface-muted)] text-[var(--muted)]"
+                    }`}
                   >
                     GB
                   </button>

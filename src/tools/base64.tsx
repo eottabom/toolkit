@@ -91,6 +91,7 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleClear("plain")}
+              tone="orange"
             >
               {clearState === "plain" ? "Cleared" : "Clear"}
             </ToolActionButton>
@@ -109,6 +110,7 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => copy(encoded, "encoded")}
+              tone="teal"
             >
               {isCopied("encoded") ? "Copied" : "Copy"}
             </ToolActionButton>
@@ -131,6 +133,7 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => handleClear("base64")}
+              tone="orange"
             >
               {clearState === "base64" ? "Cleared" : "Clear"}
             </ToolActionButton>
@@ -149,6 +152,7 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
             <ToolActionButton
               type="button"
               onClick={() => copy(decoded, "decoded")}
+              tone="teal"
             >
               {isCopied("decoded") ? "Copied" : "Copy"}
             </ToolActionButton>

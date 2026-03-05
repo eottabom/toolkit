@@ -230,8 +230,8 @@ export default function Home() {
                   placeholder="Type a tool name"
                 />
                 <Button
-                  className="h-10 rounded-2xl bg-[var(--accent-2)] px-4 text-xs font-semibold text-white transition hover:opacity-90 sm:h-12 sm:px-6 sm:text-sm">
-                  Go
+                  className="h-10 rounded-xl border border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] px-4 text-xs font-semibold tracking-[0.04em] text-[var(--foreground)] transition hover:brightness-95 sm:h-12 sm:px-6 sm:text-sm">
+                  Search
                 </Button>
               </div>
               <div className="flex flex-col gap-2">

@@ -434,10 +434,10 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
   const showBody = ["POST", "PUT", "PATCH"].includes(method);
 
   const tabBtnClass = (active: boolean) =>
-    `cursor-pointer h-8 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
+    `cursor-pointer h-9 rounded-xl px-3 text-xs font-semibold tracking-[0.06em] transition hover:brightness-95 ${
       active
-        ? "bg-blue-600 text-white"
-        : "border border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--foreground)]"
+        ? "border border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+        : "border border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
     }`;
 
   return (
@@ -624,15 +624,23 @@ export default function K6Generator({ tool }: { tool: ToolItem }) {
             <div className="flex items-center justify-between">
               <ToolBadge>Generated Script</ToolBadge>
               <div className="flex items-center gap-2">
-                <ToolActionButton type="button" onClick={handleCopy} disabled={!activeScript.trim()}>
+                <ToolActionButton type="button" onClick={handleCopy} tone="teal" disabled={!activeScript.trim()}>
                   {isCopied() ? "Copied!" : "Copy"}
                 </ToolActionButton>
                 {scriptTab === "custom" ? (
-                  <ToolActionButton type="button" onClick={() => setCustomScript("")}>
+                  <ToolActionButton
+                    type="button"
+                    onClick={() => setCustomScript("")}
+                    tone="orange"
+                  >
                     Clear
                   </ToolActionButton>
                 ) : (
-                  <ToolActionButton type="button" onClick={handleClear}>
+                  <ToolActionButton
+                    type="button"
+                    onClick={handleClear}
+                    tone="orange"
+                  >
                     Clear
                   </ToolActionButton>
                 )}

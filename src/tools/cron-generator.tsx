@@ -189,7 +189,7 @@ const PRESETS: Preset[] = [
 
 /* 표현식 생성 */
 
-function fieldToExpression(field: FieldState, def: FieldDef, platform: CronPlatform): string {
+function fieldToExpression(field: FieldState, def: FieldDef): string {
   switch (field.mode) {
     case "every":
       return "*";
@@ -218,7 +218,7 @@ function fieldToExpression(field: FieldState, def: FieldDef, platform: CronPlatf
 
 function buildExpression(fields: Record<FieldKey, FieldState>, platform: CronPlatform): string {
   const defs = FIELD_DEFS[platform];
-  return defs.map((def) => fieldToExpression(fields[def.key], def, platform)).join(" ");
+  return defs.map((def) => fieldToExpression(fields[def.key], def)).join(" ");
 }
 
 /* 표현식 해석 */
@@ -552,6 +552,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
   /* 수동 입력 모드 */
   const [manualMode, setManualMode] = useState(false);
   const [manualExpr, setManualExpr] = useState("");
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
   /* Jenkins 해시 시드 (0~59) */
   const [hashSeed, setHashSeed] = useState(7);
@@ -615,6 +616,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
         result.year = defaultField(YEAR_DEF);
       }
       setFields(result);
+      setSelectedPreset(null);
     },
     [fields],
   );
@@ -623,15 +625,18 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
     (preset: Preset) => {
       setFields(preset.apply(platform));
       setManualMode(false);
+      setSelectedPreset(preset.label);
     },
     [platform],
   );
 
   const updateField = useCallback((key: FieldKey, patch: Partial<FieldState>) => {
+    setSelectedPreset(null);
     setFields((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
   }, []);
 
   const toggleSpecific = useCallback((key: FieldKey, val: number) => {
+    setSelectedPreset(null);
     setFields((prev) => {
       const field = prev[key];
       const specific = field.specific.includes(val) ? field.specific.filter((v) => v !== val) : [...field.specific, val];
@@ -645,10 +650,10 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
 
   /* 스타일 */
   const tabBtnClass = (active: boolean) =>
-    `cursor-pointer h-8 rounded-full px-3 text-[11px] font-semibold uppercase tracking-[0.16em] transition ${
+    `cursor-pointer h-9 rounded-xl px-3 text-xs font-semibold tracking-[0.06em] transition hover:brightness-95 ${
       active
-        ? "bg-blue-600 text-white"
-        : "border border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--foreground)]"
+        ? "border border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+        : "border border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
     }`;
 
   const currentDefs = FIELD_DEFS[platform];
@@ -702,10 +707,10 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                   key={p.value}
                   type="button"
                   onClick={() => handlePlatformChange(p.value)}
-                  className={`cursor-pointer flex flex-col gap-1 rounded-2xl border p-3 text-left transition ${
+                  className={`cursor-pointer flex flex-col gap-1 rounded-2xl border p-3 text-left transition hover:brightness-95 ${
                     platform === p.value
-                      ? "border-blue-500 bg-blue-500/10 text-[var(--foreground)]"
-                      : "border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--muted)] hover:border-[color:var(--card-border-hover)]"
+                      ? "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+                      : "border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--muted)] hover:brightness-95"
                   }`}
                 >
                   <span className="text-sm font-semibold">{p.label}</span>
@@ -724,7 +729,11 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                   key={pr.label}
                   type="button"
                   onClick={() => applyPreset(pr)}
-                  className="cursor-pointer rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[color:var(--card-border-hover)] hover:bg-[var(--surface-muted)]"
+                  className={`cursor-pointer rounded-xl border px-3 py-1.5 text-xs font-semibold text-[var(--foreground)] transition hover:brightness-95 ${
+                    selectedPreset === pr.label
+                      ? "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)]"
+                      : "border-[color:var(--card-border)] bg-[var(--surface-muted)]"
+                  }`}
                 >
                   {pr.label}
                 </button>
@@ -781,7 +790,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                   <div className="flex items-center justify-between">
                     <ToolBadge>{def.label}</ToolBadge>
                     <span className="font-mono text-xs text-[var(--muted)]">
-                      {fieldToExpression(fields[def.key], def, platform)}
+                      {fieldToExpression(fields[def.key], def)}
                     </span>
                   </div>
 
@@ -792,10 +801,10 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
                         key={m.value}
                         type="button"
                         onClick={() => updateField(def.key, { mode: m.value })}
-                        className={`cursor-pointer rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
+                  className={`cursor-pointer rounded-xl border px-2.5 py-1.5 text-xs font-semibold transition hover:brightness-95 ${
                           fields[def.key].mode === m.value
-                            ? "bg-blue-600 text-white"
-                            : "border border-[color:var(--card-border)] bg-[var(--surface)] text-[var(--muted)] hover:text-[var(--foreground)]"
+                            ? "border-[color:var(--utc-to-local-output-border)] bg-[var(--utc-to-local-output-bg)] text-[var(--foreground)]"
+                            : "border-[color:var(--card-border)] bg-[var(--surface-muted)] text-[var(--foreground)]"
                         }`}
                       >
                         {m.label}
@@ -969,7 +978,7 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
           <ToolCard>
             <div className="flex items-center justify-between">
               <ToolBadge>Generated Expression</ToolBadge>
-              <ToolActionButton type="button" onClick={handleCopy} disabled={!activeExpr.trim()}>
+              <ToolActionButton type="button" onClick={handleCopy} tone="teal" disabled={!activeExpr.trim()}>
                 {isCopied() ? "Copied!" : "Copy"}
               </ToolActionButton>
             </div>
