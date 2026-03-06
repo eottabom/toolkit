@@ -145,11 +145,11 @@ export default function Home() {
         <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span
-              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--foreground)] text-[var(--background)] text-base font-semibold">
-              TK
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--logo-border)] bg-[var(--logo-bg)] font-mono text-sm font-bold tracking-tight text-[#3fb950] shadow-[var(--logo-shadow)]">
+              &gt;_
             </span>
             <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-[var(--muted)]">Toolkit</p>
+              <p className="font-mono text-xs text-[var(--muted)]">~/toolkit</p>
               <h1 className="text-2xl font-semibold text-[var(--foreground)]">Developer Toolbox</h1>
             </div>
           </div>
@@ -213,26 +213,26 @@ export default function Home() {
           >
             <Card
               className="flex flex-col gap-5 rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)]/80 p-6 shadow-[var(--card-shadow)] backdrop-blur">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Tool Search</p>
-                  <h2 className="mt-2 text-2xl font-semibold leading-tight text-[var(--foreground)]">
-                    Search your tools.
-                  </h2>
-                </div>
-                <span/>
-              </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <h2 className="text-2xl font-semibold leading-tight text-[var(--foreground)]">
+                Search your tools.
+              </h2>
+              <div className="relative">
                 <Input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  className="h-10 flex-1 rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-4 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-[color:var(--card-border-hover)] focus:outline-none sm:h-12"
+                  className="h-12 w-full rounded-full border border-[color:var(--card-border)] bg-[var(--surface-muted)] pl-5 pr-14 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-[#1f7ae0] focus:outline-none"
                   placeholder="Type a tool name"
                 />
-                <Button
-                  className="h-10 rounded-xl border border-[color:var(--date-to-unix-output-border)] bg-[var(--date-to-unix-output-bg)] px-4 text-xs font-semibold tracking-[0.04em] text-[var(--foreground)] transition hover:brightness-95 sm:h-12 sm:px-6 sm:text-sm">
-                  Search
-                </Button>
+                <button
+                  type="button"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#1f7ae0] text-white transition hover:bg-[#1a6bc7]"
+                  aria-label="Search"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                </button>
               </div>
               <div className="flex flex-col gap-2">
                 {searchPreviewTools.map((tool) => (
