@@ -105,6 +105,19 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5103032140213770"
           crossOrigin="anonymous"
         />
+        <Script
+          async
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-C4G71YP1XT"
+        />
+        <Script id="gtag-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-C4G71YP1XT');
+          `}
+        </Script>
       </head>
       <body className={`${sora.variable} ${plexMono.variable} antialiased`}>
         <ThemeProvider>{children}</ThemeProvider>
