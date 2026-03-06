@@ -151,6 +151,13 @@ export default function Home() {
             <div>
               <p className="font-mono text-xs text-[var(--muted)]">~/toolkit</p>
               <h1 className="text-2xl font-semibold text-[var(--foreground)]">Developer Toolbox</h1>
+              <p className="mt-0.5 flex items-center gap-1 text-[11px] text-[var(--muted)]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                Runs locally — no data sent to server
+              </p>
             </div>
           </div>
           <nav className="flex items-center gap-4 text-sm text-[var(--muted)]">
@@ -358,7 +365,42 @@ export default function Home() {
           </section>
         </main>
 
-        <footer className="mt-6 h-14 border-t border-[color:var(--card-border)]"/>
+        <footer className="mt-6 flex items-center justify-between border-t border-[color:var(--card-border)] py-5 text-xs text-[var(--muted)]">
+          <div className="flex items-center gap-1.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span>All tools run locally in your browser — no data is sent to any server.</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <a
+              href="https://eottabom.github.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 transition hover:text-[var(--foreground)]"
+              aria-label="Blog"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+              <span>Blog</span>
+            </a>
+            <a
+              href="https://github.com/eottabom"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 transition hover:text-[var(--foreground)]"
+              aria-label="GitHub"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z" />
+              </svg>
+              <span>GitHub</span>
+            </a>
+          </div>
+        </footer>
       </div>
     </div>
   );
