@@ -150,7 +150,7 @@ export default function Home() {
             </span>
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-[var(--muted)]">Toolkit</p>
-              <h1 className="text-2xl font-semibold text-[var(--foreground)]">Useful Utilities</h1>
+              <h1 className="text-2xl font-semibold text-[var(--foreground)]">Developer Toolbox</h1>
             </div>
           </div>
           <nav className="flex items-center gap-4 text-sm text-[var(--muted)]">

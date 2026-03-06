@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BASE_URL } from "@/lib/constants";
 import { tools } from "@/lib/tools";
 import { toolPages } from "@/tools";
 import { AdsenseAutoRelaxed } from "@/components/adsense-auto-relaxed";
@@ -24,8 +25,22 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
   const tool = tools.find((t) => t.slug === slug);
   if (!tool) return {};
   return {
-    title: `${tool.title} | Toolkit`,
+    title: tool.title,
     description: tool.desc,
+    alternates: {
+      canonical: `${BASE_URL}${tool.slug}/`,
+    },
+    openGraph: {
+      type: "website",
+      url: `${BASE_URL}${tool.slug}/`,
+      title: `${tool.title} | Toolkit`,
+      description: tool.desc,
+    },
+    twitter: {
+      card: "summary",
+      title: `${tool.title} | Toolkit`,
+      description: tool.desc,
+    },
   };
 }
 
