@@ -59,6 +59,8 @@ export default function Home() {
         return (
           tool.title.toLowerCase().includes(q) ||
           tool.desc.toLowerCase().includes(q) ||
+          tool.conceptTitle.toLowerCase().includes(q) ||
+          tool.conceptSummary.toLowerCase().includes(q) ||
           tool.tag.toLowerCase().includes(q) ||
           tool.slug.toLowerCase().includes(q)
         );
@@ -342,7 +344,7 @@ export default function Home() {
               .map((tool, index) => (
                 <Card
                   key={tool.slug}
-                  className="group rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-6 shadow-[var(--card-shadow)] transition hover:-translate-y-1 hover:border-[color:var(--card-border-hover)] hover:shadow-[0_18px_45px_rgba(16,24,40,0.12)] animate-[fade-in_0.7s_ease-out]"
+                  className="group relative z-0 overflow-visible rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-6 shadow-[var(--card-shadow)] transition hover:-translate-y-1 hover:border-[color:var(--card-border-hover)] hover:shadow-[0_18px_45px_rgba(16,24,40,0.12)] has-[[data-tooltip-trigger]:hover]:z-50 has-[[data-tooltip-trigger]:focus]:z-50 has-[[data-tooltip-trigger]:focus-visible]:z-50 animate-[fade-in_0.7s_ease-out]"
                   style={{
                     animationDelay: `${0.12 + index * 0.06}s`,
                     animationFillMode: "both",
@@ -352,7 +354,26 @@ export default function Home() {
                     className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
                     <span>{tool.tag}</span>
                   </div>
-                  <h3 className="mt-4 text-lg font-semibold text-[var(--foreground)]">{tool.title}</h3>
+                  <div className="group/title relative z-0 mt-4 hover:z-50 focus-within:z-50">
+                    <button
+                      type="button"
+                      data-tooltip-trigger
+                      aria-describedby={`concept-${tool.slug}`}
+                      className="cursor-help text-left text-lg font-semibold text-[var(--foreground)] decoration-dotted underline-offset-4 focus:outline-none focus-visible:underline"
+                    >
+                      {tool.title}
+                    </button>
+                    <div
+                      id={`concept-${tool.slug}`}
+                      role="tooltip"
+                      className="tool-concept-tooltip pointer-events-none absolute left-0 top-full z-50 mt-3 translate-y-1 rounded-2xl border border-[color:var(--card-border-hover)] bg-[var(--surface)] p-4 text-left opacity-0 shadow-[0_18px_45px_rgba(16,24,40,0.16)] transition duration-200 group-hover/title:translate-y-0 group-hover/title:opacity-100 group-focus-within/title:translate-y-0 group-focus-within/title:opacity-100"
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent-2)]">
+                        {tool.conceptTitle}
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-[var(--foreground)]">{tool.conceptSummary}</p>
+                    </div>
+                  </div>
                   <p className="mt-2 text-sm text-[var(--muted)]">{tool.desc}</p>
                   <Link
                     href={`/${tool.slug}`}
