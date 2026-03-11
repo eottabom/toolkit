@@ -1,7 +1,9 @@
 "use client";
 
-import {useMemo, useState} from "react";
+import type { MouseEvent } from "react";
+import {useEffect, useMemo, useState} from "react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { RECENT_TOOL_MAX, RECENT_TOOL_SLUGS_KEY } from "@/lib/constants";
 import {tools} from "@/lib/tools";
 import {useTheme} from "@/components/theme-provider";
@@ -16,11 +18,20 @@ const TOOL_BY_SLUG = new Map(tools.map((tool) => [tool.slug, tool]));
 const SHUFFLED_TOOL_SLUGS = [...tools]
   .sort(() => Math.random() - 0.5)
   .map((tool) => tool.slug);
+const TOOLTIP_OFFSET = 12;
+
+type HoveredConceptTooltip = {
+  conceptTitle: string;
+  conceptSummary: string;
+  left: number;
+  top: number;
+};
 
 export default function Home() {
   const {theme, mounted, toggleTheme} = useTheme();
   const [query, setQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [hoveredTooltip, setHoveredTooltip] = useState<HoveredConceptTooltip | null>(null);
   const recentToolSlugs = useMemo(() => {
     if (!mounted) {
       return [];
@@ -133,10 +144,36 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!hoveredTooltip) {
+      return;
+    }
+
+    const closeTooltip = () => setHoveredTooltip(null);
+    window.addEventListener("scroll", closeTooltip, true);
+    window.addEventListener("resize", closeTooltip);
+
+    return () => {
+      window.removeEventListener("scroll", closeTooltip, true);
+      window.removeEventListener("resize", closeTooltip);
+    };
+  }, [hoveredTooltip]);
+
+  const showTooltip = (event: MouseEvent<HTMLSpanElement>, conceptTitle: string, conceptSummary: string) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setHoveredTooltip({
+      conceptTitle,
+      conceptSummary,
+      left: rect.left,
+      top: rect.bottom + TOOLTIP_OFFSET,
+    });
+  };
+
   return (
-    <div
-      className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,106,61,0.14)_0%,_transparent_55%),radial-gradient(circle_at_bottom,_rgba(31,122,224,0.16)_0%,_transparent_45%)]">
-      <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10">
+    <>
+      <div
+        className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(255,106,61,0.14)_0%,_transparent_55%),radial-gradient(circle_at_bottom,_rgba(31,122,224,0.16)_0%,_transparent_45%)]">
+        <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-10 sm:px-10">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -top-24 right-6 h-44 w-44 rounded-full bg-[#ff6a3d]/20 blur-3xl animate-[float-slow_10s_ease-in-out_infinite]"/>
@@ -344,7 +381,7 @@ export default function Home() {
               .map((tool, index) => (
                 <Card
                   key={tool.slug}
-                  className="group relative z-0 overflow-visible rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-6 shadow-[var(--card-shadow)] transition hover:-translate-y-1 hover:border-[color:var(--card-border-hover)] hover:shadow-[0_18px_45px_rgba(16,24,40,0.12)] has-[[data-tooltip-trigger]:hover]:z-50 has-[[data-tooltip-trigger]:focus]:z-50 has-[[data-tooltip-trigger]:focus-visible]:z-50 animate-[fade-in_0.7s_ease-out]"
+                  className="group rounded-3xl border border-[color:var(--card-border)] bg-[var(--surface)] p-6 shadow-[var(--card-shadow)] transition hover:-translate-y-1 hover:border-[color:var(--card-border-hover)] hover:shadow-[0_18px_45px_rgba(16,24,40,0.12)] animate-[fade-in_0.7s_ease-out]"
                   style={{
                     animationDelay: `${0.12 + index * 0.06}s`,
                     animationFillMode: "both",
@@ -354,25 +391,14 @@ export default function Home() {
                     className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[var(--muted)]">
                     <span>{tool.tag}</span>
                   </div>
-                  <div className="group/title relative z-0 mt-4 hover:z-50 focus-within:z-50">
-                    <button
-                      type="button"
-                      data-tooltip-trigger
-                      aria-describedby={`concept-${tool.slug}`}
-                      className="cursor-help text-left text-lg font-semibold text-[var(--foreground)] decoration-dotted underline-offset-4 focus:outline-none focus-visible:underline"
+                  <div className="mt-4">
+                    <span
+                      className="cursor-help text-left text-lg font-semibold text-[var(--foreground)] decoration-dotted underline-offset-4"
+                      onMouseEnter={(event) => showTooltip(event, tool.conceptTitle, tool.conceptSummary)}
+                      onMouseLeave={() => setHoveredTooltip(null)}
                     >
                       {tool.title}
-                    </button>
-                    <div
-                      id={`concept-${tool.slug}`}
-                      role="tooltip"
-                      className="tool-concept-tooltip pointer-events-none absolute left-0 top-full z-50 mt-3 translate-y-1 rounded-2xl border border-[color:var(--card-border-hover)] bg-[var(--surface)] p-4 text-left opacity-0 shadow-[0_18px_45px_rgba(16,24,40,0.16)] transition duration-200 group-hover/title:translate-y-0 group-hover/title:opacity-100 group-focus-within/title:translate-y-0 group-focus-within/title:opacity-100"
-                    >
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent-2)]">
-                        {tool.conceptTitle}
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-[var(--foreground)]">{tool.conceptSummary}</p>
-                    </div>
+                    </span>
                   </div>
                   <p className="mt-2 text-sm text-[var(--muted)]">{tool.desc}</p>
                   <Link
@@ -422,7 +448,26 @@ export default function Home() {
             </a>
           </div>
         </footer>
+        </div>
       </div>
-    </div>
+      {mounted && hoveredTooltip && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              role="tooltip"
+              className="tool-concept-tooltip pointer-events-none fixed rounded-2xl border border-[color:var(--card-border-hover)] bg-[var(--surface)] p-4 text-left shadow-[0_18px_45px_rgba(16,24,40,0.16)]"
+              style={{
+                left: hoveredTooltip.left,
+                top: hoveredTooltip.top,
+              }}
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent-2)]">
+                {hoveredTooltip.conceptTitle}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--foreground)]">{hoveredTooltip.conceptSummary}</p>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }

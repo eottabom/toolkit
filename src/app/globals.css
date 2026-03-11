@@ -203,6 +203,7 @@ html.theme-dark input[type="datetime-local"]::-webkit-calendar-picker-indicator 
 .tool-concept-tooltip {
   width: var(--tool-tooltip-width-mobile);
   max-width: none;
+  z-index: 120;
 }
 
 @media (min-width: 640px) {
