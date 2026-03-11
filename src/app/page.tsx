@@ -410,6 +410,7 @@ export default function Home() {
                 </Card>
               ))}
           </section>
+
         </main>
 
         <footer className="mt-6 flex items-center justify-between border-t border-[color:var(--card-border)] py-5 text-xs text-[var(--muted)]">
@@ -433,6 +434,22 @@ export default function Home() {
                 <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
               </svg>
               <span>Blog</span>
+            </a>
+            <a
+              href="https://eottabom.github.io/playground/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 transition hover:text-[var(--foreground)]"
+              aria-label="Playground"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="m12 3 1.6 3.9L18 8.5l-3.4 2.6 1.2 4.2L12 13l-3.8 2.3 1.2-4.2L6 8.5l4.4-1.6Z" />
+                <path d="M19 4v3" />
+                <path d="M20.5 5.5h-3" />
+                <path d="M4 15v2.5" />
+                <path d="M5.25 16.25h-2.5" />
+              </svg>
+              <span>Playground</span>
             </a>
             <a
               href="https://github.com/eottabom"
