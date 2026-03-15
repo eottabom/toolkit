@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, Sora } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { BASE_URL } from "@/lib/constants";
+import { tools } from "@/lib/tools";
 import "./globals.css";
 
 const sora = Sora({
@@ -51,6 +52,7 @@ export const metadata: Metadata = {
     title: "Free Online Developer Tools — Toolkit",
     description: SITE_DESCRIPTION,
     siteName: "Toolkit",
+    locale: "en_US",
   },
   twitter: {
     card: "summary",
@@ -96,6 +98,25 @@ export default function RootLayout({
                 priceCurrency: "USD",
               },
               browserRequirements: "Requires a modern web browser",
+              inLanguage: "en",
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              name: "Free Online Developer Tools",
+              description: SITE_DESCRIPTION,
+              numberOfItems: tools.length,
+              itemListElement: tools.map((tool, index) => ({
+                "@type": "ListItem",
+                position: index + 1,
+                name: tool.title,
+                url: `${BASE_URL}${tool.slug}/`,
+              })),
             }),
           }}
         />

@@ -1,3 +1,9 @@
+# AI
+.claude/
+.codex/
+AGENTS.md
+CLAUDE.md
+
 # IDE/editor
 .idea/
 .vscode/
