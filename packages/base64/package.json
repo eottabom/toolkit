@@ -1,7 +1,7 @@
 {
   "name": "@eottabom/base64",
   "version": "0.1.0",
-  "description": "UTF-8 safe Base64 encode/decode utilities.",
+  "description": "UTF-8 safe Base64 encoding and decoding utilities.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
