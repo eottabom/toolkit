@@ -4,10 +4,10 @@ on:
   push:
     branches: ["main"]
     paths-ignore:
+      - ".github/**"
       - "README.md"
       - ".editorconfig"
       - ".gitignore"
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,7 +29,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          node-version: "24"
+          node-version: "20"
           cache: "npm"
 
       - name: Install
@@ -166,7 +166,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          node-version: "24"
+          node-version: "20"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
 
@@ -244,9 +244,15 @@ jobs:
         if: ${{ steps.detect_and_bump.outputs.changed_packages != '' }}
         env:
           CHANGED_PACKAGES: ${{ steps.detect_and_bump.outputs.changed_packages }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "NPM_TOKEN is required to publish packages."
+            exit 1
+          fi
 
           IFS=',' read -r -a changed_package_dirs <<< "$CHANGED_PACKAGES"
 

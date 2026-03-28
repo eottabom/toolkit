@@ -131,19 +131,6 @@ export const tools = [
 5. 변경된 패키지만 build 후 `npm publish`
 6. 패키지 태그는 `<package>-v<version>` 형식 사용
 
-### npm Trusted Publisher 설정
-
-npm publish는 GitHub Actions OIDC trusted publishing 기준으로 동작한다. `NPM_TOKEN`은 필요하지 않다.
-
-npm 웹에서 각 패키지에 대해 Trusted Publisher를 추가한다.
-
-- Provider: `GitHub Actions`
-- Organization or user: `eottabom`
-- Repository: `toolkit`
-- Workflow file: `.github/workflows/deploy.yml`
-
-설정 후에는 `main` push 또는 `workflow_dispatch`로 같은 워크플로우에서 웹 배포와 npm publish를 함께 처리한다.
-
 ### 수동 배포 (tag)
 
 1. GitHub Actions → `Deploy GitHub Pages (Tag)` 실행
