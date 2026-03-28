@@ -19,7 +19,13 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@eottabom/base64": ["./packages/base64/src/index.ts"],
+      "@eottabom/url": ["./packages/url/src/index.ts"],
+      "@eottabom/jwt": ["./packages/jwt/src/index.ts"],
+      "@eottabom/diff-engine": ["./packages/diff-engine/src/index.ts"],
+      "@eottabom/datetime-utils": ["./packages/datetime-utils/src/index.ts"],
+      "@eottabom/cron-core": ["./packages/cron-core/src/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".next/dev/types/**/*.ts", "**/*.mts"],

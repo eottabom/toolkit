@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { decodeUrlComponent, encodeUrlComponent } from "@eottabom/url";
 import {
   ToolActionButton,
   ToolBadge,
@@ -26,7 +27,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
       return "";
     }
     try {
-      return encodeURIComponent(plainInput);
+      return encodeUrlComponent(plainInput);
     } catch {
       return "";
     }
@@ -37,7 +38,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
       return "";
     }
     try {
-      return decodeURIComponent(encodedInput);
+      return decodeUrlComponent(encodedInput);
     } catch {
       return "";
     }
@@ -48,7 +49,7 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
       return "";
     }
     try {
-      decodeURIComponent(encodedInput);
+      decodeUrlComponent(encodedInput);
       return "";
     } catch {
       return "Invalid URL-encoded string.";

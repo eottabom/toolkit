@@ -146,3 +146,130 @@ jobs:
             echo "$TAGS_TO_DELETE" | xargs -I {} git tag -d {}
             echo "$TAGS_TO_DELETE" | xargs -I {} git push origin :refs/tags/{}
           fi
+
+  publish_packages:
+    needs: version
+    if: ${{ !contains(toJson(github.event.commits), '[skip ci]') && !contains(toJson(github.event.commits), '[ci skip]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync latest main
+        run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Detect and bump changed packages
+        id: detect_and_bump
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t changed_package_dirs < <(
+            git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA" -- 'packages/*' \
+              | awk -F/ 'NF >= 2 {print $2}' \
+              | sort -u
+          )
+
+          if [ "${#changed_package_dirs[@]}" -eq 0 ]; then
+            echo "changed_packages=" >> "$GITHUB_OUTPUT"
+            echo "No changed packages detected."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          changed_csv=""
+          version_bumped=false
+
+          for package_short_name in "${changed_package_dirs[@]}"; do
+            package_file="packages/${package_short_name}/package.json"
+            current_version="$(node -p "require('./${package_file}').version")"
+            previous_version=""
+
+            if [ -n "$changed_csv" ]; then
+              changed_csv="${changed_csv},"
+            fi
+            changed_csv="${changed_csv}${package_short_name}"
+
+            if git cat-file -e "${BEFORE_SHA}:${package_file}" 2>/dev/null; then
+              previous_version="$(git show "${BEFORE_SHA}:${package_file}" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version")"
+            fi
+
+            if [ -z "$previous_version" ]; then
+              echo "New package detected: ${package_short_name}@${current_version}"
+              continue
+            fi
+
+            if [ "$previous_version" = "$current_version" ]; then
+              node scripts/bump-package-version.mjs "$package_short_name" patch
+              version_bumped=true
+              continue
+            fi
+
+            echo "Keep manually updated version for ${package_short_name}: ${previous_version} -> ${current_version}"
+          done
+
+          if [ "$version_bumped" = true ]; then
+            git add packages/*/package.json
+            git commit -m "[skip ci] chore: 패키지 버전 자동 증가"
+            git push origin HEAD:main
+          fi
+
+          echo "changed_packages=${changed_csv}" >> "$GITHUB_OUTPUT"
+
+      - name: Build packages
+        if: ${{ steps.detect_and_bump.outputs.changed_packages != '' }}
+        run: npm run build:packages
+
+      - name: Publish changed packages
+        if: ${{ steps.detect_and_bump.outputs.changed_packages != '' }}
+        env:
+          CHANGED_PACKAGES: ${{ steps.detect_and_bump.outputs.changed_packages }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
+            echo "NPM_TOKEN is required to publish packages."
+            exit 1
+          fi
+
+          IFS=',' read -r -a changed_package_dirs <<< "$CHANGED_PACKAGES"
+
+          for package_short_name in "${changed_package_dirs[@]}"; do
+            package_file="packages/${package_short_name}/package.json"
+            package_name="$(node -p "require('./${package_file}').name")"
+            current_version="$(node -p "require('./${package_file}').version")"
+
+            echo "Publishing ${package_name}@${current_version}"
+            npm publish --workspace "$package_name" --access public
+
+            tag_name="${package_short_name}-v${current_version}"
+            if git rev-parse -q --verify "refs/tags/${tag_name}" >/dev/null; then
+              echo "Tag already exists: ${tag_name}"
+              continue
+            fi
+
+            git tag "${tag_name}"
+            git push origin "${tag_name}"
+          done

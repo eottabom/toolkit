@@ -6,7 +6,6 @@ import { tools } from "@/lib/tools";
 import { toolPages } from "@/tools";
 import { AdsenseAutoRelaxed } from "@/components/adsense-auto-relaxed";
 import { RecentToolTracker } from "@/components/recent-tool-tracker";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/error-boundary";
 

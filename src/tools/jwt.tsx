@@ -1,114 +1,14 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { ALGORITHMS, decodeJwt, encodeJwt, getJwtAlgorithmMinKeyBytes, isSupportedJwtAlgorithm, verifyJwt } from "@eottabom/jwt";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPage, ToolSelect } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
-
-const ALGORITHMS = ["HS256", "HS384", "HS512"] as const;
 type Algorithm = (typeof ALGORITHMS)[number];
-
-const ALG_HASH_MAP: Record<Algorithm, string> = {
-  HS256: "SHA-256",
-  HS384: "SHA-384",
-  HS512: "SHA-512",
-};
-
-const ALG_MIN_KEY_BYTES: Record<Algorithm, number> = {
-  HS256: 32,
-  HS384: 48,
-  HS512: 64,
-};
-
-function base64UrlDecode(str: string): string {
-  let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
-  const pad = base64.length % 4;
-  if (pad) {
-    base64 += "=".repeat(4 - pad);
-  }
-  const binary = atob(base64);
-  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
-}
-
-function base64UrlEncode(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer);
-  let binary = "";
-  bytes.forEach((b) => {
-    binary += String.fromCharCode(b);
-  });
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-
-function decodeJwt(token: string): {
-  header: string;
-  payload: string;
-  signature: string;
-  headerAlg: string;
-} {
-  const parts = token.trim().split(".");
-  if (parts.length !== 3) {
-    throw new Error("JWT must have 3 parts separated by dots.");
-  }
-  const headerObj = JSON.parse(base64UrlDecode(parts[0]));
-  const header = JSON.stringify(headerObj, null, 2);
-  const payload = JSON.stringify(JSON.parse(base64UrlDecode(parts[1])), null, 2);
-  return {
-    header,
-    payload,
-    signature: parts[2],
-    headerAlg: headerObj.alg || "",
-  };
-}
-
-async function signJwt(data: string, secret: string, alg: Algorithm): Promise<string> {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(secret),
-    { name: "HMAC", hash: ALG_HASH_MAP[alg] },
-    false,
-    ["sign"],
-  );
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(data));
-  return base64UrlEncode(sig);
-}
-
-async function verifyJwt(token: string, secret: string, alg: Algorithm): Promise<boolean> {
-  const enc = new TextEncoder();
-  const parts = token.trim().split(".");
-  if (parts.length !== 3) {
-    return false;
-  }
-  const data = `${parts[0]}.${parts[1]}`;
-  const key = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(secret),
-    { name: "HMAC", hash: ALG_HASH_MAP[alg] },
-    false,
-    ["verify"],
-  );
-  const sigBytes = Uint8Array.from(
-    atob(parts[2].replace(/-/g, "+").replace(/_/g, "/") + "==".slice(0, (4 - (parts[2].length % 4)) % 4)),
-    (c) => c.charCodeAt(0),
-  );
-  return crypto.subtle.verify("HMAC", key, sigBytes, enc.encode(data));
-}
-
-async function encodeJwt(headerJson: string, payloadJson: string, secret: string, alg: Algorithm): Promise<string> {
-  JSON.parse(headerJson);
-  JSON.parse(payloadJson);
-
-  const enc = new TextEncoder();
-  const headerB64 = base64UrlEncode(enc.encode(headerJson).buffer as ArrayBuffer);
-  const payloadB64 = base64UrlEncode(enc.encode(payloadJson).buffer as ArrayBuffer);
-  const data = `${headerB64}.${payloadB64}`;
-  const sigB64 = await signJwt(data, secret, alg);
-  return `${data}.${sigB64}`;
-}
 
 export default function JwtTool({ tool }: { tool: ToolItem }) {
   // Decode
@@ -169,7 +69,7 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
     setVerifyResult("idle");
     try {
       const { headerAlg } = decodeJwt(value);
-      if (ALGORITHMS.includes(headerAlg as Algorithm)) {
+      if (isSupportedJwtAlgorithm(headerAlg)) {
         setVerifyAlg(headerAlg as Algorithm);
       }
     } catch (error) {
@@ -350,10 +250,10 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
                   className="w-full rounded-2xl border border-[color:var(--card-border)] bg-[var(--surface-muted)] px-4 py-3 font-mono text-xs text-[var(--foreground)] outline-none focus:border-[color:var(--card-border-hover)]"
                 />
 
-                {verifySecret.length > 0 && verifySecret.length < ALG_MIN_KEY_BYTES[verifyAlg] && (
+                {verifySecret.length > 0 && verifySecret.length < getJwtAlgorithmMinKeyBytes(verifyAlg) && (
                   <p className="text-[11px] text-[color:var(--error)]">
-                    RFC 7518: {verifyAlg} requires a key of {ALG_MIN_KEY_BYTES[verifyAlg] * 8} bits (
-                    {ALG_MIN_KEY_BYTES[verifyAlg]} bytes) or larger. Current: {verifySecret.length} bytes.
+                    RFC 7518: {verifyAlg} requires a key of {getJwtAlgorithmMinKeyBytes(verifyAlg) * 8} bits (
+                    {getJwtAlgorithmMinKeyBytes(verifyAlg)} bytes) or larger. Current: {verifySecret.length} bytes.
                   </p>
                 )}
 
@@ -467,9 +367,9 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
               placeholder="Enter your HMAC secret key"
               className={textareaClass}
             />
-            {secret.length > 0 && secret.length < ALG_MIN_KEY_BYTES[encAlg] && (
+            {secret.length > 0 && secret.length < getJwtAlgorithmMinKeyBytes(encAlg) && (
               <p className="text-[11px] text-[color:var(--error)]">
-                RFC 7518: {encAlg} requires a key of {ALG_MIN_KEY_BYTES[encAlg] * 8} bits ({ALG_MIN_KEY_BYTES[encAlg]}{" "}
+                RFC 7518: {encAlg} requires a key of {getJwtAlgorithmMinKeyBytes(encAlg) * 8} bits ({getJwtAlgorithmMinKeyBytes(encAlg)}{" "}
                 bytes) or larger. Current: {secret.length} bytes.
               </p>
             )}

@@ -1,0 +1,27 @@
+{
+  "name": "@eottabom/url",
+  "version": "0.1.0",
+  "description": "URL encode/decode helpers for query and path values.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "keywords": [
+    "url",
+    "encoding",
+    "decoding"
+  ],
+  "license": "MIT"
+}

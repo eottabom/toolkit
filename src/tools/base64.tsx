@@ -1,25 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { decodeBase64, encodeBase64 } from "@eottabom/base64";
 import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolOutput, ToolPage, ToolTextarea } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
-
-function encodeBase64(input: string) {
-  const bytes = new TextEncoder().encode(input);
-  let binary = "";
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-  return btoa(binary);
-}
-
-function decodeBase64(input: string) {
-  const binary = atob(input);
-  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
-}
 
 export default function Base64Tool({ tool }: { tool: ToolItem }) {
   const [plainInput, setPlainInput] = useState("");

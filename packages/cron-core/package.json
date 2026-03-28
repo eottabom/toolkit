@@ -1,0 +1,27 @@
+{
+  "name": "@eottabom/cron-core",
+  "version": "0.1.0",
+  "description": "Cron expression builder and validator extracted from Toolkit.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "keywords": [
+    "cron",
+    "scheduler",
+    "jenkins"
+  ],
+  "license": "MIT"
+}
