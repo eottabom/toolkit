@@ -173,7 +173,7 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Detect and bump changed packages
+      - name: Detect packages to publish and bump changed versions
         id: detect_and_bump
         env:
           BEFORE_SHA: ${{ github.event.before }}
@@ -182,33 +182,55 @@ jobs:
         run: |
           set -euo pipefail
 
+          mapfile -t all_package_dirs < <(
+            find packages -mindepth 1 -maxdepth 1 -type d \
+              | xargs -n 1 basename \
+              | sort -u
+          )
+
           mapfile -t changed_package_dirs < <(
             git diff --name-only "$BEFORE_SHA" "$CURRENT_SHA" -- 'packages/*' \
               | awk -F/ 'NF >= 2 {print $2}' \
               | sort -u
           )
 
-          if [ "${#changed_package_dirs[@]}" -eq 0 ]; then
-            echo "changed_packages=" >> "$GITHUB_OUTPUT"
-            echo "No changed packages detected."
+          if [ "${#all_package_dirs[@]}" -eq 0 ]; then
+            echo "publish_packages=" >> "$GITHUB_OUTPUT"
+            echo "No packages found."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          changed_csv=""
+          declare -A changed_lookup=()
+          for package_short_name in "${changed_package_dirs[@]}"; do
+            changed_lookup["$package_short_name"]=1
+          done
+
+          publish_csv=""
           version_bumped=false
 
-          for package_short_name in "${changed_package_dirs[@]}"; do
+          for package_short_name in "${all_package_dirs[@]}"; do
             package_file="packages/${package_short_name}/package.json"
+            package_name="$(node -p "require('./${package_file}').name")"
             current_version="$(node -p "require('./${package_file}').version")"
             previous_version=""
+            published_version="$(npm view "$package_name" version 2>/dev/null || true)"
 
-            if [ -n "$changed_csv" ]; then
-              changed_csv="${changed_csv},"
+            if [ -z "$published_version" ]; then
+              echo "Unpublished package detected: ${package_name}@${current_version}"
+              if [ -n "$publish_csv" ]; then
+                publish_csv="${publish_csv},"
+              fi
+              publish_csv="${publish_csv}${package_short_name}"
+              continue
             fi
-            changed_csv="${changed_csv}${package_short_name}"
+
+            if [ -z "${changed_lookup[$package_short_name]:-}" ]; then
+              echo "Skip unchanged published package: ${package_name}@${published_version}"
+              continue
+            fi
 
             if git cat-file -e "${BEFORE_SHA}:${package_file}" 2>/dev/null; then
               previous_version="$(git show "${BEFORE_SHA}:${package_file}" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version")"
@@ -216,16 +238,17 @@ jobs:
 
             if [ -z "$previous_version" ]; then
               echo "New package detected: ${package_short_name}@${current_version}"
-              continue
-            fi
-
-            if [ "$previous_version" = "$current_version" ]; then
+            elif [ "$previous_version" = "$current_version" ]; then
               node scripts/bump-package-version.mjs "$package_short_name" patch
               version_bumped=true
-              continue
+            else
+              echo "Keep manually updated version for ${package_short_name}: ${previous_version} -> ${current_version}"
             fi
 
-            echo "Keep manually updated version for ${package_short_name}: ${previous_version} -> ${current_version}"
+            if [ -n "$publish_csv" ]; then
+              publish_csv="${publish_csv},"
+            fi
+            publish_csv="${publish_csv}${package_short_name}"
           done
 
           if [ "$version_bumped" = true ]; then
@@ -234,16 +257,16 @@ jobs:
             git push origin HEAD:main
           fi
 
-          echo "changed_packages=${changed_csv}" >> "$GITHUB_OUTPUT"
+          echo "publish_packages=${publish_csv}" >> "$GITHUB_OUTPUT"
 
       - name: Build packages
-        if: ${{ steps.detect_and_bump.outputs.changed_packages != '' }}
+        if: ${{ steps.detect_and_bump.outputs.publish_packages != '' }}
         run: npm run build:packages
 
-      - name: Publish changed packages
-        if: ${{ steps.detect_and_bump.outputs.changed_packages != '' }}
+      - name: Publish packages
+        if: ${{ steps.detect_and_bump.outputs.publish_packages != '' }}
         env:
-          CHANGED_PACKAGES: ${{ steps.detect_and_bump.outputs.changed_packages }}
+          PUBLISH_PACKAGES: ${{ steps.detect_and_bump.outputs.publish_packages }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         shell: bash
         run: |
@@ -254,9 +277,9 @@ jobs:
             exit 1
           fi
 
-          IFS=',' read -r -a changed_package_dirs <<< "$CHANGED_PACKAGES"
+          IFS=',' read -r -a publish_package_dirs <<< "$PUBLISH_PACKAGES"
 
-          for package_short_name in "${changed_package_dirs[@]}"; do
+          for package_short_name in "${publish_package_dirs[@]}"; do
             package_file="packages/${package_short_name}/package.json"
             package_name="$(node -p "require('./${package_file}').name")"
             current_version="$(node -p "require('./${package_file}').version")"

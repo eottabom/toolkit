@@ -126,10 +126,11 @@ export const tools = [
 
 1. `packages/<name>` 내부 코드 변경 후 `main`에 push
 2. 메인 배포 워크플로우 안에서 `git diff`로 변경된 패키지를 감지
-3. `package.json` 버전이 그대로면 patch 자동 증가 후 커밋
-4. 사용자가 직접 major/minor/version을 올렸다면 그 버전을 그대로 사용
-5. 변경된 패키지만 build 후 `npm publish`
-6. 패키지 태그는 `<package>-v<version>` 형식 사용
+3. npm에 아직 없는 패키지는 변경 여부와 관계없이 함께 publish
+4. 변경된 패키지에서 `package.json` 버전이 그대로면 patch 자동 증가 후 커밋
+5. 사용자가 직접 major/minor/version을 올렸다면 그 버전을 그대로 사용
+6. publish 대상 패키지를 build 후 `npm publish`
+7. 패키지 태그는 `<package>-v<version>` 형식 사용
 
 ### 수동 배포 (tag)
 
