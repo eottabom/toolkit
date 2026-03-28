@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { ALGORITHMS, decodeJwt, encodeJwt, getJwtAlgorithmMinKeyBytes, isSupportedJwtAlgorithm, verifyJwt } from "@eottabom/jwt";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPage, ToolSelect } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolOutput, ToolPackageInfoPanel, ToolPage, ToolSelect } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -120,6 +120,8 @@ export default function JwtTool({ tool }: { tool: ToolItem }) {
         description={tool.desc}
         right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">Encode + Decode</div>}
       />
+
+      <ToolPackageInfoPanel packageName="@eottabom/jwt" />
 
       {/* Decode Section */}
       <section className="flex flex-col gap-4">

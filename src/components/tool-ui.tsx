@@ -305,3 +305,25 @@ export function ToolInfoPanel({
     </Card>
   );
 }
+
+export function ToolPackageInfoPanel({
+  packageName,
+  className,
+}: {
+  packageName: string;
+  className?: string;
+}) {
+  return (
+    <ToolInfoPanel
+      icon="N"
+      title="npm Package"
+      description={
+        <>
+          이 도구의 핵심 로직은 <code className="text-[var(--url-panel-accent)]">{packageName}</code> 패키지로도 사용할 수 있습니다.
+        </>
+      }
+      chips={[`npm install ${packageName}`, `import from ${packageName}`]}
+      className={className}
+    />
+  );
+}

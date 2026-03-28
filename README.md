@@ -15,12 +15,14 @@ npm run dev
 
 개별 툴 로직은 앱 UI와 분리하여 `packages/` 아래 워크스페이스 패키지로 관리한다.
 
-- `@eottabom/base64`
-- `@eottabom/url`
-- `@eottabom/jwt`
-- `@eottabom/diff-engine`
-- `@eottabom/datetime-utils`
-- `@eottabom/cron-core`
+현재 제공 패키지
+
+- `@eottabom/base64` Base64 인코드/디코드
+- `@eottabom/url` URL 인코드/디코드
+- `@eottabom/jwt` JWT 디코드, HMAC 서명/검증
+- `@eottabom/diff-engine` 라인/단어 diff 계산
+- `@eottabom/datetime-utils` 타임존, UTC, Unix timestamp 변환
+- `@eottabom/cron-core` cron 표현식 생성, 검증, 다음 실행 시간 계산
 
 앱 화면 컴포넌트는 `src/tools/*.tsx`를 유지하고, 내부 계산 로직만 위 패키지를 import 한다.
 
@@ -31,6 +33,17 @@ npm run build:packages
 ### npm 사용 방법
 
 외부 사용자는 필요한 패키지만 설치해서 사용할 수 있다.
+
+```bash
+npm install @eottabom/base64
+npm install @eottabom/url
+npm install @eottabom/jwt
+npm install @eottabom/diff-engine
+npm install @eottabom/datetime-utils
+npm install @eottabom/cron-core
+```
+
+패키지별 설치 예시
 
 ```bash
 npm install @eottabom/base64
@@ -55,15 +68,6 @@ const query = encodeUrlComponent("hello world");
 const jwt = decodeJwt("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.signature");
 const isValid = await verifyJwt("token", "secret", "HS256");
 ```
-
-패키지 용도
-
-- `@eottabom/base64` Base64 인코드/디코드
-- `@eottabom/url` URL 인코드/디코드
-- `@eottabom/jwt` JWT 디코드, HMAC 서명/검증
-- `@eottabom/diff-engine` 라인/단어 diff 계산
-- `@eottabom/datetime-utils` 타임존, UTC, Unix timestamp 변환
-- `@eottabom/cron-core` cron 표현식 생성, 검증, 다음 실행 시간 계산
 
 패키지 버전 갱신
 

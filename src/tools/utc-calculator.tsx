@@ -26,6 +26,7 @@ import {
   ToolInfoPanel,
   ToolInput,
   ToolOutput,
+  ToolPackageInfoPanel,
   ToolPage,
 } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
@@ -361,6 +362,8 @@ export default function UtcCalculator({ tool }: { tool: ToolItem }) {
         description={tool.desc}
         right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">UTC + Local</div>}
       />
+
+      <ToolPackageInfoPanel packageName="@eottabom/datetime-utils" />
 
       <ToolInfoPanel
         icon="T"

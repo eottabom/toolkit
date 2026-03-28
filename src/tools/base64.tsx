@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { decodeBase64, encodeBase64 } from "@eottabom/base64";
-import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolOutput, ToolPage, ToolTextarea } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolOutput, ToolPackageInfoPanel, ToolPage, ToolTextarea } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -62,6 +62,8 @@ export default function Base64Tool({ tool }: { tool: ToolItem }) {
         description={tool.desc}
         right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">Encode + Decode</div>}
       />
+
+      <ToolPackageInfoPanel packageName="@eottabom/base64" />
 
       <ToolInfoPanel
         icon="E"

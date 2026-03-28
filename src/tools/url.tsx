@@ -9,6 +9,7 @@ import {
   ToolHeader,
   ToolInfoPanel,
   ToolOutput,
+  ToolPackageInfoPanel,
   ToolPage,
   ToolTextarea,
 } from "@/components/tool-ui";
@@ -73,6 +74,8 @@ export default function UrlTool({ tool }: { tool: ToolItem }) {
         description={tool.desc}
         right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">Encode + Decode</div>}
       />
+
+      <ToolPackageInfoPanel packageName="@eottabom/url" />
 
       <ToolInfoPanel
         icon="E"

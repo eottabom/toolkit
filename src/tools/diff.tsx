@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { DiffEngine, type LineStatus, type WordPart } from "@eottabom/diff-engine";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { ToolActionButton, ToolBadge, ToolCard, ToolDiffText, ToolHeader, ToolInfoPanel, ToolPage, ToolTextarea } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolDiffText, ToolHeader, ToolInfoPanel, ToolPackageInfoPanel, ToolPage, ToolTextarea } from "@/components/tool-ui";
 import type { ToolItem } from "@/lib/tools";
 
 const defaultLeft = `{
@@ -83,6 +83,8 @@ export default function DiffTool({ tool }: { tool: ToolItem }) {
         description={tool.desc}
         right={<div className="self-start text-xs uppercase tracking-[0.2em] text-[var(--muted)] md:self-auto">Compare</div>}
       />
+
+      <ToolPackageInfoPanel packageName="@eottabom/diff-engine" />
 
       <div className="flex justify-end">
         <div className="flex items-center gap-4 rounded-full border border-[color:var(--card-border)] bg-[var(--surface)] px-4 py-1.5 shadow-[var(--card-shadow)]">

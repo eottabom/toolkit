@@ -19,7 +19,7 @@ import {
   type Preset,
   validateExpression,
 } from "@eottabom/cron-core";
-import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolInput, ToolPage } from "@/components/tool-ui";
+import { ToolActionButton, ToolBadge, ToolCard, ToolHeader, ToolInfoPanel, ToolInput, ToolPackageInfoPanel, ToolPage } from "@/components/tool-ui";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 
 import type { ToolItem } from "@/lib/tools";
@@ -171,6 +171,8 @@ export default function CronGenerator({ tool }: { tool: ToolItem }) {
           </div>
         }
       />
+
+      <ToolPackageInfoPanel packageName="@eottabom/cron-core" />
 
       <ToolInfoPanel
         icon="⏰"
