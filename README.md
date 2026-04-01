@@ -23,6 +23,7 @@ npm run dev
 - `@eottabom/diff-engine` 라인/단어 diff 계산
 - `@eottabom/datetime-utils` 타임존, UTC, Unix timestamp 변환
 - `@eottabom/cron-core` cron 표현식 생성, 검증, 다음 실행 시간 계산
+- `@eottabom/tokenizer-core` OpenAI, Anthropic, Google 오프라인 토큰 계산
 
 앱 화면 컴포넌트는 `src/tools/*.tsx`를 유지하고, 내부 계산 로직만 위 패키지를 import 한다.
 
@@ -41,6 +42,7 @@ npm install @eottabom/jwt
 npm install @eottabom/diff-engine
 npm install @eottabom/datetime-utils
 npm install @eottabom/cron-core
+npm install @eottabom/tokenizer-core
 ```
 
 패키지별 설치 예시
@@ -52,6 +54,7 @@ npm install @eottabom/jwt
 npm install @eottabom/diff-engine
 npm install @eottabom/datetime-utils
 npm install @eottabom/cron-core
+npm install @eottabom/tokenizer-core
 ```
 
 예시
@@ -60,10 +63,12 @@ npm install @eottabom/cron-core
 import { encodeBase64, decodeBase64 } from "@eottabom/base64";
 import { encodeUrlComponent } from "@eottabom/url";
 import { decodeJwt, verifyJwt } from "@eottabom/jwt";
+import { countTokens } from "@eottabom/tokenizer-core";
 
 const encoded = encodeBase64("hello");
 const decoded = decodeBase64(encoded);
 const query = encodeUrlComponent("hello world");
+const tokenCount = countTokens("hello world", "openai_o200k");
 
 const jwt = decodeJwt("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.signature");
 const isValid = await verifyJwt("token", "secret", "HS256");

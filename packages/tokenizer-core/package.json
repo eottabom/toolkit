@@ -1,0 +1,28 @@
+{
+  "name": "@eottabom/tokenizer-core",
+  "version": "1.0.0",
+  "description": "Offline tokenizer for OpenAI, Anthropic, and Google models.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "bin": {
+    "tokenizer-core": "./cli.js"
+  },
+  "files": [
+    "*.js",
+    "data"
+  ],
+  "keywords": [
+    "tokenizer",
+    "llm",
+    "openai",
+    "anthropic",
+    "google"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^14.0.3"
+  }
+}
