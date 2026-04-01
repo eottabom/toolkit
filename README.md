@@ -34,6 +34,7 @@ npm run build:packages
 ### npm 사용 방법
 
 외부 사용자는 필요한 패키지만 설치해서 사용할 수 있다.
+자세한 사용법은 각 `packages/<name>/README.md`와 npm 패키지 페이지 문서를 참고한다.
 
 ```bash
 npm install @eottabom/base64
