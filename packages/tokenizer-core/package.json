@@ -1,6 +1,6 @@
 {
   "name": "@eottabom/tokenizer-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Offline tokenizer for OpenAI, Anthropic, and Google models.",
   "type": "module",
   "main": "./index.js",
@@ -12,7 +12,8 @@
   },
   "files": [
     "*.js",
-    "data"
+    "data",
+    "README.md"
   ],
   "keywords": [
     "tokenizer",
